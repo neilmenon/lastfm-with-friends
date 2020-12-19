@@ -1,0 +1,3 @@
+<p *ngIf="message">{{ message }}</p>
+<button mat-raised-button [routerLink]="['/lastfmauth']">Login</button>
+<button mat-raised-button (click)="clearToken();">Clear Token</button>
