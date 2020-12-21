@@ -13,6 +13,7 @@ import { HttpClient } from '@angular/common/http';
 export class LastfmauthComponent implements OnInit {
   session;
   username;
+  url_string;
   constructor(private route: ActivatedRoute, public router: Router, private messageService: MessageService, private http: HttpClient) { }
 
   ngOnInit(): void {
@@ -28,25 +29,44 @@ export class LastfmauthComponent implements OnInit {
           let post_data = this.sign(data);
           post_data['format'] = 'json';
           console.log(post_data)
-          let p = new URLSearchParams(post_data)
-          this.http.post("https://ws.audioscrobbler.com/2.0/?" + p.toString(), null).subscribe(response => {
+          this.url_string = new URLSearchParams(post_data).toString()
+
+          this.getSession().then(response => {
             console.log(response)
             this.session = response['session']['key'];
             this.username = response['session']['name']
             localStorage.setItem("lastfm_session", this.session)
             localStorage.setItem("lastfm_username", this.username)
+            this.messageService.save('Successfully signed in as ' + this.username + '!')
+            this.router.navigate([''])
+          }).catch(error => {
+            this.messageService.open("Error signing in! Last.fm returned: " + error['error']['message'])
+            console.log(error)
+            this.router.navigate([''])
           })
-          this.messageService.save('Logged in as ' + localStorage.getItem('lastfm_username') + '!')
-          this.router.navigate([''])
         } else {
+          this.messageService.open("Sending you to authentication page...")
           window.location.href = 'https://www.last.fm/api/auth/?api_key='+ config.api_key +'&cb='+ config.project_root +'/lastfmauth';
         }
       });
     } else {
-      this.messageService.save('Already logged in!')
+      this.messageService.save('Already signed in!')
       this.router.navigate([''])
     }
   }
+
+  async getSession() {
+    const response_data = await this.http.post("https://ws.audioscrobbler.com/2.0/?" + this.url_string, null).toPromise();
+    return response_data;
+    // this.http.post("https://ws.audioscrobbler.com/2.0/?" + this.url_string, null).toPromise().then(response => {
+    //   console.log(response)
+    //   this.session = response['session']['key'];
+    //   this.username = response['session']['name']
+    //   localStorage.setItem("lastfm_session", this.session)
+    //   localStorage.setItem("lastfm_username", this.username)
+    // })
+  }
+
   sign(params) {
     let ss = "";
     let st = [];

@@ -5,7 +5,7 @@ import { MatSnackBar, MatSnackBarHorizontalPosition } from '@angular/material/sn
 })
 export class MessageService {
   message: string;
-  horizontalPosition: MatSnackBarHorizontalPosition = 'right';
+  horizontalPosition: MatSnackBarHorizontalPosition = 'center';
   constructor(private snackBar: MatSnackBar) {}
   save(message: string) {
     this.message = message;

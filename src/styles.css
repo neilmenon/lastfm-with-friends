@@ -7,10 +7,16 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     padding: 15px;
 }
 
-/* .mat-toolbar.mat-primary {
-    background: #ba0000;
+.center {
+    text-align: center;
+    margin: auto;
+    display: block;
+}
+
+.mat-toolbar.mat-primary {
+    background: #212121;
 }
 
 .mat-flat-button.mat-primary, .mat-raised-button.mat-primary, .mat-fab.mat-primary, .mat-mini-fab.mat-primary {
     background-color: #ba0000;
-} */
+}

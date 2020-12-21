@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -37,6 +38,7 @@ import { MessagesComponent } from './messages/messages.component';
     MatIconModule,
     MatListModule,
     MatSnackBarModule,
+    MatProgressSpinnerModule,
     HttpClientModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
