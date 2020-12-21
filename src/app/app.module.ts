@@ -13,9 +13,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { AuthService } from './auth.service';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { LastfmauthComponent } from './lastfmauth/lastfmauth.component';
 import { HomeComponent } from './home/home.component';
+import { MessagesComponent } from './messages/messages.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { HomeComponent } from './home/home.component';
     HeaderComponent,
     LastfmauthComponent,
     HomeComponent,
+    MessagesComponent,
   ],
   imports: [
     BrowserModule,
@@ -34,13 +36,14 @@ import { HomeComponent } from './home/home.component';
     MatSidenavModule,
     MatIconModule,
     MatListModule,
+    MatSnackBarModule,
     HttpClientModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},
     ])
   ],
-  providers: [AuthService],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

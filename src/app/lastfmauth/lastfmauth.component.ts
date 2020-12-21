@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-import { AuthService } from '../auth.service';
+import { MessageService } from '../message.service';
+import { config } from '../config'
+import { Md5 } from 'ts-md5/dist/md5';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-lastfmauth',
@@ -8,25 +11,59 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./lastfmauth.component.css']
 })
 export class LastfmauthComponent implements OnInit {
-  token;
-  constructor(private authService: AuthService, private route: ActivatedRoute, public router: Router) { }
+  session;
+  username;
+  constructor(private route: ActivatedRoute, public router: Router, private messageService: MessageService, private http: HttpClient) { }
 
   ngOnInit(): void {
-    this.token = localStorage.getItem('lastfm_token');
-    if (this.token == null) {
+    this.session = localStorage.getItem('lastfm_session');
+    if (this.session == null) {
       this.route.queryParams.subscribe(params => {
         if (params['token']) {
-          localStorage.setItem("lastfm_token", params['token'])
-          const message: NavigationExtras = {state: {message: 'Logged in! Token: ' + params['token']}};
-          this.router.navigate([''], message)
+
+          let data = {}
+          data['api_key'] = config.api_key;
+          data['method'] = 'auth.getSession';
+          data['token'] = params['token'];
+          let post_data = this.sign(data);
+          post_data['format'] = 'json';
+          console.log(post_data)
+          let p = new URLSearchParams(post_data)
+          this.http.post("https://ws.audioscrobbler.com/2.0/?" + p.toString(), null).subscribe(response => {
+            console.log(response)
+            this.session = response['session']['key'];
+            this.username = response['session']['name']
+            localStorage.setItem("lastfm_session", this.session)
+            localStorage.setItem("lastfm_username", this.username)
+          })
+          this.messageService.save('Logged in as ' + localStorage.getItem('lastfm_username') + '!')
+          this.router.navigate([''])
         } else {
-          window.location.href = 'https://www.last.fm/api/auth/?api_key=b2ed5e82a59e49eadc2db1883daf7d58&cb=http://localhost:4200/lastfmauth';
+          window.location.href = 'https://www.last.fm/api/auth/?api_key='+ config.api_key +'&cb='+ config.project_root +'/lastfmauth';
         }
       });
     } else {
-      const message: NavigationExtras = {state: {message: 'Already logged in. Token: ' + this.token}};
-      this.router.navigate([''], message)
+      this.messageService.save('Already logged in!')
+      this.router.navigate([''])
     }
+  }
+  sign(params) {
+    let ss = "";
+    let st = [];
+    let so = {};
+    Object.keys(params).forEach(function(key){
+        st.push(key); // Get list of object keys
+    });
+    st.sort(); // Alphabetise it 
+    st.forEach(function(std){
+        ss = ss + std + params[std]; // build string
+        so[std] = params[std];  // return object in exact same order JIC
+    });
+        // console.log(ss + last_fm_data['secret']);
+        // api_keyAPIKEY1323454formatjsonmethodauth.getSessiontokenTOKEN876234876SECRET348264386
+    let hashed_sec = Md5.hashStr(unescape(encodeURIComponent(ss + config.api_secret)));
+    so['api_sig'] = hashed_sec; // Correct when calculated elsewhere.
+    return so; // Returns signed POSTable object
   }
 
 }
