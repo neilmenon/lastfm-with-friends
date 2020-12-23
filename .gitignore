@@ -5,6 +5,7 @@
 
 # virtualenv env
 /backend/env
+/backend/api/__pycache__/
 
 # compiled output
 /dist
