@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageService} from '../message.service'
@@ -7,9 +8,9 @@ import { MessageService} from '../message.service'
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  username;
-  signed_in;
-  constructor(public router: Router, private messageService: MessageService) { }
+  username: string;
+  signed_in: boolean;
+  constructor(public router: Router, private messageService: MessageService, public http: HttpClient) { }
 
   ngOnInit(): void {
     this.username = localStorage.getItem("lastfm_username")

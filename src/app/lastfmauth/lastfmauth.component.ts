@@ -11,9 +11,9 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./lastfmauth.component.css']
 })
 export class LastfmauthComponent implements OnInit {
-  session;
-  username;
-  url_string;
+  session: string;
+  username: string;
+  url_string: string;
   constructor(private route: ActivatedRoute, public router: Router, private messageService: MessageService, private http: HttpClient) { }
 
   ngOnInit(): void {
