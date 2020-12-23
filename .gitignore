@@ -3,6 +3,9 @@
 # lastfm-with-friends configuration file
 /src/app/config.ts
 
+# virtualenv env
+/backend/env
+
 # compiled output
 /dist
 /tmp
@@ -27,6 +30,7 @@ speed-measure-plugin*.json
 *.sublime-workspace
 
 # IDE - VSCode
+/.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
