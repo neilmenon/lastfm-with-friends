@@ -6,6 +6,7 @@
 # virtualenv env
 /backend/env
 /backend/api/__pycache__/
+/backend/__pycache__/
 
 # backend config file
 /backend/api/config.py
