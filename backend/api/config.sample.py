@@ -4,7 +4,7 @@ config = {
         'password': '',
         'host': '',
         'port': 3306,
-        'database': 'lastfm-with-friends',
+        'database': 'lastfm_with_friends',
     },
     'api': {
         'key': '', # Last.fm API key. See https://www.last.fm/api/account/create
