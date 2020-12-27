@@ -1,4 +1,3 @@
-import werkzeug
 import sys
 from flask import *
 import json
@@ -20,7 +19,7 @@ def create():
         data = {
             "username": params['username'],
             "display_name": params['display_name'],
-            "registered": datetime.datetime.utcfromtimestamp(int(params['registered'])),
+            "registered": params['registered'],
             "profile_image": params['profile_image'],
         }
         sql = sql_helper.insert_into_where_not_exists("users", data, "username")
