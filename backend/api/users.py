@@ -6,6 +6,7 @@ import datetime
 from . import config
 from . import sql_helper
 from . import auth_helper
+from . import user_helper
 from . import api_logger as logger
 cfg = config.config
 
@@ -67,14 +68,10 @@ def create():
 @user_api.route('/api/users/<string:username>', methods=['GET'])
 def get(username):
     try:
-        mdb = mariadb.connect(**(cfg['sql']))
-        cursor = mdb.cursor(dictionary=True)
         params = request.args
-        cursor.execute("SELECT * FROM users WHERE username = '" + str(username) + "';")
-        result = list(cursor)
-        mdb.close()
+        result = user_helper.get_user(username)
         if result:
-            return jsonify(result[0])
+            return jsonify(result)
         else:
             response = make_response(jsonify(error="User " + str(username) + " not found."), 404)
             abort(response)

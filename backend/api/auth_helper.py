@@ -4,6 +4,7 @@ import requests
 import hashlib
 from . import config
 from . import sql_helper
+from . import user_helper
 from . import api_logger as logger
 import urllib
 
@@ -28,6 +29,7 @@ def is_authenticated(username, session_key):
             sql = "UPDATE `sessions` SET `last_used` = '"+str(datetime.datetime.now())+"' WHERE `sessions`.`session_key` = '"+session_key+"'"
             cursor.execute(sql)
             mdb.commit()
+            mdb.close()
             return True
         else: # session key not found in database, user is not authenticated
             return False
@@ -38,7 +40,8 @@ def is_authenticated(username, session_key):
         logger.log("Error while checking if " + username + " is authenticated: " + str(e))
 
 '''
-    Gets session key from Last.fm and stores it in the database
+    Gets session key from Last.fm and stores it in the database.
+    If user is not in database, a new record will be added to the database.
     returns the user's username if session key was obtained and stored properly, else False
 '''
 def get_and_store_session(token):
@@ -62,6 +65,9 @@ def get_and_store_session(token):
     except Exception as e:
         logger.log("Error while getting session from Last.fm:" + str(e))
         return False
+    # check if user exists in database, if not create new user
+    if not user_helper.get_user(username):
+        user_helper.create_user(username)
     # store session key in sessions table
     try:
         mdb = mariadb.connect(**(cfg['sql']))
@@ -73,6 +79,7 @@ def get_and_store_session(token):
         sql = sql_helper.insert_into_where_not_exists("sessions", table_data, "session_key")
         cursor.execute(sql)
         mdb.commit()
+        mdb.close()
         return {"username": username, "session_key": session_key}
     except mariadb.Error as e:
         logger.log("Database error while storing session for " + username + ": " + str(e))

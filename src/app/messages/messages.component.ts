@@ -10,7 +10,6 @@ import { NavigationEnd, Router } from '@angular/router';
 export class MessagesComponent implements OnInit {
   constructor(public messageService: MessageService, private router: Router) { 
     router.events.subscribe(val => {
-      console.log(val)
       if (val instanceof NavigationEnd && val.url != "/lastfmauth") {
         if (this.messageService.message)
           this.messageService.open(this.messageService.message);

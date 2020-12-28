@@ -24,7 +24,12 @@ export class LastfmauthComponent implements OnInit {
             this.messageService.save('Successfully signed in as ' + response['username'] + '!')
             this.router.navigate([''])
           }).catch(error => {
-            this.messageService.save(error['error']['error'])
+            console.log(error)
+            if (error['error']['error']) {
+              this.messageService.save(error['error']['error'])
+            } else {
+              this.messageService.save("Authentication failed. Most likely the backend service is down.")
+            }
             this.router.navigate([''])
           })
         } else {
