@@ -1,3 +1,6 @@
-<p *ngIf="username">Welcome, {{ username }}.</p>
+<div *ngIf="user">
+    <img src="{{ user.profile_image }}">
+    <p>Welcome, {{ user.username }}.</p>
+</div>
 <button *ngIf="!signed_in" color="primary" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
 <button *ngIf="signed_in" mat-raised-button (click)="signOut();">Sign Out</button>

@@ -38,6 +38,23 @@ def is_authenticated(username, session_key):
         return False
     except Exception as e:
         logger.log("Error while checking if " + username + " is authenticated: " + str(e))
+        return False
+
+def remove_session(username, session_key):
+    try:
+        mdb = mariadb.connect(**(cfg['sql']))
+        cursor = mdb.cursor(dictionary=True)
+        sql = 'DELETE FROM sessions WHERE session_key = "'+session_key+'";'
+        cursor.execute(sql)
+        mdb.commit()
+        mdb.close()
+        return True
+    except mariadb.Error as e:
+        logger.log("Database error while removing session key for " + username + ": " + str(e))
+        return False
+    except Exception as e:
+        logger.log("Error while removing session key for " + username + ": " + str(e))
+        return False
 
 '''
     Gets session key from Last.fm and stores it in the database.

@@ -31,6 +31,25 @@ def auth():
         response = make_response(jsonify(error="Authentication failed. This is most likely due to a Last.fm server error or invalid/used Last.fm token. Please try again."), 401)
         abort(response)
 
+@user_api.route('/api/users/signout', methods=['POST'])
+def signout():
+    params = request.get_json()
+    if params:
+        try:
+            username = params['username']
+            session_key = params['session_key']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if auth_helper.is_authenticated(username, session_key):
+        auth_helper.remove_session(username, session_key)
+        return jsonify({"success": "Successfully signed out " + username + "."})
+    else:
+        abort(401)
+
 @user_api.route('/api/users', methods=['POST'])
 def create():
     try:
