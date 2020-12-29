@@ -10,12 +10,15 @@ import { UserService } from '../user.service'
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  signed_in: boolean;
-  user;
+  signed_in: boolean = undefined;
+  user: any;
   constructor(public router: Router, private messageService: MessageService, public http: HttpClient, private userService: UserService) {
     this.userService.getUser().toPromise().then(data => {
-      console.log(data)
-      this.user = data
+      this.user = data;
+      console.log(typeof(this.user))
+      this.signed_in = this.userService.isSignedIn();
+    }).catch(error => {
+      this.signed_in = this.userService.isSignedIn();
     })
    }
 
@@ -23,16 +26,5 @@ export class HomeComponent implements OnInit {
     this.signed_in = this.userService.isSignedIn();
   }
 
-  signOut() {
-    this.userService.signOut().toPromise().then(response => {
-      localStorage.removeItem("lastfm_session");
-      localStorage.removeItem("lastfm_username");
-      this.user = null;
-      this.signed_in = null;
-      this.messageService.open(response['success']);
-    }).catch(error => {
-      this.messageService.open("An error occured while trying to sign you out! Please try again.");
-    })
     
-  }
 }

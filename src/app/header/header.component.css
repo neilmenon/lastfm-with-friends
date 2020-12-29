@@ -30,3 +30,43 @@
 .spacer {
   flex: 1 1 auto;
 }
+.navbar-user-image {
+  height: 26px;
+  margin: 0 4px -10px 0;
+  border-radius: 50%;
+  border: 2px solid #bfbfbf;
+  user-select: none;
+  
+}
+
+.navbar-user-panel {
+  text-align: center;
+  height: 220px;
+  line-height: 22px;
+  text-decoration: none;
+  max-width: 100%;
+  position: relative;
+  background: transparent;
+  color: #fff;
+  padding: 0 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.navbar-menu-user-image {
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid;
+}
+
+.navbar-menu-username {
+  display: block;
+  font-size: 20px;
+}
+
+.navbar-menu-since {
+  display: block;
+  color: #bfbfbf;
+}

@@ -4,6 +4,7 @@ import { MessageService } from '../message.service';
 import { config } from '../config'
 import { Md5 } from 'ts-md5/dist/md5';
 import { HttpClient } from '@angular/common/http';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-lastfmauth',
@@ -11,18 +12,18 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./lastfmauth.component.css']
 })
 export class LastfmauthComponent implements OnInit {
-  constructor(private route: ActivatedRoute, public router: Router, private messageService: MessageService, private http: HttpClient) { }
+  constructor(private route: ActivatedRoute, public router: Router, private messageService: MessageService, private http: HttpClient, private userService: UserService) { }
 
   ngOnInit(): void {
     let session = localStorage.getItem('lastfm_session');
     if (session == null) {
       this.route.queryParams.subscribe(params => {
         if (params['token']) {
+          this.messageService.open('Signing in...')
           this.authenticate(params['token']).then(response => {
             localStorage.setItem("lastfm_session", response['session_key'])
             localStorage.setItem("lastfm_username", response['username'])
-            this.messageService.save('Successfully signed in as ' + response['username'] + '!')
-            this.router.navigate([''])
+            window.location.href = config.project_root;
           }).catch(error => {
             console.log(error)
             if (error['error']['error']) {

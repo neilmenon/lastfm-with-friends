@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -18,6 +19,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { LastfmauthComponent } from './lastfmauth/lastfmauth.component';
 import { HomeComponent } from './home/home.component';
 import { MessagesComponent } from './messages/messages.component';
+import { SignoutComponent } from './signout/signout.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,7 @@ import { MessagesComponent } from './messages/messages.component';
     LastfmauthComponent,
     HomeComponent,
     MessagesComponent,
+    SignoutComponent,
   ],
   imports: [
     BrowserModule,
@@ -39,10 +42,12 @@ import { MessagesComponent } from './messages/messages.component';
     MatListModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatMenuModule,
     HttpClientModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},
+      {path: 'signout', component: SignoutComponent}
     ])
   ],
   providers: [],

@@ -23,9 +23,28 @@
       <span>lastfm-with-friends</span>
       <span class="spacer"></span>
       <span *ngIf="!(isHandset$ | async)">
-        <a mat-button href="#">Link 1</a>
+        <!-- <a mat-button href="#">Link 1</a>
         <a mat-button href="#">Link 2</a>
-        <a mat-button href="#">Link 3</a>
+        <a mat-button href="#">Link 3</a> -->
+        <a *ngIf="signed_in" mat-button [matMenuTriggerFor]="menu">
+          <span>
+              <img src="{{ user.profile_image }}" class="navbar-user-image">
+              {{ user.username }}
+          </span>
+          <mat-menu #menu="matMenu">
+            <span class="navbar-user-panel">
+              <img src="{{ user.profile_image }}" class="navbar-menu-user-image">
+              <span class="navbar-menu-username">
+                {{ user.username }}
+              </span>
+              <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMMM Do, YYYY') }}</span>
+            </span>
+            <button mat-menu-item>Settings</button>
+            <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
+          </mat-menu>
+        </a>
+        <button *ngIf="signed_in == false" color="primary" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
+        <mat-spinner *ngIf="signed_in == undefined" diameter="25" color="accent" class="center"></mat-spinner>
       </span>
     </mat-toolbar>
     <ng-content></ng-content>

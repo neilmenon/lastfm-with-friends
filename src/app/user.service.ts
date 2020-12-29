@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { share } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { config } from './config'
 import { MessageService } from './message.service';
@@ -11,6 +11,7 @@ import { MessageService } from './message.service';
 export class UserService {
   username: string = localStorage.getItem("lastfm_username");
   session_key: string = localStorage.getItem("lastfm_session");
+  user: Observable<any>;
   constructor(private http: HttpClient, public messageService: MessageService) { }
 
   isSignedIn() {
@@ -19,10 +20,20 @@ export class UserService {
 
   signOut() {
     this.messageService.open("Signing out...");
+    this.user = null;
     return this.http.post(config.api_root + "/users/signout", {'username': this.username, 'session_key': this.session_key})
   }
   
-  getUser() {
-    return this.http.get(config.api_root + '/users/' + localStorage.getItem("lastfm_username"));
+  /**
+   * Prevent making multiple API requests for the same endpoint on different components.
+   * Thanks to https://stackoverflow.com/a/50865911/14861722 for solution
+  */
+  getUser(): Observable<any> {
+    if (this.user) {
+      return this.user;
+    } else {
+      this.user = this.http.get(config.api_root + '/users/' + localStorage.getItem("lastfm_username")).pipe(share());
+      return this.user;
+    }
   }
 }
