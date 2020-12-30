@@ -30,13 +30,17 @@
 .spacer {
   flex: 1 1 auto;
 }
+
+.navbar-user-button {
+  line-height: 43px;
+}
+
 .navbar-user-image {
   height: 26px;
   margin: 0 4px -10px 0;
   border-radius: 50%;
   border: 2px solid #bfbfbf;
   user-select: none;
-  
 }
 
 .navbar-user-panel {
@@ -69,4 +73,9 @@
 .navbar-menu-since {
   display: block;
   color: #bfbfbf;
+}
+
+.mobile-menu-toggle {
+  padding-top: 13px;
+  margin-left: -15px;
 }

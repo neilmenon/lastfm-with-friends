@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule } from '@angular/material/dialog';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -43,6 +44,7 @@ import { SignoutComponent } from './signout/signout.component';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatMenuModule,
+    MatDialogModule,
     HttpClientModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},

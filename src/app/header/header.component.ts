@@ -5,6 +5,7 @@ import { map, shareReplay } from 'rxjs/operators';
 import { UserService } from '../user.service';
 import { ChangeDetectorRef } from '@angular/core';
 import * as moment from 'moment';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-header',
@@ -21,10 +22,9 @@ export class HeaderComponent {
       shareReplay()
     );
 
-  constructor(private breakpointObserver: BreakpointObserver, private userService: UserService, private cdr: ChangeDetectorRef) {
+  constructor(private breakpointObserver: BreakpointObserver, private userService: UserService, public dialog: MatDialog) {
     this.userService.getUser().toPromise().then(data => {
       this.user = data
-      this.cdr.detectChanges();
       this.signed_in = this.userService.isSignedIn();
     }).catch(error => {
       this.signed_in = this.userService.isSignedIn();
