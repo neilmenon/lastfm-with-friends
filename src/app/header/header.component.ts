@@ -6,6 +6,7 @@ import { UserService } from '../user.service';
 import { ChangeDetectorRef } from '@angular/core';
 import * as moment from 'moment';
 import { MatDialog } from '@angular/material/dialog';
+import { MessageService } from '../message.service';
 
 @Component({
   selector: 'app-header',
@@ -22,12 +23,14 @@ export class HeaderComponent {
       shareReplay()
     );
 
-  constructor(private breakpointObserver: BreakpointObserver, private userService: UserService, public dialog: MatDialog) {
+  constructor(private breakpointObserver: BreakpointObserver, private userService: UserService, public dialog: MatDialog, private messageService: MessageService) {
     this.userService.getUser().toPromise().then(data => {
       this.user = data
       this.signed_in = this.userService.isSignedIn();
     }).catch(error => {
       this.signed_in = this.userService.isSignedIn();
+      if (this.signed_in)
+        this.messageService.open("Error getting data from the backend. Please refresh and try again.");
     })
   }
 

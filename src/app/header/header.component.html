@@ -42,7 +42,7 @@
         <!-- <a mat-button href="#">Link 1</a>
         <a mat-button href="#">Link 2</a>
         <a mat-button href="#">Link 3</a> -->
-        <a *ngIf="signed_in" class="navbar-user-button" mat-button [matMenuTriggerFor]="menu">
+        <a *ngIf="signed_in && user" class="navbar-user-button" mat-button [matMenuTriggerFor]="menu">
           <span>
               <img src="{{ user.profile_image }}" class="navbar-user-image">
               {{ user.username }}
