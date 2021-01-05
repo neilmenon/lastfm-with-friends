@@ -11,19 +11,18 @@ import { UserService } from '../user.service'
 })
 export class HomeComponent implements OnInit {
   signed_in: boolean = undefined;
-  user: any;
+  user: any = undefined;
   constructor(public router: Router, private messageService: MessageService, public http: HttpClient, private userService: UserService) {
-    this.userService.getUser().toPromise().then(data => {
-      this.user = data;
-      console.log(typeof(this.user))
-      this.signed_in = this.userService.isSignedIn();
-    }).catch(error => {
-      this.signed_in = this.userService.isSignedIn();
-    })
+    this.signed_in = this.userService.isSignedIn();
+    if (this.signed_in) {
+      this.userService.getUser().toPromise().then(data => {
+        this.user = data;
+      }).catch(error => {
+      })
+    }
    }
 
   ngOnInit(): void {
-    this.signed_in = this.userService.isSignedIn();
   }
 
     

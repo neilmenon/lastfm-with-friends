@@ -44,11 +44,8 @@ def signout():
     else:
         response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
         abort(response)
-    if auth_helper.is_authenticated(username, session_key):
-        auth_helper.remove_session(username, session_key)
-        return jsonify({"success": "Successfully signed out " + username + "."})
-    else:
-        abort(401)
+    auth_helper.remove_session(username, session_key)
+    return jsonify({"success": "Successfully signed out " + username + "."})
 
 @user_api.route('/api/users', methods=['POST'])
 def create():

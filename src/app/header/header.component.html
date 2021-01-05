@@ -59,7 +59,7 @@
             <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
           </mat-menu>
         </a>
-        <mat-spinner *ngIf="signed_in == undefined" diameter="25" color="accent" class="center"></mat-spinner>
+        <mat-spinner *ngIf="user === undefined" diameter="25" color="accent" class="center"></mat-spinner>
       </span>
       <button *ngIf="signed_in == false" color="primary" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
     </mat-toolbar>

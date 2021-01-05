@@ -15,23 +15,22 @@ import { MessageService } from '../message.service';
 })
 export class HeaderComponent {
   signed_in: boolean = undefined;
-  user: any;
+  user: any = undefined;
   moment: any = moment;
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
-    .pipe(
-      map(result => result.matches),
-      shareReplay()
-    );
+  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(map(result => result.matches), shareReplay());
 
   constructor(private breakpointObserver: BreakpointObserver, private userService: UserService, public dialog: MatDialog, private messageService: MessageService) {
-    this.userService.getUser().toPromise().then(data => {
-      this.user = data
-      this.signed_in = this.userService.isSignedIn();
-    }).catch(error => {
-      this.signed_in = this.userService.isSignedIn();
-      if (this.signed_in)
+    this.signed_in = this.userService.isSignedIn();
+    if (this.signed_in) {
+      this.userService.getUser().toPromise().then(data => {
+        this.user = data
+      }).catch(error => {
+        this.user = null;
         this.messageService.open("Error getting data from the backend. Please refresh and try again.");
-    })
+      })
+    } else {
+      this.user = null;
+    }
   }
 
   ngOnInit() {
