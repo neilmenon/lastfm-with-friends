@@ -1,7 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+html {
+    /* height: 100%; */
+}
+
+body {
+    margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif;
+    height: 100%;
+    background-image: url(/assets/img/background.svg);
+    background-color: #212121;
+    color: rgb(226, 226, 226);
+    width: 85%;
+    margin: auto;
+}
+
+@media (max-width: 600px) {
+    body {
+        width: 100%;
+    }
+}
 
 .container {
     padding: 15px;
@@ -14,9 +32,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 }
 
 .mat-toolbar.mat-primary {
-    background: #212121;
+    background: transparent;
+    
+    border-bottom: 1px solid #5a5a5a;
+    margin: auto;
 }
 
-.mat-flat-button.mat-primary, .mat-raised-button.mat-primary, .mat-fab.mat-primary, .mat-mini-fab.mat-primary {
+.mat-drawer-container {
+    background-image: url(/assets/img/background.svg);
+    background-color: #212121;
+    color: rgb(226, 226, 226);
+}
+
+.mat-flat-button.mat-primary, .mat-raised-button.mat-primary, .mat-fab.mat-primary, .mat-mini-fab.mat-primary, .primary {
     background-color: #ba0000;
+}
+
+.box {
+    overflow: hidden;
+    background: rgba(255,255,255,0.08);
+    margin-bottom: 15px;
+    padding: 15px 15px 0px 15px;
 }
