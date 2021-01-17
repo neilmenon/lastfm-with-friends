@@ -19,6 +19,17 @@ def get_user(username):
     else:
         return False
 
+def get_users():
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SELECT username FROM users;")
+    result = list(cursor)
+    mdb.close()
+    if result:
+        return result
+    else:
+        return False
+
 def create_user(username):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
