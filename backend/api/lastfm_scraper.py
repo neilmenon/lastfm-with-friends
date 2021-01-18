@@ -3,6 +3,7 @@ import json
 import requests
 import mariadb
 import datetime
+from bs4 import BeautifulSoup
 from . import config
 from . import sql_helper
 from . import auth_helper
@@ -24,7 +25,7 @@ def scrape_artist_data():
         page = 1
         total_pages = 1
         while page <= total_pages:
-            logger.log("Getting page" + str(page))
+            logger.log("Getting page " + str(page))
             req_url = "https://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=" + user + "&api_key=" + api_key + "&page="+str(page)+"&limit=500&format=json"
             try:
                 req = requests.get(req_url).json()
@@ -72,6 +73,20 @@ def scrape_artist_data():
                     continue
             page += 1
     mdb.close()
+
+def scrape_artist_images():
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    
+    # okay... let's try and get the artist artwork...
+    img = requests.get(url).text
+    soup = BeautifulSoup(img, features="html.parser")
+    s = soup.find('div', {"class", "header-new-background-image"})
+    if s:
+        image_url = s.get('content')
+    else:
+        image_url = None
+
 
 def get_artists():
     mdb = mariadb.connect(**(cfg['sql']))
