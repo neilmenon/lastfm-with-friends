@@ -45,28 +45,32 @@ def scrape_artist_data():
                 scrobbles = int(entry["playcount"])
                 url = entry["url"]
 
-                # insert artist record
-                artist_record = {"name": artist, "url": url}
-                logger.log("Inserting new artist: " + str(artist_record))
-                sql = sql_helper.insert_into_where_not_exists("artists", artist_record, "name")
-                cursor.execute(sql)
-                mdb.commit()
+                try:
+                    # insert artist record
+                    artist_record = {"name": artist, "url": url}
+                    logger.log("Inserting new artist: " + str(artist_record))
+                    sql = sql_helper.insert_into_where_not_exists("artists", artist_record, "name")
+                    cursor.execute(sql)
+                    mdb.commit()
 
-                # insert scrobble record
-                scrobble_record = {
-                    "artist_name": artist,
-                    "username": user,
-                    "scrobbles": scrobbles
-                }
-                logger.log("Inserting new scrobble record: " + str(scrobble_record))
-                sql = sql_helper.replace_into("artist_scrobbles", scrobble_record)
-                # print(sql)
-                # break
-                cursor.execute(sql)
-                mdb.commit()
-                
+                    # insert scrobble record
+                    scrobble_record = {
+                        "artist_name": artist,
+                        "username": user,
+                        "scrobbles": scrobbles
+                    }
+                    logger.log("Inserting new scrobble record: " + str(scrobble_record))
+                    sql = sql_helper.replace_into("artist_scrobbles", scrobble_record)
+
+                    cursor.execute(sql)
+                    mdb.commit()
+                except mariadb.Error as e:
+                    logger.log("A database error occurred while inserting a record: " + str(e))
+                    continue
+                except Exception as e:
+                    logger.log("An unknown error occured while inserting a record: " + str(e))
+                    continue
             page += 1
-
     mdb.close()
 
 def get_artists():

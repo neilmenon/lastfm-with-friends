@@ -25,6 +25,9 @@ export class HeaderComponent {
       this.userService.getUser().toPromise().then(data => {
         this.user = data
       }).catch(error => {
+        if (error['status'] == 404) {
+          this.userService.clearLocalData()
+        }
         this.user = null;
         this.messageService.open("Error getting data from the backend. Please refresh and try again.");
       })

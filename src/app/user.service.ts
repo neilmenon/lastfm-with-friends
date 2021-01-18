@@ -18,6 +18,11 @@ export class UserService {
     return (localStorage.getItem("lastfm_username") != null) && (localStorage.getItem("lastfm_session") != null);
   }
 
+  clearLocalData() {
+    localStorage.removeItem("lastfm_username")
+    localStorage.removeItem("lastfm_session")
+  }
+
   signOut() {
     this.messageService.open("Signing out...");
     this.user = null;
