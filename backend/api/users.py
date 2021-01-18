@@ -8,6 +8,7 @@ from . import sql_helper
 from . import auth_helper
 from . import user_helper
 from . import api_logger as logger
+from . import lastfm_scraper
 cfg = config.config
 
 user_api = Blueprint('users', __name__)
@@ -98,3 +99,19 @@ def get(username):
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
+
+@user_api.route('/api/users/update', methods=['POST'])
+def update():
+    params = request.get_json()
+    if params:
+        try:
+            username = params['username']
+            session_key = params['session_key']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    lastfm_scraper.user_scrape(username)
+    return jsonify({"success": "Successfully updated " + username + "."})

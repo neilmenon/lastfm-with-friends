@@ -5,9 +5,7 @@ import { Observable } from 'rxjs';
 import { config } from './config'
 import { MessageService } from './message.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class UserService {
   username: string = localStorage.getItem("lastfm_username");
   session_key: string = localStorage.getItem("lastfm_session");
@@ -33,8 +31,8 @@ export class UserService {
    * Prevent making multiple API requests for the same endpoint on different components.
    * Thanks to https://stackoverflow.com/a/50865911/14861722 for solution
   */
-  getUser(): Observable<any> {
-    if (this.user) {
+  getUser(force = false): Observable<any> {
+    if (this.user && !force) {
       return this.user;
     } else {
       this.user = this.http.get(config.api_root + '/users/' + localStorage.getItem("lastfm_username")).pipe(share());

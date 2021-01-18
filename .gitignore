@@ -11,6 +11,10 @@
 # backend config file
 /backend/api/config.py
 
+# backend test python files
+/backend/api/test.py
+/backend/database/schema.txt
+
 # compiled output
 /dist
 /tmp

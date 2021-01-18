@@ -12,21 +12,23 @@
   </mat-sidenav>-->
   <mat-sidenav-content>
     <mat-toolbar color="primary">
-      <a class="mobile-menu-toggle" *ngIf="signed_in && (isHandset$ | async)" mat-button [matMenuTriggerFor]="menu">
+      <a class="mobile-menu-toggle" *ngIf="signed_in && user && (isHandset$ | async)" mat-button [matMenuTriggerFor]="menu">
         <span >
           <mat-icon aria-label="side menu">menu</mat-icon>
         </span>
         <mat-menu #menu="matMenu">
-          <span class="navbar-user-panel">
-            <img src="{{ user.profile_image }}" class="navbar-menu-user-image">
-            <span class="navbar-menu-username">
-              {{ user.username }}
+            <span class="navbar-user-panel">
+              <img src="{{ user.profile_image }}" class="navbar-menu-user-image">
+              <span class="navbar-menu-username">
+                {{ user.username }}
+              </span>
+              <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMMM Do, YYYY') }}</span>
+              <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles...</span>
+              <span class="navbar-menu-updated" *ngIf="user.last_update" [matTooltip]="moment(user.last_update)" matTooltipPosition="above" matTooltipClass="tooltip">Last updated {{ moment(user.last_update).fromNow() }}</span>
             </span>
-            <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMMM Do, YYYY') }}</span>
-          </span>
-          <button mat-menu-item>Settings</button>
-          <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
-        </mat-menu>
+            <button mat-menu-item>Settings</button>
+            <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
+          </mat-menu>
       </a>
       <!--<button
         type="button"
@@ -39,13 +41,10 @@
       <span>lastfm-with-friends</span>
       <span class="spacer"></span>
       <span *ngIf="!(isHandset$ | async)">
-        <!-- <a mat-button href="#">Link 1</a>
-        <a mat-button href="#">Link 2</a>
-        <a mat-button href="#">Link 3</a> -->
         <a *ngIf="signed_in && user" class="navbar-user-button" mat-button [matMenuTriggerFor]="menu">
           <span>
-              <img src="{{ user.profile_image }}" class="navbar-user-image">
-              {{ user.username }}
+            <img src="{{ user.profile_image }}" class="navbar-user-image">
+            {{ user.username }} <mat-spinner *ngIf="!user.last_update" diameter="14" color="warn" style="display: inline; margin-left: 4px; top: 1.5px; "></mat-spinner>
           </span>
           <mat-menu #menu="matMenu">
             <span class="navbar-user-panel">
@@ -54,14 +53,16 @@
                 {{ user.username }}
               </span>
               <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMMM Do, YYYY') }}</span>
+              <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles...</span>
+              <span class="navbar-menu-updated" *ngIf="user.last_update" [matTooltip]="moment(user.last_update)" matTooltipPosition="above" matTooltipClass="tooltip">Last updated {{ moment(user.last_update).fromNow() }}</span>
             </span>
             <button mat-menu-item>Settings</button>
             <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
           </mat-menu>
         </a>
-        <mat-spinner *ngIf="user === undefined" diameter="25" color="accent" class="center"></mat-spinner>
       </span>
       <button *ngIf="signed_in == false" color="primary" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
+      <mat-spinner *ngIf="user === undefined" diameter="25" color="accent"></mat-spinner>
     </mat-toolbar>
     <ng-content></ng-content>
   </mat-sidenav-content>

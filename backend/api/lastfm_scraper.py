@@ -11,13 +11,33 @@ from . import user_helper
 from . import api_logger as logger
 cfg = config.config
 
-def scrape_artist_data():
+def user_scrape(username):
+    change_updated_date(username, True)
+    scrape_artist_data(username)
+    change_updated_date(username)
+
+def change_updated_date(username, clear_date=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
-    users = user_helper.get_users()
-    if not users:
-        logger.log("No users to scrape artists from!")
-        return False
+    if clear_date:
+        sql = "UPDATE `users` SET `last_update` = NULL WHERE `users`.`username` = '"+ username + "';"
+    else:
+        sql = "UPDATE `users` SET `last_update` = '"+str(datetime.datetime.utcnow())+"' WHERE `users`.`username` = '"+ username + "';"
+    cursor.execute(sql)
+    mdb.commit()
+    mdb.close()
+
+def scrape_artist_data(username=None):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    if username:
+        users = [{"username": username}]
+        logger.log("Fetching artist data for user: " + username)
+    else:
+        users = user_helper.get_users()
+        if not users:
+            logger.log("No users to scrape artists from!")
+            return False
     count = 0
     for user_row in users:
         user = user_row['username']
@@ -25,7 +45,7 @@ def scrape_artist_data():
         page = 1
         total_pages = 1
         while page <= total_pages:
-            logger.log("Getting page " + str(page))
+            # logger.log("Getting page " + str(page) + " of artists for " + user)
             req_url = "https://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=" + user + "&api_key=" + api_key + "&page="+str(page)+"&limit=500&format=json"
             try:
                 req = requests.get(req_url).json()
@@ -49,7 +69,7 @@ def scrape_artist_data():
                 try:
                     # insert artist record
                     artist_record = {"name": artist, "url": url}
-                    logger.log("Inserting new artist: " + str(artist_record))
+                    # logger.log("Inserting new artist: " + str(artist_record))
                     sql = sql_helper.insert_into_where_not_exists("artists", artist_record, "name")
                     cursor.execute(sql)
                     mdb.commit()
@@ -60,7 +80,7 @@ def scrape_artist_data():
                         "username": user,
                         "scrobbles": scrobbles
                     }
-                    logger.log("Inserting new scrobble record: " + str(scrobble_record))
+                    # logger.log("Inserting new scrobble record: " + str(scrobble_record))
                     sql = sql_helper.replace_into("artist_scrobbles", scrobble_record)
 
                     cursor.execute(sql)
@@ -77,15 +97,25 @@ def scrape_artist_data():
 def scrape_artist_images():
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
-    
-    # okay... let's try and get the artist artwork...
-    img = requests.get(url).text
-    soup = BeautifulSoup(img, features="html.parser")
-    s = soup.find('div', {"class", "header-new-background-image"})
-    if s:
-        image_url = s.get('content')
-    else:
-        image_url = None
+    cursor.execute("SELECT * FROM `artists` WHERE `image_url` IS null;")
+    result = list(cursor)
+
+    for artist in result:
+        img = requests.get(artist['url']).text
+        soup = BeautifulSoup(img, features="html.parser")
+        s = soup.find('div', {"class", "header-new-background-image"})
+        if s:
+            image_url = s.get('content')
+            record = artist
+            record['name'] = sql_helper.esc_db(record['name'])
+            record['image_url'] = image_url
+            sql = sql_helper.replace_into("artists", record)
+            cursor.execute(sql)
+            mdb.commit()
+            print("Added image for " + artist['name'] + ".")
+        else:
+            continue
+    mdb.close()
 
 
 def get_artists():
@@ -98,5 +128,3 @@ def get_artists():
         return result
     else:
         return False
-
-scrape_artist_data()

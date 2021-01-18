@@ -24,12 +24,20 @@ export class HeaderComponent {
     if (this.signed_in) {
       this.userService.getUser().toPromise().then(data => {
         this.user = data
+        setInterval(() => {
+          if (document.visibilityState == "visible") {
+            this.userService.getUser(true).toPromise().then(data => {
+              console.log("Checking for user update...")
+              this.user = data
+            })
+          }
+        }, 30000)
       }).catch(error => {
         if (error['status'] == 404) {
           this.userService.clearLocalData()
         }
         this.user = null;
-        this.messageService.open("Error getting data from the backend. Please refresh and try again.");
+        this.messageService.open("Error getting data from the backend. Please refresh.");
       })
     } else {
       this.user = null;

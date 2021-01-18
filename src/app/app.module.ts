@@ -17,10 +17,12 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { LastfmauthComponent } from './lastfmauth/lastfmauth.component';
 import { HomeComponent } from './home/home.component';
 import { MessagesComponent } from './messages/messages.component';
 import { SignoutComponent } from './signout/signout.component';
+import { UserService } from './user.service';
 
 @NgModule({
   declarations: [
@@ -45,6 +47,7 @@ import { SignoutComponent } from './signout/signout.component';
     MatProgressSpinnerModule,
     MatMenuModule,
     MatDialogModule,
+    MatTooltipModule,
     HttpClientModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
@@ -52,7 +55,7 @@ import { SignoutComponent } from './signout/signout.component';
       {path: 'signout', component: SignoutComponent}
     ])
   ],
-  providers: [],
+  providers: [UserService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

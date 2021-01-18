@@ -26,7 +26,7 @@ def is_authenticated(username, session_key):
             if session['username'] != username: # user does not match session key
                 return False
             # session key is valid; updated last_used field in sessions table then return True
-            sql = "UPDATE `sessions` SET `last_used` = '"+str(datetime.datetime.now())+"' WHERE `sessions`.`session_key` = '"+session_key+"'"
+            sql = "UPDATE `sessions` SET `last_used` = '"+str(datetime.datetime.utcnow())+"' WHERE `sessions`.`session_key` = '"+session_key+"'"
             cursor.execute(sql)
             mdb.commit()
             mdb.close()
@@ -92,7 +92,7 @@ def get_and_store_session(token):
         table_data = {}
         table_data['username'] = username
         table_data['session_key'] = session_key
-        table_data['last_used'] = str(datetime.datetime.now())
+        table_data['last_used'] = str(datetime.datetime.utcnow())
         sql = sql_helper.insert_into_where_not_exists("sessions", table_data, "session_key")
         cursor.execute(sql)
         mdb.commit()
