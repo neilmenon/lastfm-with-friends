@@ -16,6 +16,41 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `artist_scrobbles`
+--
+
+DROP TABLE IF EXISTS `artist_scrobbles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `artist_scrobbles` (
+  `artist_name` varchar(400) NOT NULL,
+  `username` varchar(191) NOT NULL,
+  `scrobbles` int(11) NOT NULL,
+  PRIMARY KEY (`artist_name`,`username`),
+  KEY `foreign_key_user` (`username`),
+  CONSTRAINT `foreign_key_artist` FOREIGN KEY (`artist_name`) REFERENCES `artists` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `foreign_key_user` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `artists`
+--
+
+DROP TABLE IF EXISTS `artists`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `artists` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(400) NOT NULL,
+  `url` varchar(400) DEFAULT NULL,
+  `image_url` varchar(400) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `sessions`
 --
 
@@ -29,7 +64,7 @@ CREATE TABLE `sessions` (
   PRIMARY KEY (`session_key`),
   UNIQUE KEY `session_key` (`session_key`),
   KEY `user_sessions` (`username`),
-  CONSTRAINT `user_sessions` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `user_sessions` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -46,10 +81,10 @@ CREATE TABLE `users` (
   `display_name` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `registered` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `profile_image` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
-  `last_update` timestamp NOT NULL DEFAULT current_timestamp(),
+  `last_update` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -61,4 +96,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-12-26 19:33:04
+-- Dump completed on 2021-01-18 14:35:42
