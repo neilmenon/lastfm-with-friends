@@ -39,4 +39,8 @@ export class UserService {
       return this.user;
     }
   }
+
+  updateUser() {
+    return this.http.post(config.api_root + '/users/update', {'username': this.username, 'session_key': this.session_key})
+  }
 }

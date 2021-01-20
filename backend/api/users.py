@@ -8,7 +8,7 @@ from . import sql_helper
 from . import auth_helper
 from . import user_helper
 from . import api_logger as logger
-# from . import lastfm_scraper
+from . import lastfm_scraper
 cfg = config.config
 
 user_api = Blueprint('users', __name__)
@@ -113,5 +113,7 @@ def update():
     else:
         response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
         abort(response)
-    # lastfm_scraper.user_scrape(username)
+    if not auth_helper.is_authenticated(username, session_key):
+        abort(401)
+    lastfm_scraper.user_scrape(username)
     return jsonify({"success": "Successfully updated " + username + "."})

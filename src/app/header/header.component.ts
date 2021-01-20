@@ -48,4 +48,13 @@ export class HeaderComponent {
     
   }
 
+  updateUser() {
+    this.user.last_update = null
+    this.userService.updateUser().toPromise().then(data => {
+      this.user.last_update = moment().format()
+      this.messageService.open(data['success'])
+    }).catch(error => {
+        this.messageService.open("Error while updating your user scrobbles!")
+    })
+  }
 }

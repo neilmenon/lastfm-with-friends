@@ -18,11 +18,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { LastfmauthComponent } from './lastfmauth/lastfmauth.component';
 import { HomeComponent } from './home/home.component';
 import { MessagesComponent } from './messages/messages.component';
 import { SignoutComponent } from './signout/signout.component';
 import { UserService } from './user.service';
+import { CreateGroupComponent } from './create-group/create-group.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +35,7 @@ import { UserService } from './user.service';
     HomeComponent,
     MessagesComponent,
     SignoutComponent,
+    CreateGroupComponent,
   ],
   imports: [
     BrowserModule,
@@ -48,11 +52,14 @@ import { UserService } from './user.service';
     MatMenuModule,
     MatDialogModule,
     MatTooltipModule,
+    MatFormFieldModule,
     HttpClientModule,
+    MatInputModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},
-      {path: 'signout', component: SignoutComponent}
+      {path: 'signout', component: SignoutComponent},
+      {path: 'groups/create', component: CreateGroupComponent}
     ])
   ],
   providers: [UserService],
