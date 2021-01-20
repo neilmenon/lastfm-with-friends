@@ -10,11 +10,11 @@ import urllib
 
 cfg = config.config
 
-'''
-    returns True if session key is valid and matches the user
-    returns False if the above are false
-'''
 def is_authenticated(username, session_key):
+    '''
+        returns True if session key is valid and matches the user
+        returns False if the above are false
+    '''
     try:
         mdb = mariadb.connect(**(cfg['sql']))
         cursor = mdb.cursor(dictionary=True)
@@ -56,12 +56,12 @@ def remove_session(username, session_key):
         logger.log("Error while removing session key for " + username + ": " + str(e))
         return False
 
-'''
-    Gets session key from Last.fm and stores it in the database.
-    If user is not in database, a new record will be added to the database.
-    returns the user's username if session key was obtained and stored properly, else False
-'''
 def get_and_store_session(token):
+    '''
+        Gets session key from Last.fm and stores it in the database.
+        If user is not in database, a new record will be added to the database.
+        returns the user's username if session key was obtained and stored properly, else False
+    '''
     data = {}
     data['api_key'] = cfg['api']['key']
     data['token'] = token
@@ -104,11 +104,11 @@ def get_and_store_session(token):
     except Exception as e:
         logger.log("Error while storing session for " + username + ": " + str(e))
         return False
-'''
-    Creates hashed API signature and returns signed object for authentication - https://www.last.fm/api/webauth
-    Python solution based on the https://stackoverflow.com/a/30626108/14861722 JS/JQuery solution - thanks!
-'''
 def get_signed_object(data):
+    '''
+        Creates hashed API signature and returns signed object for authentication - https://www.last.fm/api/webauth
+        Python solution based on the https://stackoverflow.com/a/30626108/14861722 JS/JQuery solution - thanks!
+    '''
     signed_signature = ""
     object_keys = []
     signed_object = {}

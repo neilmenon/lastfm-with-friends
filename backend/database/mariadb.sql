@@ -1,4 +1,4 @@
--- MariaDB dump 10.18  Distrib 10.5.8-MariaDB, for Win64 (AMD64)
+-- MariaDB dump 10.18  Distrib 10.5.8-MariaDB, for osx10.15 (x86_64)
 --
 -- Host: localhost    Database: lastfm_with_friends
 -- ------------------------------------------------------
@@ -51,6 +51,26 @@ CREATE TABLE `artists` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `groups`
+--
+
+DROP TABLE IF EXISTS `groups`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(400) NOT NULL,
+  `description` varchar(400) NOT NULL,
+  `created` datetime NOT NULL,
+  `owner` varchar(191) NOT NULL,
+  `join_code` varchar(191) NOT NULL,
+  PRIMARY KEY (`id`,`join_code`),
+  UNIQUE KEY `join_code` (`join_code`),
+  CONSTRAINT `foreign_key_owner` FOREIGN KEY (`owner`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `sessions`
 --
 
@@ -69,6 +89,24 @@ CREATE TABLE `sessions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `user_groups`
+--
+
+DROP TABLE IF EXISTS `user_groups`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_groups` (
+  `username` varchar(191) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  `joined` datetime NOT NULL,
+  PRIMARY KEY (`username`,`group_id`),
+  UNIQUE KEY `group_id` (`group_id`),
+  CONSTRAINT `foreign_key_group_id` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `foreign_key_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `users`
 --
 
@@ -82,7 +120,7 @@ CREATE TABLE `users` (
   `registered` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `profile_image` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `last_update` datetime DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
+  PRIMARY KEY (`user_id`,`username`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -96,4 +134,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-18 18:03:04
+-- Dump completed on 2021-01-19 19:38:47
