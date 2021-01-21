@@ -2,10 +2,12 @@ import mariadb
 import datetime
 import requests
 import hashlib
+from threading import Thread
 from . import config
 from . import sql_helper
 from . import user_helper
 from . import api_logger as logger
+from . import lastfm_scraper
 import urllib
 
 cfg = config.config
@@ -85,6 +87,9 @@ def get_and_store_session(token):
     # check if user exists in database, if not create new user
     if not user_helper.get_user(username):
         user_helper.create_user(username)
+        # new user needs an initial data fetch
+        thread = Thread(target=lastfm_scraper.user_scrape, args=(username,))
+        thread.start()
     # store session key in sessions table
     try:
         mdb = mariadb.connect(**(cfg['sql']))

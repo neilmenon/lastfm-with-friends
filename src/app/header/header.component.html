@@ -57,7 +57,7 @@
               <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles...</span>
               <span class="navbar-menu-updated" *ngIf="user.last_update" [matTooltip]="moment(user.last_update)" matTooltipPosition="above" matTooltipClass="tooltip">Last updated {{ moment(user.last_update).fromNow() }}</span>
             </span>
-            <button mat-menu-item (click)="updateUser()">Update</button>
+            <button mat-menu-item *ngIf="user.last_update" (click)="updateUser()">Update</button>
             <button mat-menu-item>Settings</button>
             <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
           </mat-menu>
