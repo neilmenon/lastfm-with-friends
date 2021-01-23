@@ -26,6 +26,8 @@ import { MessagesComponent } from './messages/messages.component';
 import { SignoutComponent } from './signout/signout.component';
 import { UserService } from './user.service';
 import { CreateGroupComponent } from './create-group/create-group.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { GroupDetailComponent } from './group-detail/group-detail.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,7 @@ import { CreateGroupComponent } from './create-group/create-group.component';
     MessagesComponent,
     SignoutComponent,
     CreateGroupComponent,
+    GroupDetailComponent,
   ],
   imports: [
     BrowserModule,
@@ -55,11 +58,13 @@ import { CreateGroupComponent } from './create-group/create-group.component';
     MatFormFieldModule,
     HttpClientModule,
     MatInputModule,
+    ReactiveFormsModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},
       {path: 'signout', component: SignoutComponent},
-      {path: 'groups/create', component: CreateGroupComponent}
+      {path: 'groups/create', component: CreateGroupComponent},
+      {path: 'group/:joinCode', component: GroupDetailComponent}
     ])
   ],
   providers: [UserService],

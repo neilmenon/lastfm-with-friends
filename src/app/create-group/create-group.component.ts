@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { MatInputModule } from '@angular/material/input';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import { FormBuilder } from '@angular/forms';
+import { Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MessageService } from '../message.service';
+import { UserService } from '../user.service';
+
 
 @Component({
   selector: 'app-create-group',
@@ -8,10 +12,26 @@ import {MatFormFieldModule} from '@angular/material/form-field';
   styleUrls: ['./create-group.component.css']
 })
 export class CreateGroupComponent implements OnInit {
-
-  constructor() { }
+  groupForm;
+  constructor( private formBuilder: FormBuilder, private messageService: MessageService, private UserService: UserService, public router: Router) { 
+    this.groupForm = this.formBuilder.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required]
+    });
+  }
 
   ngOnInit(): void {
   }
 
+  onSubmit(formData) {
+    if (this.groupForm.status == "VALID") {
+      this.UserService.createGroup(formData).toPromise().then(data => {
+        this.messageService.save('Successfully created group "'+data['name']+'"')
+        this.router.navigate(['group/' + data['join_code']])
+      }).catch(error => {
+        this.messageService.open("Error creating group!")
+        console.log(error)
+      })
+    }
+  }
 }

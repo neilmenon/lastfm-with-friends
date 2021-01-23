@@ -1,3 +1,14 @@
 <div class="center">
     <h1>Create Group</h1>
+    <form [formGroup]="groupForm" class="create-group-form" (ngSubmit)="onSubmit(groupForm.value)">
+        <mat-form-field appearance="outline" class="full-width" color="accent">
+            <mat-label>Group Name</mat-label>
+            <input matInput name="name" placeholder="The Audiophiles, The Lastfmers, etc." type="text" formControlName="name" required>
+        </mat-form-field>
+        <mat-form-field class="full-width" color="accent" appearance="outline">
+            <mat-label>Group Description</mat-label>
+            <textarea matInput placeholder="Much scrobbles, many music, big friends." type="text" formControlName="description" required></textarea>
+        </mat-form-field>
+        <button color="accent" mat-raised-button type="submit">Create</button>
+    </form>
 </div>

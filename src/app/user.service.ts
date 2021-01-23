@@ -43,4 +43,17 @@ export class UserService {
   updateUser() {
     return this.http.post(config.api_root + '/users/update', {'username': this.username, 'session_key': this.session_key})
   }
+
+  createGroup(formData) {
+    return this.http.post(config.api_root + '/groups', {
+      'name': formData['name'], 
+      'description': formData['description'], 
+      'username': this.username, 
+      'session_key': this.session_key
+    })
+  }
+
+  getGroup(joinCode:string) {
+    return this.http.post(config.api_root + '/groups/' + joinCode, {'username': this.username, 'session_key': this.session_key})
+  }
 }

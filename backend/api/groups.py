@@ -55,7 +55,7 @@ def create():
         response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
         abort(response)
 
-@group_api.route('/api/groups/<string:join_code>', methods=['GET'])
+@group_api.route('/api/groups/<string:join_code>', methods=['POST'])
 def get(join_code):
     try:
         params = request.get_json()
