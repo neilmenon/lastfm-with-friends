@@ -5,7 +5,7 @@ from . import sql_helper
 from . import api_logger as logger
 cfg = config.config
 
-def link_user_to_group(username, join_code):
+def join_group(username, join_code):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     data = {
@@ -13,7 +13,15 @@ def link_user_to_group(username, join_code):
         "group_jc": join_code,
         "joined": str(datetime.datetime.utcnow())
     }
-    sql = sql_helper.replace_into("user_groups", data)
+    sql = sql_helper.insert_into("user_groups", data)
+    cursor.execute(sql)
+    mdb.commit()
+    mdb.close()
+
+def leave_group(username, join_code):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    sql = "DELETE FROM `user_groups` WHERE `user_groups`.`username` = '"+username+"' AND `user_groups`.`group_jc` = '"+join_code+"'"
     cursor.execute(sql)
     mdb.commit()
     mdb.close()

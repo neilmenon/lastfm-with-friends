@@ -39,7 +39,7 @@
         *ngIf="isHandset$ | async">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>-->
-      <span>lastfm-with-friends</span>
+      <span [routerLink]="['/']" style="cursor: pointer;outline: none;">lastfm-with-friends</span>
       <span class="spacer"></span>
       <span *ngIf="!(isHandset$ | async)">
         <a *ngIf="signed_in && user" class="navbar-user-button" mat-button [matMenuTriggerFor]="menu">

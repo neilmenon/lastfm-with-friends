@@ -1,4 +1,11 @@
 <div *ngIf="signed_in && user" class="box">
     <p>Welcome, {{ user.username }}.</p>
+    <p>
+        <strong>My groups:</strong>
+        <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group]">{{ group }}</a></li>
+    </p>
+    <p>
+        <a [routerLink]="['groups/join']">Join Group</a> | <a [routerLink]="['groups/create']">Create Group</a> 
+    </p>
 </div>
 

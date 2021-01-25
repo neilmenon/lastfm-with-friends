@@ -28,6 +28,7 @@ import { UserService } from './user.service';
 import { CreateGroupComponent } from './create-group/create-group.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GroupDetailComponent } from './group-detail/group-detail.component';
+import { JoinGroupComponent } from './join-group/join-group.component';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { GroupDetailComponent } from './group-detail/group-detail.component';
     SignoutComponent,
     CreateGroupComponent,
     GroupDetailComponent,
+    JoinGroupComponent,
   ],
   imports: [
     BrowserModule,
@@ -64,7 +66,8 @@ import { GroupDetailComponent } from './group-detail/group-detail.component';
       {path: 'lastfmauth', component: LastfmauthComponent},
       {path: 'signout', component: SignoutComponent},
       {path: 'groups/create', component: CreateGroupComponent},
-      {path: 'group/:joinCode', component: GroupDetailComponent}
+      {path: 'groups/join', component: JoinGroupComponent},
+      {path: 'groups/:joinCode', component: GroupDetailComponent}
     ])
   ],
   providers: [UserService],

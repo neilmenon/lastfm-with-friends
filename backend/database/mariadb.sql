@@ -100,7 +100,6 @@ CREATE TABLE `user_groups` (
   `group_jc` varchar(191) NOT NULL,
   `joined` datetime NOT NULL,
   PRIMARY KEY (`username`,`group_jc`),
-  UNIQUE KEY `group_id` (`group_jc`),
   CONSTRAINT `foreign_key_join_code` FOREIGN KEY (`group_jc`) REFERENCES `groups` (`join_code`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `foreign_key_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -134,4 +133,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-20 15:13:32
+-- Dump completed on 2021-01-25 17:41:32

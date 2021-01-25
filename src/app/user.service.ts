@@ -56,4 +56,16 @@ export class UserService {
   getGroup(joinCode:string) {
     return this.http.post(config.api_root + '/groups/' + joinCode, {'username': this.username, 'session_key': this.session_key})
   }
+
+  joinGroup(joinCode:string) {
+    return this.http.post(config.api_root + '/groups/join', {
+      'username': this.username, 
+      'session_key': this.session_key,
+      'join_code': joinCode
+    })
+  }
+
+  leaveGroup(joinCode:string) {
+    return this.http.post(config.api_root + '/groups/' + joinCode + '/leave', {'username': this.username, 'session_key': this.session_key})
+  }
 }

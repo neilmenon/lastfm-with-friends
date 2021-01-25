@@ -1,0 +1,7 @@
+<form [formGroup]="joinForm" (ngSubmit)="onSubmit(joinForm.value)" class="join-group-form">
+    <mat-form-field appearance="legacy" class="full-width" color="accent">
+        <mat-label>Join Code</mat-label>
+        <input matInput name="joinCode" placeholder="" type="text" formControlName="joinCode" required>
+    </mat-form-field>
+    <button color="accent" mat-raised-button type="submit">Join</button>
+</form>

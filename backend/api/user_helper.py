@@ -13,11 +13,13 @@ def get_user(username):
     cursor = mdb.cursor(dictionary=True)
     cursor.execute("SELECT * FROM users WHERE username = '" + str(username) + "';")
     result = list(cursor)
-    mdb.close()
-    if result:
-        return result[0]
-    else:
+    if not result:
         return False
+    user_data = result[0]
+    cursor.execute("SELECT group_jc FROM user_groups WHERE username = '" + str(username) + "';")
+    user_data['groups'] = [k['group_jc'] for k in list(cursor)]
+    mdb.close()
+    return user_data
 
 def get_users():
     mdb = mariadb.connect(**(cfg['sql']))
