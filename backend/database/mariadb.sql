@@ -23,7 +23,13 @@ DROP TABLE IF EXISTS `album_scrobbles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `album_scrobbles` (
-  `album_name` varchar(400) NOT NULL
+  `album_id` int(11) NOT NULL,
+  `username` varchar(191) NOT NULL,
+  `scrobbles` int(11) NOT NULL,
+  PRIMARY KEY (`album_id`,`username`),
+  KEY `username` (`username`),
+  CONSTRAINT `album_scrobbles_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `album_scrobbles_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -37,12 +43,28 @@ DROP TABLE IF EXISTS `albums`;
 CREATE TABLE `albums` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `artist_name` varchar(191) NOT NULL,
-  `album` varchar(400) NOT NULL,
+  `name` varchar(400) NOT NULL,
   `url` varchar(191) NOT NULL,
   `image_url` varchar(191) NOT NULL,
-  PRIMARY KEY (`id`,`artist_name`,`album`),
+  PRIMARY KEY (`id`,`artist_name`,`name`),
   KEY `artist_name` (`artist_name`),
   CONSTRAINT `albums_ibfk_1` FOREIGN KEY (`artist_name`) REFERENCES `artists` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `artist_redirects`
+--
+
+DROP TABLE IF EXISTS `artist_redirects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `artist_redirects` (
+  `artist_name` varchar(191) NOT NULL,
+  `redirected_name` varchar(191) NOT NULL,
+  PRIMARY KEY (`artist_name`,`redirected_name`),
+  KEY `redirected_name` (`redirected_name`),
+  CONSTRAINT `artist_redirects_ibfk_1` FOREIGN KEY (`redirected_name`) REFERENCES `artists` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -54,12 +76,12 @@ DROP TABLE IF EXISTS `artist_scrobbles`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `artist_scrobbles` (
-  `artist_name` varchar(400) NOT NULL,
+  `artist_id` bigint(20) NOT NULL,
   `username` varchar(191) NOT NULL,
   `scrobbles` int(11) NOT NULL,
-  PRIMARY KEY (`artist_name`,`username`),
+  PRIMARY KEY (`artist_id`,`username`),
   KEY `foreign_key_user` (`username`),
-  CONSTRAINT `foreign_key_artist` FOREIGN KEY (`artist_name`) REFERENCES `artists` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `artist_scrobbles_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `foreign_key_user` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -78,7 +100,7 @@ CREATE TABLE `artists` (
   `image_url` varchar(400) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1233 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -154,7 +176,7 @@ CREATE TABLE `users` (
   `last_update` datetime DEFAULT NULL,
   PRIMARY KEY (`user_id`,`username`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -166,4 +188,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-26 16:10:41
+-- Dump completed on 2021-01-26 18:46:06

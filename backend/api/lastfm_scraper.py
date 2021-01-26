@@ -14,6 +14,7 @@ cfg = config.config
 def user_scrape(username):
     change_updated_date(username, True)
     scrape_artist_data(username)
+    scrape_album_data(username)
     change_updated_date(username)
 
 def change_updated_date(username, clear_date=False):
@@ -74,9 +75,14 @@ def scrape_artist_data(username=None):
                     cursor.execute(sql)
                     mdb.commit()
 
+                    # get the album id that was created
+                    cursor.execute("SELECT id FROM artists WHERE name = '"+artist+"';")
+                    result = list(cursor)
+                    artist_id = result[0]["id"]
+
                     # insert scrobble record
                     scrobble_record = {
-                        "artist_name": artist,
+                        "artist_id": artist_id,
                         "username": user,
                         "scrobbles": scrobbles
                     }
@@ -95,6 +101,7 @@ def scrape_artist_data(username=None):
     mdb.close()
 
 def scrape_album_data(username=None):
+    failed_artists = []
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     if username:
@@ -130,37 +137,103 @@ def scrape_album_data(username=None):
 
             for entry in lastfm["album"]:
                 artist = sql_helper.esc_db(entry["artist"]["name"])
-                artist_url = entry["artist"]["url"]
-                scrobbles = int(entry["playcount"])
+                album = sql_helper.esc_db(entry["name"])
                 url = entry["url"]
+                image_url = entry["image"][3]["#text"]
+                scrobbles = int(entry["playcount"])
 
                 try:
-                    # insert artist record
-                    artist_record = {"name": artist, "url": url}
+                    # insert album record
+                    album_record = {
+                        "artist_name": artist, 
+                        "name": album,
+                        "url": url,
+                        "image_url": image_url
+                    }
                     # logger.log("Inserting new artist: " + str(artist_record))
-                    sql = sql_helper.insert_into_where_not_exists("artists", artist_record, "name")
+                    sql = sql_helper.insert_into_where_not_exists("albums", album_record, "url")
                     cursor.execute(sql)
                     mdb.commit()
 
+                    # get the album id that was created
+                    cursor.execute("SELECT id FROM albums WHERE url = '"+url+"';")
+                    result = list(cursor)
+                    album_id = result[0]["id"]
+
                     # insert scrobble record
                     scrobble_record = {
-                        "artist_name": artist,
+                        "album_id": album_id,
                         "username": user,
                         "scrobbles": scrobbles
                     }
                     # logger.log("Inserting new scrobble record: " + str(scrobble_record))
-                    sql = sql_helper.replace_into("artist_scrobbles", scrobble_record)
+                    sql = sql_helper.replace_into("album_scrobbles", scrobble_record)
 
                     cursor.execute(sql)
                     mdb.commit()
                 except mariadb.Error as e:
-                    logger.log("A database error occurred while inserting a record: " + str(e))
+                    if "albums_ibfk_1" in str(e) and artist != "Various Artists": 
+                        logger.log("Redirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, url))
+                        # artist name redirected to different page so not in artist table
+                        # add alternate name to artist_redirects table
+
+                        redirected_url = entry['artist']['url']
+                        artist_page = requests.get(redirected_url).text
+                        soup = BeautifulSoup(artist_page, features="html.parser")
+                        if "noredirect" in redirected_url:
+                            s = soup.select('p.nag-bar-message > strong > a')[0].text.strip()
+                        else:
+                            s = soup.select('h1.header-new-title')[0].text.strip()
+                        if s:
+                            artist_name = artist
+                            redirected_name = s
+                            logger.log("\tFound Last.fm artist name: {}. Continuing with inserts...".format(redirected_name))
+                            
+                            try:
+                                # insert into artist_redirects table
+                                data = {"artist_name": artist_name, "redirected_name": redirected_name}
+                                sql = sql_helper.insert_into_where_not_exists("artist_redirects", data, "artist_name")
+                                cursor.execute(sql)
+                                mdb.commit()
+
+                                # now we can insert into the the albums table and album_scrobbles tables
+                                album_record["artist_name"] = redirected_name
+                                sql = sql_helper.insert_into_where_not_exists("albums", album_record, "url")
+                                cursor.execute(sql)
+                                mdb.commit()
+
+                                # get the album id that was created
+                                cursor.execute("SELECT id FROM albums WHERE url = '"+url+"';")
+                                result = list(cursor)
+                                album_id = result[0]["id"]
+
+                                # insert scrobble record
+                                scrobble_record = {
+                                    "album_id": album_id,
+                                    "username": user,
+                                    "scrobbles": scrobbles
+                                }
+                                sql = sql_helper.replace_into("album_scrobbles", scrobble_record)
+                                cursor.execute(sql)
+                                mdb.commit()
+                            except mariadb.Error as e:
+                                logger.log("\tFailed to insert.")
+                                failed_artists.append([redirected_name, redirected_url])
+                                break
+                    elif artist == "Various Artists":
+                        continue
+                    else:
+                        logger.log("A database error occurred while inserting a record: " + str(e))
+                        logger.log("\tQuery: " + sql)
                     continue
                 except Exception as e:
                     logger.log("An unknown error occured while inserting a record: " + str(e))
                     continue
             page += 1
     mdb.close()
+    logger.log("------ Failed after attempted fix -----")
+    for f in failed_artists:
+        logger.log(str(f))
 
 def scrape_artist_images():
     mdb = mariadb.connect(**(cfg['sql']))
