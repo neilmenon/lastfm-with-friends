@@ -88,7 +88,7 @@ def get_and_store_session(token):
     if not user_helper.get_user(username):
         user_helper.create_user(username)
         # new user needs an initial data fetch
-        thread = Thread(target=lastfm_scraper.user_scrape, args=(username,))
+        thread = Thread(target=lastfm_scraper.full_user_scrape, args=(username,))
         thread.start()
     # store session key in sessions table
     try:

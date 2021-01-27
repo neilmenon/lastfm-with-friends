@@ -50,3 +50,24 @@ def create_user(username):
     sql = sql_helper.insert_into_where_not_exists("users", data, "username")
     cursor.execute(sql)
     mdb.commit()
+
+def change_updated_date(username, clear_date=False, start_time=None):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    if clear_date:
+        sql = "UPDATE `users` SET `last_update` = NULL WHERE `users`.`username` = '"+ username + "';"
+    elif start_time:
+        sql = "UPDATE `users` SET `last_update` = '"+str(start_time)+"' WHERE `users`.`username` = '"+ username + "';"
+    else:
+        sql = "UPDATE `users` SET `last_update` = '"+str(datetime.datetime.utcnow())+"' WHERE `users`.`username` = '"+ username + "';"
+    cursor.execute(sql)
+    mdb.commit()
+    mdb.close()
+
+def get_updated_date(username):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SELECT last_update FROM users WHERE `users`.`username` = '"+ username + "';")
+    result = list(cursor)
+    mdb.close()
+    return result[0]['last_update']

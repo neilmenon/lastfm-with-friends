@@ -115,5 +115,12 @@ def update():
         abort(response)
     if not auth_helper.is_authenticated(username, session_key):
         abort(401)
-    lastfm_scraper.user_scrape(username)
-    return jsonify({"success": "Successfully updated " + username + "."})
+    tracks_fetched = lastfm_scraper.update_user(username)
+    if tracks_fetched == -1:
+        return jsonify({"success": "You are already up to date!"})
+    elif tracks_fetched == 1:
+        return jsonify({"success": "Fetched {} new track for {}.".format(tracks_fetched, username)})
+    elif tracks_fetched:
+        return jsonify({"success": "Fetched {} new tracks for {}.".format(tracks_fetched, username)})
+    else:
+        abort(500)
