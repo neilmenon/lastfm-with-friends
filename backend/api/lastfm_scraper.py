@@ -438,5 +438,3 @@ def get_artists():
         return result
     else:
         return False
-
-update_user("neilmenon")
