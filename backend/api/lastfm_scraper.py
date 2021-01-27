@@ -21,6 +21,9 @@ def full_user_scrape(username):
 def update_user(username):
     logger.log("Updating user: " + username)
     last_update = user_helper.get_updated_date(username)
+    if not last_update:
+        full_user_scrape(username)
+        return
     updated_unix = str(int(last_update.replace(tzinfo=datetime.timezone.utc).timestamp()))
     current_unix = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
     mdb = mariadb.connect(**(cfg['sql']))
@@ -31,7 +34,6 @@ def update_user(username):
     most_recent_uts = None
     while page <= total_pages:
         req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&from="+updated_unix+"&to="+current_unix+"&limit=500&&extended=1&format=json"
-        logger.log(req_url)
         try:
             req = requests.get(req_url).json()
             lastfm = req["recenttracks"]
@@ -195,7 +197,7 @@ def update_user(username):
                 continue
         page += 1
     user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(most_recent_uts))
-    logger.log("\tDone.")
+    logger.log("\tFetched {} track(s) for {}.".format(tracks_fetched, username))
     return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}
 
 def scrape_artist_data(username=None):
@@ -221,13 +223,10 @@ def scrape_artist_data(username=None):
             try:
                 req = requests.get(req_url).json()
                 lastfm = req["topartists"]
-            except KeyError:
-                logger.log("KeyError, skipping...")
-                logger.log("Raw output: " + str(lastfm.text))
-                break
             except Exception as e:
                 logger.log("Some other issue occurred on getting this user from Last.fm:", e)
-                break
+                user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(1))
+                return
 
             # get the total pages
             total_pages = int(lastfm["@attr"]["totalPages"])
@@ -439,3 +438,5 @@ def get_artists():
         return result
     else:
         return False
+
+update_user("neilmenon")
