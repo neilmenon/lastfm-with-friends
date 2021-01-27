@@ -27,6 +27,8 @@ def update_user(username):
     cursor = mdb.cursor(dictionary=True)
     page = 1
     total_pages = 1
+    get_recent_uts = True
+    most_recent_uts = None
     while page <= total_pages:
         req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&from="+updated_unix+"&to="+current_unix+"&limit=500&&extended=1&format=json"
         logger.log(req_url)
@@ -46,7 +48,7 @@ def update_user(username):
         tracks_fetched = int(lastfm["@attr"]["total"])
         if tracks_fetched == 0:
             logger.log("\tNo tracks to fetch, user is up to date!")
-            return -1
+            return {'tracks_fetched': -1, "last_update": last_update}
             break
 
         for entry in lastfm["track"]:
@@ -55,6 +57,10 @@ def update_user(username):
                     continue
             except KeyError:
                 pass
+            
+            if get_recent_uts: # use the most recent track's timestamp as the last_updated date
+                most_recent_uts = int(entry['date']['uts']) + 1
+                get_recent_uts = False
 
             artist = sql_helper.esc_db(entry['artist']["name"])
             artist_url = entry['artist']['url']
@@ -188,9 +194,9 @@ def update_user(username):
                 logger.log("An unknown error occured while inserting a record: " + str(e))
                 continue
         page += 1
-    user_helper.change_updated_date(username)
+    user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(most_recent_uts))
     logger.log("\tDone.")
-    return tracks_fetched
+    return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}
 
 def scrape_artist_data(username=None):
     mdb = mariadb.connect(**(cfg['sql']))

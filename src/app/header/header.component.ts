@@ -49,10 +49,19 @@ export class HeaderComponent {
   }
 
   updateUser() {
+    let tmp = this.user.last_update
     this.user.last_update = null
     this.userService.updateUser().toPromise().then(data => {
-      this.user.last_update = moment().format()
-      this.messageService.open(data['success'])
+      if (data['tracks_fetched'] == -1) {
+        this.user.last_update = tmp
+        this.messageService.open("You are already up to date!")
+      } else if (data['tracks_fetched'] == 1) {
+        this.user.last_update = data['last_update']
+        this.messageService.open("Fetched 1 new track for " + this.user.username + ".")
+      } else {
+        this.user.last_update = data['last_update']
+        this.messageService.open("Fetched "+data['tracks_fetched']+" new tracks for " + this.user.username + ".")
+      }
     }).catch(error => {
         this.messageService.open("Error while updating your user scrobbles!")
     })

@@ -1,3 +1,5 @@
-<p>{{ group.name }}</p>
-<p>{{ group.description }}</p>
-<button *ngIf="group.owner !== user.username" color="accent" mat-raised-button (click)="leaveGroup()">Leave Group</button>
+<div class="box center">
+    <h2>{{ group.name }}</h2>
+    <p><strong>Description: </strong>{{ group.description }}</p>
+    <button *ngIf="group.owner !== user.username" color="accent" mat-raised-button (click)="leaveGroup()">Leave Group</button>
+</div>

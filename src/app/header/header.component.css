@@ -46,7 +46,7 @@
 
 .navbar-user-panel {
   text-align: center;
-  height: 235px;
+  height: 243px;
   line-height: 22px;
   text-decoration: none;
   max-width: 100%;
@@ -84,6 +84,7 @@
 .navbar-menu-updated {
   display: block;
   color: darkseagreen;
+  line-height: 15px;
 }
 
 .mobile-menu-toggle {
