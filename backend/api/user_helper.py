@@ -17,7 +17,17 @@ def get_user(username):
         return False
     user_data = result[0]
     cursor.execute("SELECT group_jc FROM user_groups WHERE username = '" + str(username) + "';")
-    user_data['groups'] = [k['group_jc'] for k in list(cursor)]
+    group_jcs = [k['group_jc'] for k in list(cursor)]
+    user_data['groups'] = []
+    for join_code in group_jcs:
+        sql = "SELECT * from groups WHERE join_code = '{}';".format(join_code)
+        cursor.execute(sql)
+        result = list(cursor)
+        sql = "SELECT username,joined from user_groups WHERE group_jc = '{}';".format(join_code)
+        cursor.execute(sql)
+        result1 = list(cursor)
+        result[0]['members'] = result1
+        user_data['groups'].append(result[0])
     mdb.close()
     return user_data
 

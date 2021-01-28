@@ -2,7 +2,7 @@
     <p>Welcome, {{ user.username }}.</p>
     <p>
         <strong>My groups:</strong>
-        <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group]">{{ group }}</a></li>
+        <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> - {{ group.description }}</li>
     </p>
     <p>
         <a [routerLink]="['groups/join']">Join Group</a> | <a [routerLink]="['groups/create']">Create Group</a> 
