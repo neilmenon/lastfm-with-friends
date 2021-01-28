@@ -18,7 +18,15 @@
           </mat-expansion-panel-header>
             <div class="container">
                 <div class="box center" >
-                    <h2>Who Knows... Artist</h2>
+                    <h2 class="box-title">Who Knows... Artist</h2>
+                    <div class="container">
+                        <mat-form-field appearance="legacy" class="full-width" color="accent">
+                            <input matInput name="name" placeholder="Foals, Coldplay, etc." type="text" formControlName="name" required>
+                        </mat-form-field>
+                        <div class="box-button">
+                            <button color="accent" mat-raised-button type="submit"><mat-icon>search</mat-icon></button>
+                        </div>
+                    </div>
                 </div>
         
                 <div class="box center" >

@@ -65,6 +65,13 @@ h1,h2,h3,h4,h5,h6 {
     margin-bottom: 15px;
     padding: 15px 15px 0px 15px;
 }
+.box-title {
+    margin-bottom: 0px!important;
+}
+.box-button {
+    margin-top: 7px;
+    margin-left: 7px;
+}
 .container {
     display: flex;
 }
@@ -89,6 +96,7 @@ h1,h2,h3,h4,h5,h6 {
     .container > div:not(:last-child) {
         margin-right: 0;
     }
+    .box-button {display: none;}
 }
 
 .tooltip {
