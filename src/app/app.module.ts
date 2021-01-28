@@ -6,6 +6,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -61,6 +62,7 @@ import { JoinGroupComponent } from './join-group/join-group.component';
     HttpClientModule,
     MatInputModule,
     ReactiveFormsModule,
+    MatExpansionModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},

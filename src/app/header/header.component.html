@@ -16,20 +16,20 @@
         <span >
           <mat-icon aria-label="side menu">menu</mat-icon>
         </span>
-        <mat-menu #menu="matMenu">
-            <span class="navbar-user-panel">
-              <img src="{{ user.profile_image }}" class="navbar-menu-user-image">
-              <span class="navbar-menu-username">
-                {{ user.username }}
-              </span>
-              <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMMM Do, YYYY') }}</span>
-              <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles...</span>
-              <span class="navbar-menu-updated" *ngIf="user.last_update" [matTooltip]="moment(user.last_update)" matTooltipPosition="above" matTooltipClass="tooltip">Last updated {{ moment(user.last_update).fromNow() }}</span>
+        <mat-menu #menu="matMenu" xPosition="before">
+          <span class="navbar-user-panel">
+            <img src="{{ user.profile_image }}" class="navbar-menu-user-image">
+            <span class="navbar-menu-username">
+              {{ user.username }}
             </span>
-            <button mat-menu-item *ngIf="user.last_update && moment().diff(moment(user.last_update), 'minutes') > 10" (click)="updateUser()">Update</button>
-            <button mat-menu-item>Settings</button>
-            <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
-          </mat-menu>
+            <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMMM Do, YYYY') }}</span>
+            <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles...</span>
+            <span class="navbar-menu-updated" *ngIf="user.last_update" [matTooltip]="moment(user.last_update)" matTooltipPosition="above" matTooltipClass="tooltip">Last fetched track was played<br> {{ moment(user.last_update).fromNow() }}</span>
+          </span>
+          <button mat-menu-item (click)="updateUser()">Update</button>
+          <button mat-menu-item>Settings</button>
+          <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
+        </mat-menu>
       </a>
       <!--<button
         type="button"

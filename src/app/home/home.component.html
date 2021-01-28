@@ -1,11 +1,36 @@
-<div *ngIf="signed_in && user" class="box">
-    <p>Welcome, {{ user.username }}.</p>
-    <p>
-        <strong>My groups:</strong>
-        <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> - {{ group.description }}</li>
-    </p>
-    <p>
-        <a [routerLink]="['groups/join']">Join Group</a> | <a [routerLink]="['groups/create']">Create Group</a> 
-    </p>
-</div>
+<div *ngIf="signed_in">
+    <div *ngIf="signed_in && user" class="box">
+        <p>Welcome, {{ user.username }}.</p>
+        <p>
+            <strong>My groups:</strong>
+            <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> - {{ group.description }}</li>
+        </p>
+        <p>
+            <a [routerLink]="['groups/join']">Join Group</a> | <a [routerLink]="['groups/create']">Create Group</a> 
+        </p>
+    </div>
 
+    <mat-accordion>
+        <mat-expansion-panel *ngFor="let group of user.groups" [expanded]="true" class="group-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ group.name }}</mat-panel-title>
+            <mat-panel-description>{{ group.description }}</mat-panel-description>
+          </mat-expansion-panel-header>
+            <div class="container">
+                <div class="box center" >
+                    <h2>Who Knows... Artist</h2>
+                </div>
+        
+                <div class="box center" >
+                    <!-- <h2>Who Knows... Album</h2> -->
+                </div>
+        
+                <div class="box center" >
+                    <!-- <h2>Who Knows... Track</h2> -->
+                </div>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+
+    
+</div>

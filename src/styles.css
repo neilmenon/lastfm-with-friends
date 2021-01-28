@@ -29,11 +29,14 @@ h1,h2,h3,h4,h5,h6 {
     }
 }
 
-.container {
+.app-container {
     padding-top: 15px;
 }
 
 .center {
+    text-align: center;
+}
+.center-all {
     text-align: center;
     margin: auto;
     display: block;
@@ -61,6 +64,31 @@ h1,h2,h3,h4,h5,h6 {
     background: rgba(255,255,255,0.08);
     margin-bottom: 15px;
     padding: 15px 15px 0px 15px;
+}
+.container {
+    display: flex;
+}
+.container > div {
+    flex: 1;
+}
+.container > div:not(:last-child) {
+    margin-right: 15px;
+}
+.group-panel {
+    background: transparent;
+}
+
+@media screen and (max-width: 960px) {
+    .container {
+        display: block;
+        
+    }
+    .container > div {
+        flex: none;
+    }
+    .container > div:not(:last-child) {
+        margin-right: 0;
+    }
 }
 
 .tooltip {

@@ -422,8 +422,9 @@ def scrape_artist_images():
             sql = sql_helper.replace_into("artists", record)
             cursor.execute(sql)
             mdb.commit()
-            print("Added image for " + artist['name'] + ".")
+            logger.log("Added image for " + artist['name'] + ".")
         else:
+            logger.log("\tImage for " + artist['name'] + " not found.")
             continue
     mdb.close()
 

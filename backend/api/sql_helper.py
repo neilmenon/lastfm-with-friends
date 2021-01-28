@@ -26,3 +26,14 @@ def replace_into(table, data):
 
 def esc_db(item):
     return item.replace("'", "\\'")
+
+def sanitize_db_field(db_field):
+    special_chars_replace_with_blank = ['"', "\\'", ',']
+    special_chars_replace_with_space = ['•']
+    sanitized = "REPLACE({}, '{}', '')".format(db_field, special_chars_replace_with_blank.pop(0))
+    for s in special_chars_replace_with_blank:
+       sanitized = "REPLACE({}, '{}', '')".format(sanitized, s)
+    for s in special_chars_replace_with_space:
+       sanitized = "REPLACE({}, '{}', ' ')".format(sanitized, s)
+    return sanitized
+
