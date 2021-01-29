@@ -19,7 +19,7 @@ def full_user_scrape(username):
     user_helper.change_updated_date(username=username, start_time=start_time)
 
 def update_user(username):
-    logger.log("Updating user: " + username)
+    logger.log("User update triggered for: " + username)
     last_update = user_helper.get_updated_date(username)
     if not last_update:
         full_user_scrape(username)

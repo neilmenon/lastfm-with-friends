@@ -32,5 +32,7 @@ def wk_artist(query, users):
     sql = 'SELECT username,scrobbles FROM artist_scrobbles WHERE artist_id = {} AND username IN ({}) ORDER BY scrobbles DESC;'.format(artist['id'], users_list)
     cursor.execute(sql)
     result = list(cursor)
+    if not result:
+        return False
 
     return {'artist': artist, 'users': result}

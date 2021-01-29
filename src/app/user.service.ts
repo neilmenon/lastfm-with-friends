@@ -68,4 +68,13 @@ export class UserService {
   leaveGroup(joinCode:string) {
     return this.http.post(config.api_root + '/groups/' + joinCode + '/leave', {'username': this.username, 'session_key': this.session_key})
   }
+
+  wkArtist(query, users) {
+    return this.http.post(config.api_root + "/commands/wkartist", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'query': query,
+      'users': users
+    })
+  }
 }
