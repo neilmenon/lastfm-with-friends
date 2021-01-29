@@ -10,54 +10,8 @@
         </p>
     </div>
 
-    <mat-accordion>
-        <mat-expansion-panel *ngFor="let group of user.groups; let i = index" [expanded]="i==0" class="group-panel">
-          <mat-expansion-panel-header>
-            <mat-panel-title>{{ group.name }}</mat-panel-title>
-            <mat-panel-description>{{ group.description }}</mat-panel-description>
-          </mat-expansion-panel-header>
-            <div class="container">
-                <div class="box center" >
-                    <h2 class="box-title">Who Knows... Artist</h2>
-                    <div class="container">
-                        <form [formGroup]="wkArtistForm" class="box-form" (ngSubmit)="wkArtistSubmit(wkArtistForm.value, group.members, group.name)">
-                            <mat-form-field appearance="legacy" class="full-width" color="accent">
-                                <input matInput name="name" placeholder="Foals, Coldplay, etc." type="text" formControlName="query">
-                            </mat-form-field>
-                            <div class="box-button">
-                                <button color="accent" mat-raised-button type="submit"><mat-icon>search</mat-icon></button>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="command-result" *ngIf="wkArtistResults">
-                        <table class="results-table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>User</th>
-                                    <th>Scrobbles</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let entry of wkArtistResults.users; let i = index">
-                                    <td>{{ i+1 }}</td>
-                                    <td>{{ entry.username }}</td>
-                                    <td>{{ entry.scrobbles }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        
-                    </div>
-                </div>
-        
-                <div class="box center" >
-                    <!-- <h2>Who Knows... Album</h2> -->
-                </div>
-        
-                <div class="box center" >
-                    <!-- <h2>Who Knows... Track</h2> -->
-                </div>
-            </div>
-        </mat-expansion-panel>
-    </mat-accordion>
+    <div *ngFor="let group of user.groups; last as lastChild">
+        <app-group-dashboard [group]="group"></app-group-dashboard>
+        <hr *ngIf="!lastChild">
+    </div>
 </div>

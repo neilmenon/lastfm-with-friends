@@ -30,6 +30,7 @@ import { CreateGroupComponent } from './create-group/create-group.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GroupDetailComponent } from './group-detail/group-detail.component';
 import { JoinGroupComponent } from './join-group/join-group.component';
+import { GroupDashboardComponent } from './group-dashboard/group-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -42,6 +43,7 @@ import { JoinGroupComponent } from './join-group/join-group.component';
     CreateGroupComponent,
     GroupDetailComponent,
     JoinGroupComponent,
+    GroupDashboardComponent,
   ],
   imports: [
     BrowserModule,
