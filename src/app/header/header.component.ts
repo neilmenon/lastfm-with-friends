@@ -63,6 +63,7 @@ export class HeaderComponent {
         this.messageService.open("Fetched "+data['tracks_fetched']+" new tracks for " + this.user.username + ".")
       }
     }).catch(error => {
+        this.user.last_update = tmp
         this.messageService.open("Error while updating your user scrobbles!")
     })
   }

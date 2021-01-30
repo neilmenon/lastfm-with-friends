@@ -13,7 +13,8 @@ export class MessageService {
 
   open(message: string) {
     this.snackBar.open(message, "Dismiss", {
-      horizontalPosition: this.horizontalPosition
+      horizontalPosition: this.horizontalPosition,
+      duration: 5000
     })
   }
 

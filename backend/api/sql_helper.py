@@ -37,3 +37,11 @@ def sanitize_db_field(db_field):
        sanitized = "REPLACE({}, '{}', ' ')".format(sanitized, s)
     return sanitized
 
+def sanitize_query(query):
+    special_chars_replace_with_blank = ['"', "'", ',']
+    special_chars_replace_with_space = ['•']
+    for s in special_chars_replace_with_blank:
+        query = query.replace(s, '')
+    for s in special_chars_replace_with_space:
+        query = query.replace(s, ' ')
+    return query

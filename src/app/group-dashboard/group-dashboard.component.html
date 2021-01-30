@@ -1,19 +1,12 @@
-<!-- <mat-expansion-panel class="group-panel">
-    <mat-expansion-panel-header>
-      <mat-panel-title>{{ group.name }}</mat-panel-title>
-      <mat-panel-description>{{ group.description }}</mat-panel-description>
-    </mat-expansion-panel-header>
-      
-</mat-expansion-panel> -->
-<div class="center-all">
+<div class="center-all group-dashboard-header">
     <h2 class="box-title">{{ group.name }}</h2>
     <span>{{ group.description }}</span>
 </div>
 <div class="container">
-    <div class="box center" >
-        <h2 class="box-title">Who Knows... Artist</h2>
+    <div class="box center command-box" #wkArtist >
+        <h2 class="box-title">Who Knows This Artist?</h2>
         <div class="container">
-            <form [formGroup]="wkArtistForm" class="box-form" (ngSubmit)="wkArtistSubmit(wkArtistForm.value, group.members, group.name)">
+            <form [formGroup]="wkArtistForm" class="box-form" (ngSubmit)="wkArtistSubmit(wkArtistForm.value, group.members)">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
                     <input matInput name="name" placeholder="Foals, Coldplay, etc." type="text" formControlName="query">
                 </mat-form-field>
@@ -23,14 +16,29 @@
             </form>
         </div>
         <div class="command-result" *ngIf="wkArtistResults">
-            <a href="{{ wkArtistResults.artist.url }}" target="_blank">{{ wkArtistResults.artist.name }}</a><br>
-            <img src="{{ wkArtistResults.artist.image_url }}" width="200px">
-            <table class="results-table">
+            <div class="command-result-summary">
+                <a href="{{ wkArtistResults.artist.url }}" target="_blank">
+                    {{ wkArtistResults.artist.name }}<br>
+                </a>
+                <span *ngIf="wkArtistResults.users.length > 1">
+                    {{ 
+                        wkArtistResults.users.length == wkArtistResults.total_users ? 
+                        "Everyone knows " +  wkArtistResults.artist.name + " in " + group.name 
+                        : wkArtistResults.users.length + " out of " + wkArtistResults.total_users + " users know " + wkArtistResults.artist.name  + " in " + group.name
+                    }}, for a total of {{ wkArtistResults.total_scrobbles }} scrobbles.
+                </span>
+                <span *ngIf="wkArtistResults.users.length == 1">
+                    Only {{ wkArtistResults.users[0].username }} knows {{ wkArtistResults.artist.name }} in {{ group.name  }}!
+                </span>
+            </div>
+            <table class="results-table" >
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>User</th>
-                        <th>Scrobbles</th>
+                        <th class="clickable" title="Click to sort" (click)="sort('scrobbles')">Scrobbles</th>
+                        <th class="clickable" title="Percent of the user's total number of scrobbles (click to sort)" (click)="sort('percent')">%</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,10 +46,15 @@
                         <td>{{ i+1 }}</td>
                         <td>{{ entry.username }}</td>
                         <td>{{ entry.scrobbles }}</td>
+                        <td>{{ entry.percent }}</td>
+                        <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
                     </tr>
                 </tbody>
             </table>
-            
+        </div>
+        <span *ngIf="wkArtistInit === undefined">No one knows this artist in {{ group.name }}.</span>
+        <div *ngIf="!wkArtistResults && wkArtistInit" style="padding-bottom: 10px;">
+            <mat-spinner diameter="25" color="accent" class="center-all"></mat-spinner>
         </div>
     </div>
 

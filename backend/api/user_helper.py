@@ -58,6 +58,7 @@ def create_user(username):
     data['display_name'] = user_info['user']['realname']
     data['registered'] = user_info['user']['registered']['unixtime']
     data['profile_image'] = user_info['user']['image'][3]['#text']
+    data['scrobbles'] = user_info['user']['playcount']
     sql = sql_helper.insert_into_where_not_exists("users", data, "username")
     cursor.execute(sql)
     mdb.commit()

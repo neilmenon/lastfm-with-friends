@@ -10,7 +10,7 @@ body {
     height: 100%;
     background-image: url(/assets/img/background.svg);
     background-color: #212121;
-    color: rgb(226, 226, 226);
+    color: #e2e2e2;
     width: 85%;
     margin: auto;
 }
@@ -66,9 +66,15 @@ hr {
 .mat-flat-button.mat-primary, .mat-raised-button.mat-primary, .mat-fab.mat-primary, .mat-mini-fab.mat-primary, .primary {
     background-color: #ba0000;
 }
+.clickable {
+    cursor: pointer;
+}
+.spacer {
+    flex: 1 1 auto;
+}
 
 .box {
-    overflow: hidden;
+    overflow: auto;
     background: rgba(255,255,255,0.08);
     margin-bottom: 15px;
     padding: 15px 15px 0px 15px;
@@ -94,15 +100,25 @@ hr {
 .container > div:not(:last-child) {
     margin-right: 15px;
 }
+
+.lastfm-icon {
+    color: #e2e2e2;
+}
+.command-box {
+    height: 300px;
+}
 .group-panel {
     background: transparent;
 }
 .command-result {
     padding-bottom: 10px;
 }
+
 .command-result > table {
     width: 100%;
     border-collapse: collapse;
+    background-image: url(/assets/img/background.svg);
+    background: #212121;
 }
 .command-result > table th {
     /* border: 0.1px solid rgba(191, 191, 191, 0.534); */
@@ -114,8 +130,18 @@ hr {
     border: none;
 }
 .command-result > table > tbody > tr:nth-child(odd) {
-    background: rgba(33, 33, 33, 0.39);
+    background: rgb(44, 44, 44);
     /* border: 1px solid #212121; */
+}
+.command-result-summary {
+    padding-bottom: 5px;
+}
+.command-result-summary > a:first-child {
+    color: #e2e2e2;
+    font-size: 18px;
+}
+.group-dashboard-header {
+    padding-bottom: 10px;
 }
 
 @media screen and (max-width: 960px) {
@@ -129,6 +155,9 @@ hr {
     .container > div:not(:last-child) {
         margin-right: 0;
     }
+}
+
+@media screen and (max-width: 990px) {
     .box-button {display: none;}
 }
 
