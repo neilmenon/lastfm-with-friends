@@ -18,8 +18,8 @@ def full_user_scrape(username):
     scrape_album_data(username)
     user_helper.change_updated_date(username=username, start_time=start_time)
 
-def update_user(username, full=False):
-    logger.log("User update triggered for: " + username)
+def update_user(username, full=False, app=None):
+    logger.log("User update triggered for: " + username, app)
     user = user_helper.get_user(username, extended=False)
     last_update = user_helper.get_updated_date(username)
     full_scrape = not last_update or full
@@ -27,7 +27,7 @@ def update_user(username, full=False):
         updated_unix = str(int(last_update.replace(tzinfo=datetime.timezone.utc).timestamp()))
         current_unix = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
         if user['progress']: # if there is a value here it means the the initial scrape did not finish
-            logger.log("\tDetected an unfinished ({}%) initial scrape. Finishing it...".format(user['progress']))
+            logger.log("\tDetected an unfinished ({}%) initial scrape. Finishing it...".format(user['progress']), app)
             registered_unix = str(user['registered'])
             # we can clear the last updated date now to signify an update
             user_helper.change_updated_date(username, clear_date=True)
@@ -48,9 +48,9 @@ def update_user(username, full=False):
             req = requests.get(req_url).json()
             lastfm = req["recenttracks"]
         except Exception as e:
-            logger.log("\tSome issue occurred on getting this user from Last.fm: " + str(e))
+            logger.log("\tSome issue occurred on getting this user from Last.fm: " + str(e), app)
             if full_scrape or user['progress']:
-                logger.log("\tSomething went during the initial update or fixing failed update, storing earliest grabbed track date as last updated date.")
+                logger.log("\tSomething went during the initial update or fixing failed update, storing earliest grabbed track date as last updated date.", app)
                 sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
                 cursor.execute(sql)
                 result = list(cursor)
@@ -62,10 +62,10 @@ def update_user(username, full=False):
         total_pages = int(lastfm["@attr"]["totalPages"])
         tracks_fetched = int(lastfm["@attr"]["total"])
         if total_pages:
-            logger.log("\tFetching page {}/{} for {}.".format(page, total_pages, username))
+            logger.log("\tFetching page {}/{} for {}.".format(page, total_pages, username), app)
             user_helper.change_update_progress(username, round((page/total_pages)*100, 2))
         if tracks_fetched == 0:
-            logger.log("\tNo tracks to fetch, user is up to date!")
+            logger.log("\tNo tracks to fetch, user is up to date!", app)
             return {'tracks_fetched': -1, "last_update": last_update}
             break
 
@@ -129,7 +129,7 @@ def update_user(username, full=False):
                 mdb.commit()
             except mariadb.Error as e:
                 if "albums_ibfk_1" in str(e) and artist != "Various Artists": 
-                    logger.log("\t\tRedirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, album_url))
+                    logger.log("\t\tRedirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, album_url), app)
                     # artist name redirected to different page so not in artist table
                     # add alternate name to artist_redirects table
 
@@ -143,7 +143,7 @@ def update_user(username, full=False):
                     if s:
                         artist_name = artist
                         redirected_name = s
-                        logger.log("\t\t\tFound Last.fm artist name: {}. Continuing with inserts...".format(redirected_name))
+                        logger.log("\t\t\tFound Last.fm artist name: {}. Continuing with inserts...".format(redirected_name), app)
                         
                         try:
                             # insert into artist_redirects table
@@ -175,16 +175,16 @@ def update_user(username, full=False):
                             cursor.execute(sql)
                             mdb.commit()
                         except mariadb.Error as e:
-                            logger.log("\t\t\tFailed to insert.")
+                            logger.log("\t\t\tFailed to insert.", app)
                             break
                 elif artist == "Various Artists":
                     continue
                 else:
-                    logger.log("A database error occurred while inserting a record: " + str(e))
+                    logger.log("A database error occurred while inserting a record: " + str(e), app)
                     logger.log("\t\tQuery: " + sql)
                 continue
             except Exception as e:
-                logger.log("An unknown error occured while inserting a record: " + str(e))
+                logger.log("An unknown error occured while inserting a record: " + str(e), app)
                 continue
         page += 1
     if user['progress']:
@@ -197,7 +197,7 @@ def update_user(username, full=False):
     if tracks_fetched > 0:
         user_helper.get_user_account(username, update=True)
     user_helper.change_update_progress(username, None, clear_progress=True)
-    logger.log("\tFetched {} track(s) for {}.".format(tracks_fetched, username))
+    logger.log("\tFetched {} track(s) for {}.".format(tracks_fetched, username), app)
     return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}
 
 def scrape_artist_data(username=None):

@@ -3,6 +3,7 @@ import datetime
 import requests
 import hashlib
 import time
+from flask import current_app
 from threading import Thread
 from . import config
 from . import sql_helper
@@ -89,7 +90,7 @@ def get_and_store_session(token):
     if not user_helper.get_user(username):
         user_helper.get_user_account(username)
         # new user needs an initial data fetch
-        thread = Thread(target=lastfm_scraper.update_user, args=(username,True))
+        thread = Thread(target=lastfm_scraper.update_user, args=(username,True,current_app._get_current_object()))
         thread.start()
     # store session key in sessions table
     try:
