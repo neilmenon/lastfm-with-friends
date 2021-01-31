@@ -120,3 +120,24 @@ def update():
         return jsonify(response)
     else:
         abort(500)
+
+@user_api.route('/api/users/globalupdate', methods=['POST'])
+def globalupdate():
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    for u in user_helper.get_users():
+        response = lastfm_scraper.update_user(u['username'])
+    if response:
+        return jsonify(response)
+    else:
+        abort(500)
