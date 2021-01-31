@@ -4,9 +4,12 @@ import json
 import requests
 import time
 
+import api.config as config
 from api.users import user_api
 from api.groups import group_api
 from api.commands import command_api
+
+cfg = config.config
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -20,4 +23,8 @@ def index():
    return flask.jsonify({'data': 'success'})
 
 if __name__ == "__main__":
+   # localhost or server?
+   if cfg['server']:
+      app.run(host='0.0.0.0')
+   else:
     app.run()
