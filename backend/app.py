@@ -18,7 +18,7 @@ app.register_blueprint(group_api)
 app.register_blueprint(command_api)
 CORS(app)
 
-@app.route('/', methods=['GET'])
+@app.route('/api', methods=['GET'])
 def index():
    return flask.jsonify({'data': 'success'})
 
