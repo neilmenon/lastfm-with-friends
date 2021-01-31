@@ -7,7 +7,8 @@
         </mat-form-field>
         <mat-form-field class="full-width" color="accent" appearance="legacy">
             <mat-label>Group Description</mat-label>
-            <textarea matInput placeholder="Much scrobbles, many music, big friends." type="text" formControlName="description" required></textarea>
+            <textarea matInput #description placeholder="Much scrobbles, many music, big friends." type="text" formControlName="description" required maxlength="100"></textarea>
+            <mat-hint align="end">{{description.value?.length || 0}}/100</mat-hint>
         </mat-form-field>
         <button color="accent" mat-raised-button type="submit">Create</button>
     </form>

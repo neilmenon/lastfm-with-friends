@@ -26,6 +26,17 @@ def leave_group(username, join_code):
     mdb.commit()
     mdb.close()
 
+def delete_group(join_code):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    sql = "DELETE FROM `user_groups` WHERE `user_groups`.`group_jc` = '"+join_code+"'"
+    cursor.execute(sql)
+    mdb.commit()
+    sql = "DELETE FROM `groups` WHERE `join_code` = '"+join_code+"'"
+    cursor.execute(sql)
+    mdb.commit()
+    mdb.close()
+
 def is_in_group(username, join_code):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)

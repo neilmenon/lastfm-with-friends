@@ -69,6 +69,10 @@ export class UserService {
     return this.http.post(config.api_root + '/groups/' + joinCode + '/leave', {'username': this.username, 'session_key': this.session_key})
   }
 
+  deleteGroup(joinCode:string) {
+    return this.http.post(config.api_root + '/groups/' + joinCode + '/delete', {'username': this.username, 'session_key': this.session_key})
+  }
+
   wkArtist(query, users) {
     return this.http.post(config.api_root + "/commands/wkartist", {
       'username': this.username,
@@ -84,6 +88,23 @@ export class UserService {
       'session_key': this.session_key,
       'query': query,
       'users': users
+    })
+  }
+
+  wkTrack(query, users) {
+    return this.http.post(config.api_root + "/commands/wktrack", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'query': query,
+      'users': users
+    })
+  }
+
+  nowPlaying(join_code) {
+    return this.http.post(config.api_root + "/commands/nowplaying", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'join_code': join_code
     })
   }
 }

@@ -86,7 +86,7 @@ def get_and_store_session(token):
         return False
     # check if user exists in database, if not create new user
     if not user_helper.get_user(username):
-        user_helper.create_user(username)
+        user_helper.get_user_account(username)
         # new user needs an initial data fetch
         thread = Thread(target=lastfm_scraper.update_user, args=(username,True))
         thread.start()

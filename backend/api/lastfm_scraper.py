@@ -194,6 +194,8 @@ def update_user(username, full=False):
         user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
     else:
         user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(most_recent_uts))
+    if tracks_fetched > 0:
+        user_helper.get_user_account(username, update=True)
     user_helper.change_update_progress(username, None, clear_progress=True)
     logger.log("\tFetched {} track(s) for {}.".format(tracks_fetched, username))
     return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}

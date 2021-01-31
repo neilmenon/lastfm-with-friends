@@ -25,7 +25,7 @@ def get_user(username, extended=True):
         sql = "SELECT * from groups WHERE join_code = '{}';".format(join_code)
         cursor.execute(sql)
         result = list(cursor)
-        sql = "SELECT users.user_id FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
+        sql = "SELECT users.user_id, users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
         cursor.execute(sql)
         result1 = list(cursor)
         result1 = [r['user_id'] for r in result1]
@@ -45,25 +45,31 @@ def get_users():
     else:
         return False
 
-def create_user(username):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    data = {
-        "method": "user.getinfo", 
-        "user": username, 
-        "api_key": cfg['api']['key'],
-        "format": "json"
-    }
-    user_info = requests.post("http://ws.audioscrobbler.com/2.0", data=data).json()
-    data = {}
-    data['username'] = username
-    data['display_name'] = user_info['user']['realname']
-    data['registered'] = user_info['user']['registered']['unixtime']
-    data['profile_image'] = user_info['user']['image'][3]['#text']
-    data['scrobbles'] = user_info['user']['playcount']
-    sql = sql_helper.insert_into_where_not_exists("users", data, "username")
-    cursor.execute(sql)
-    mdb.commit()
+def get_user_account(username, update=False):
+    try:
+        mdb = mariadb.connect(**(cfg['sql']))
+        cursor = mdb.cursor(dictionary=True)
+        data = {
+            "method": "user.getinfo", 
+            "user": username, 
+            "api_key": cfg['api']['key'],
+            "format": "json"
+        }
+        user_info = requests.post("http://ws.audioscrobbler.com/2.0", data=data).json()
+        data = {}
+        data['username'] = username
+        data['display_name'] = user_info['user']['realname']
+        data['registered'] = user_info['user']['registered']['unixtime']
+        data['profile_image'] = user_info['user']['image'][3]['#text']
+        data['scrobbles'] = user_info['user']['playcount']
+        if update:
+            sql = "UPDATE `users` SET `display_name` = '{}', `profile_image` = '{}', `scrobbles` = {} WHERE `username` = '{}'".format(data['display_name'], data['profile_image'], data['scrobbles'], username)
+        else:
+            sql = sql_helper.insert_into_where_not_exists("users", data, "username")
+        cursor.execute(sql)
+        mdb.commit()
+    except Exception as e:
+        logger.log("Error while creating or updating {}: {}".format(username, e))
 
 def change_updated_date(username, clear_date=False, start_time=None):
     mdb = mariadb.connect(**(cfg['sql']))

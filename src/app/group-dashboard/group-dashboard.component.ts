@@ -4,6 +4,7 @@ import { FormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -11,6 +12,8 @@ import { UserService } from '../user.service';
   styleUrls: ['./group-dashboard.component.css']
 })
 export class GroupDashboardComponent implements OnInit {
+  moment: any = moment;
+  
   // wkArtist
   @ViewChild('wkArtist', { static: true }) wkArtistDom: ElementRef;
   wkArtistForm;
@@ -28,7 +31,28 @@ export class GroupDashboardComponent implements OnInit {
   wkTrackForm;
   wkTrackResults;
   wkTrackInit: boolean = false;
-  constructor(private formBuilder: FormBuilder, private userService: UserService, private messageService: MessageService) {
+
+  // nowplaying
+  nowPlayingResults = null;
+  constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService) {
+    moment.locale('en-short', {
+      relativeTime: {
+        future: 'in %s',
+        past: '%s',
+        s:  's',
+        ss: '%ss',
+        m:  '1m',
+        mm: '%dm',
+        h:  '1h',
+        hh: '%dh',
+        d:  '1d',
+        dd: '%dd',
+        M:  '1m',
+        MM: '%dM',
+        y:  '1y',
+        yy: '%dY'
+      }
+    });
     this.wkArtistForm = this.formBuilder.group({query: ['']})
     this.wkAlbumForm = this.formBuilder.group({query: ['']})
     this.wkTrackForm = this.formBuilder.group({query: ['']})
@@ -37,7 +61,12 @@ export class GroupDashboardComponent implements OnInit {
   @Input() group: any;
 
   ngOnInit(): void {
-    
+    this.nowPlaying();
+    setInterval(() => {
+      if (document.visibilityState == "visible") {
+        this.nowPlaying();
+      }
+    }, 60000)
   }
 
   wkArtistSubmit(formData, users) {
@@ -75,6 +104,8 @@ export class GroupDashboardComponent implements OnInit {
       this.wkAlbumInit = false
       if (error['status'] == 404) {
         this.wkAlbumInit = undefined;
+      } else if(error['status'] == 400) {
+        this.messageService.open("Improperly formatted query. Enter your query as Artist - Album")
       } else {
         this.messageService.open("An error occured submitting your request. Please try again.")
         console.log(error)
@@ -82,26 +113,28 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  // wkTrackSubmit(formData, users) {
-  //   this.wkTrackInit = true
-  //   this.wkTrackResults = null
-  //   this.wkTrackDom.nativeElement.style.background = ''
-  //   this.userService.wkTrack(formData['query'], users).toPromise().then(data => {
-  //     this.wkTrackResults = data
-  //     this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['artist']['image_url']+')'
-  //     this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
-  //     this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-  //     this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
-  //   }).catch(error => {
-  //     this.wkTrackInit = false
-  //     if (error['status'] == 404) {
-  //       this.wkTrackInit = undefined;
-  //     } else {
-  //       this.messageService.open("An error occured submitting your request. Please try again.")
-  //       console.log(error)
-  //     }
-  //   })
-  // }
+  wkTrackSubmit(formData, users) {
+    this.wkTrackInit = true
+    this.wkTrackResults = null
+    this.wkTrackDom.nativeElement.style.background = ''
+    this.userService.wkTrack(formData['query'], users).toPromise().then(data => {
+      this.wkTrackResults = data
+      this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
+      this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
+      this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+      this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
+    }).catch(error => {
+      this.wkTrackInit = false
+      if (error['status'] == 404) {
+        this.wkTrackInit = undefined;
+      } else if(error['status'] == 400) {
+        this.messageService.open("Improperly formatted query. Enter your query as Artist - Track")
+      } else {
+        this.messageService.open("An error occured submitting your request. Please try again.")
+        console.log(error)
+      }
+    })
+  }
 
   sort(column, command) {
     if (command == "wkArtist") {
@@ -129,6 +162,26 @@ export class GroupDashboardComponent implements OnInit {
         }
       }
     }
+  }
+
+  nowPlaying() {
+    this.nowPlayingResults = null
+    this.userService.nowPlaying(this.group.join_code).toPromise().then(data => {
+      this.nowPlayingResults = data;
+    }).catch(error => {
+      this.nowPlayingResults = undefined
+    })
+  }
+
+  nowPlayingToWk(entry) {
+    let albumQuery = entry.artist + " - " + entry.album
+    let trackQuery = entry.artist + " - " + entry.track
+    this.wkArtistForm.get('query').setValue(entry.artist)
+    this.wkAlbumForm.get('query').setValue(albumQuery)
+    this.wkTrackForm.get('query').setValue(trackQuery)
+    this.wkArtistSubmit({'query': entry.artist}, this.group.members)
+    this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
+    this.wkTrackSubmit({'query': trackQuery}, this.group.members)
   }
 
 }

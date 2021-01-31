@@ -47,6 +47,15 @@ hr {
     margin: auto;
     display: block;
 }
+.center-h-v {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+    text-align: center;
+}
 
 .mat-toolbar.mat-primary {
     background: transparent;
@@ -69,6 +78,19 @@ hr {
 }
 .spacer {
     flex: 1 1 auto;
+}
+.clear-color {
+    color: #e2e2e2;
+}
+.refresh {
+    position: absolute;
+    top: -11px;
+    right: -8px;
+    color: #e2e2e2;
+    font-size: 21px;
+}
+.refresh:hover {
+    color: darkseagreen;
 }
 
 .box {
@@ -138,8 +160,72 @@ hr {
     color: #e2e2e2;
     font-size: 18px;
 }
+.command-result-summary > a:first-child:hover {
+    color: darkseagreen;
+}
 .group-dashboard-header {
     padding-bottom: 10px;
+}
+.group-dashboard-header > h1 {
+    color: #bfbfbf;
+}
+.group-dashboard-subtext {
+    display: flex; 
+    padding: 0px 5px;
+}
+.now-playing-container {
+    height: 255px;
+}
+.now-playing-details {
+
+    margin: auto;
+}
+.now-playing-details span {
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+    margin: auto;
+}
+.now-playing-box {
+    flex-wrap: wrap;
+    padding: 5px;
+}
+.now-playing-box:hover {
+    background: #bfbfbf21;
+}
+.now-playing-errors {
+    margin-top: 75px;
+}
+.now-playing-track:after {
+    content: url(/assets/img/nowplaying.gif);
+    display: inline-block;
+    margin-left: 2px;
+    position: relative;
+    top: 1px;
+}
+.recently-played-track {
+    color: #bfbfbf;
+    margin-left: 2px;
+    font-size: 13px;
+}
+.group-dashboard-subtext > span:last-child {
+    width: 45%;
+    max-width: 300px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: right;
+}
+.beta {
+    background: #ba0000;
+    padding: 4px;
+    border-radius: 3px;
+    margin-left: 4px;
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 14px;
 }
 
 @media screen and (max-width: 960px) {
@@ -152,6 +238,12 @@ hr {
     }
     .container > div:not(:last-child) {
         margin-right: 0;
+    }
+    .now-playing-container {
+        height: 455px;
+    }
+    .now-playing-errors {
+        margin-top: 155px;
     }
 }
 

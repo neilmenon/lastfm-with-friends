@@ -13,6 +13,7 @@ export class MessagesComponent implements OnInit {
       if (val instanceof NavigationEnd && val.url != "/lastfmauth") {
         if (this.messageService.message)
           this.messageService.open(this.messageService.message);
+          this.messageService.message = null;
       }
     });
   }

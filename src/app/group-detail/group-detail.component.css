@@ -1,0 +1,12 @@
+.group-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.group-actions div {
+    padding-bottom: 15px;
+}
+
+.group-actions div:not(:last-child) {
+    padding-right: 10px;
+}

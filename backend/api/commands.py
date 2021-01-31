@@ -37,8 +37,50 @@ def wk_album():
         params = request.get_json()
         if auth_helper.is_authenticated(params['username'], params['session_key']):
             result = command_helper.wk_album(params['query'], params['users'])
-            if not result:
+            if result == None:
                 abort(404)
+            elif result == False:
+                abort(400)
+            return jsonify(result)
+        else:
+            abort(401)
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)
+
+@command_api.route('/api/commands/wktrack', methods=['POST'])
+def wk_track():
+    try:
+        params = request.get_json()
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            result = command_helper.wk_track(params['query'], params['users'])
+            if result == None:
+                abort(404)
+            elif result == False:
+                abort(400)
+            return jsonify(result)
+        else:
+            abort(401)
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)
+
+@command_api.route('/api/commands/nowplaying', methods=['POST'])
+def nowplaying():
+    try:
+        params = request.get_json()
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            result = command_helper.nowplaying(params['join_code'])
+            if not result:
+                abort(500)
             return jsonify(result)
         else:
             abort(401)

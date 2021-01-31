@@ -1,5 +1,8 @@
 <div class="box center">
     <h2>{{ group.name }}</h2>
+    <div *ngIf="group.owner == user.username && deleteConfirmed" style="padding-bottom: 15px;">
+        <button color="primary" mat-raised-button (click)="deleteGroup()">Confirm Delete</button>
+    </div>
     <p><strong>Description: </strong>{{ group.description }}</p>
     <p><strong>Join Code: </strong>{{ group.join_code }}</p>
     <strong>Users: </strong><br><br>
@@ -7,11 +10,17 @@
         <div *ngFor="let u of group.users">
             <img src="{{ u.profile_image }}" width="100px" style="border-radius: 50%;border: 2px solid;"><br>
             <a href="https://last.fm/user/{{ u.username }}" target="_blank">{{ u.username }}</a> <i class="fa fa-star" style="color: #e9c267;" matTooltip="Owner" matTooltipPosition="above" *ngIf="u.username == group.owner"></i><br>
-            Joined {{ moment(user.joined).format('MM/DD/YYYY') }}<br>
+            Joined {{ moment(user.joined).locale('en').format('MM/DD/YYYY') }}<br>
             {{ u.scrobbles | number }} scrobbles<br><br>
         </div>
     </div>
-    <div *ngIf="group.owner !== user.username" style="padding-bottom: 15px;">
-        <button color="accent" mat-raised-button (click)="leaveGroup()">Leave Group</button>
+    <div class="group-actions">
+        <div><button color="accent" mat-raised-button [routerLink]="['']">Visit Dashboard</button></div>
+        <div *ngIf="group.owner !== user.username">
+            <button color="accent" mat-raised-button (click)="leaveGroup()">Leave Group</button>
+        </div>
+        <div *ngIf="group.owner == user.username && !deleteConfirmed">
+            <button color="primary" mat-raised-button (click)="deleteGroup()">Delete Group</button>
+        </div>
     </div>
 </div>

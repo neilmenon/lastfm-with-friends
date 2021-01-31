@@ -1,6 +1,6 @@
 <div *ngIf="signed_in">
-    <div *ngIf="signed_in && user" class="box">
-        <p>Welcome, {{ user.username }}.</p>
+    <div *ngIf="signed_in && user && user.groups.length > 0" class="box">
+        <p>Welcome to Last.fm with Friends!</p>
         <p>
             <strong>My groups:</strong>
             <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> - {{ group.description }}</li>
@@ -8,6 +8,12 @@
         <p>
             <a [routerLink]="['groups/join']">Join Group</a> | <a [routerLink]="['groups/create']">Create Group</a> 
         </p>
+    </div>
+    <div *ngIf="signed_in && user && user.groups.length == 0" class="center-h-v">
+        <h2>Welcome to Last.fm with Friends.</h2>
+        <app-join-group></app-join-group>
+        or<br><br>
+        <button [routerLink]="['groups/create']" color="accent" mat-raised-button type="submit">Create Group</button>
     </div>
 
     <div *ngFor="let group of user.groups; last as lastChild">
