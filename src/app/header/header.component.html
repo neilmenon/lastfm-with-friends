@@ -67,7 +67,7 @@
           </mat-menu>
         </a>
       </span>
-      <button *ngIf="signed_in == false" color="primary" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
+      <button *ngIf="signed_in == false" color="primary" class="sign-in" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
       <mat-spinner *ngIf="user === undefined" diameter="25" color="accent"></mat-spinner>
     </mat-toolbar>
     <ng-content></ng-content>

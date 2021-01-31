@@ -44,7 +44,7 @@ CREATE TABLE `albums` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `artist_name` varchar(191) NOT NULL,
   `name` varchar(400) NOT NULL,
-  `url` varchar(191) NOT NULL,
+  `url` varchar(400) NOT NULL,
   `image_url` varchar(191) NOT NULL,
   PRIMARY KEY (`id`,`artist_name`,`name`),
   KEY `artist_name` (`artist_name`),
@@ -212,4 +212,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-31 14:00:25
+-- Dump completed on 2021-01-31 17:34:58

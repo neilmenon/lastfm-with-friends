@@ -25,5 +25,5 @@
 </div>
 <div *ngIf="!signed_in" class="center-h-v">
     <h2>Welcome to Last.fm with Friends.</h2>
-    Sign in with your Last.fm account to get started.
+    <a [routerLink]="['lastfmauth']">Sign in</a> with your Last.fm account to get started.
 </div>
