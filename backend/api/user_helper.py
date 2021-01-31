@@ -60,7 +60,7 @@ def get_user_account(username, update=False):
         data['username'] = username
         data['display_name'] = user_info['user']['realname']
         data['registered'] = user_info['user']['registered']['unixtime']
-        data['profile_image'] = user_info['user']['image'][3]['#text']
+        data['profile_image'] = user_info['user']['image'][3]['#text'] if user_info['user']['image'][3]['#text'] else "https://lastfm.freetls.fastly.net/i/u/avatar170s/818148bf682d429dc215c1705eb27b98.webp"
         data['scrobbles'] = user_info['user']['playcount']
         data['progress'] = 0
         if update:
