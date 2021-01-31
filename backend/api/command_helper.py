@@ -50,7 +50,7 @@ def wk_album(query, users):
         return False
 
     # find artist in the database
-    sql = "SELECT * from artists WHERE {} LIKE '%{}%'".format(sql_helper.sanitize_db_field("name"), artist_query)
+    sql = "SELECT * from artists WHERE {} LIKE '%{}%'".format(sql_helper.sanitize_db_field("name"), sql_helper.esc_db(artist_query))
     cursor.execute(sql)
     result = list(cursor)
     if not result:
@@ -67,7 +67,7 @@ def wk_album(query, users):
     artist = result[0]
 
     # find album in the database
-    sql = "SELECT * from albums WHERE artist_name = '{}' AND {} LIKE '%{}%'".format(artist['name'], sql_helper.sanitize_db_field("name"), album_query)
+    sql = "SELECT * from albums WHERE artist_name = '{}' AND {} LIKE '%{}%'".format(artist['name'], sql_helper.sanitize_db_field("name"), sql_helper.esc_db(album_query))
     cursor.execute(sql)
     result = list(cursor)
     if not result:
@@ -94,7 +94,7 @@ def wk_track(query, users):
         return False
 
     # find artist in the database
-    sql = "SELECT * from artists WHERE {} LIKE '%{}%'".format(sql_helper.sanitize_db_field("name"), artist_query)
+    sql = "SELECT * from artists WHERE {} LIKE '%{}%'".format(sql_helper.sanitize_db_field("name"), sql_helper.esc_db(artist_query))
     cursor.execute(sql)
     result = list(cursor)
     if not result:
@@ -111,7 +111,7 @@ def wk_track(query, users):
     artist = result[0]
 
     # find track in the database
-    sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND {} LIKE '%{}%'".format(artist['id'], sql_helper.sanitize_db_field("track"), track_query)
+    sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND {} LIKE '%{}%'".format(artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(track_query))
     cursor.execute(sql)
     result = list(cursor)
     if not result:
