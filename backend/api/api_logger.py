@@ -1,4 +1,5 @@
 import datetime
+from flask import current_app
 
 def log(message):
-    print("[" + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "] " + message)
+    current_app.logger.debug(message)
