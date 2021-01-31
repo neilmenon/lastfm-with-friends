@@ -19,9 +19,7 @@ a {
     color: darkseagreen;
     text-decoration: none;
 }
-a:hover {
-    color: darksalmon;
-}
+
 h1,h2,h3,h4,h5,h6 {
     color: #e9c267;
 }

@@ -3,6 +3,7 @@
     <span>{{ group.description }}</span>
 </div>
 <div class="container">
+    <!-- wkArtist -->
     <div class="box center command-box" #wkArtist >
         <h2 class="box-title">Who Knows This Artist?</h2>
         <div class="container">
@@ -37,7 +38,7 @@
                         <th>#</th>
                         <th>User</th>
                         <th class="clickable" title="Click to sort" (click)="sort('scrobbles')">Scrobbles</th>
-                        <th class="clickable" title="Percent of the user's total number of scrobbles (click to sort)" (click)="sort('percent')">%</th>
+                        <th class="clickable" title="Percent of the user's total number of scrobbles (click to sort)" (click)="sort('percent', 'wkArtist')">%</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -58,8 +59,60 @@
         </div>
     </div>
 
-    <div class="box center" >
-        <!-- <h2>Who Knows... Album</h2> -->
+    <!-- wkAlbum -->
+    <div class="box center command-box" #wkAlbum >
+        <h2 class="box-title">Who Knows This Album?</h2>
+        <div class="container">
+            <form [formGroup]="wkAlbumForm" class="box-form" (ngSubmit)="wkAlbumSubmit(wkAlbumForm.value, group.members)">
+                <mat-form-field appearance="legacy" class="full-width" color="accent">
+                    <input matInput name="name" placeholder="Foals - Holy Fire, Coldplay - Mylo Xyloto, etc." type="text" formControlName="query">
+                </mat-form-field>
+                <div class="box-button">
+                    <button color="accent" mat-raised-button type="submit"><mat-icon>search</mat-icon></button>
+                </div>
+            </form>
+        </div>
+        <div class="command-result" *ngIf="wkAlbumResults">
+            <div class="command-result-summary">
+                <a href="{{ wkAlbumResults.album.url }}" target="_blank">
+                    {{ wkAlbumResults.artist.name }} - {{ wkAlbumResults.album.name }}<br>
+                </a>
+                <span *ngIf="wkAlbumResults.users.length > 1">
+                    {{ 
+                        wkAlbumResults.users.length == wkAlbumResults.total_users ? 
+                        "Everyone knows " +  wkAlbumResults.album.name + " in " + group.name 
+                        : wkAlbumResults.users.length + " out of " + wkAlbumResults.total_users + " users know " + wkAlbumResults.album.name  + " in " + group.name
+                    }}, for a total of {{ wkAlbumResults.total_scrobbles }} scrobbles.
+                </span>
+                <span *ngIf="wkAlbumResults.users.length == 1">
+                    Only {{ wkAlbumResults.users[0].username }} knows {{ wkAlbumResults.album.name }} in {{ group.name  }}!
+                </span>
+            </div>
+            <table class="results-table" >
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th class="clickable" title="Click to sort" (click)="sort('scrobbles', 'wkAlbum')">Scrobbles</th>
+                        <th class="clickable" title="Percent of the user's total number of scrobbles (click to sort)" (click)="sort('percent', 'wkAlbum')">%</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let entry of wkAlbumResults.users; let i = index">
+                        <td>{{ i+1 }}</td>
+                        <td>{{ entry.username }}</td>
+                        <td>{{ entry.scrobbles }}</td>
+                        <td>{{ entry.percent }}</td>
+                        <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <span *ngIf="wkAlbumInit === undefined">No one knows this album in {{ group.name }}.</span>
+        <div *ngIf="!wkAlbumResults && wkAlbumInit" style="padding-bottom: 10px;">
+            <mat-spinner diameter="25" color="accent" class="center-all"></mat-spinner>
+        </div>
     </div>
 
     <div class="box center" >

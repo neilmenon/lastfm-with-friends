@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-group-detail',
@@ -11,6 +12,7 @@ import { UserService } from '../user.service';
 export class GroupDetailComponent implements OnInit {
   group;
   user;
+  moment: any = moment;
   constructor(private route: ActivatedRoute, private userService: UserService, private messageService: MessageService, public router: Router) {
     this.route.paramMap.subscribe(params => {
       this.userService.getGroup(params.get('joinCode')).toPromise().then(data => {

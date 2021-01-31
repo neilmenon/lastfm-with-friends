@@ -77,4 +77,13 @@ export class UserService {
       'users': users
     })
   }
+
+  wkAlbum(query, users) {
+    return this.http.post(config.api_root + "/commands/wkalbum", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'query': query,
+      'users': users
+    })
+  }
 }

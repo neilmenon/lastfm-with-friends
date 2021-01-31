@@ -18,14 +18,19 @@ def full_user_scrape(username):
     scrape_album_data(username)
     user_helper.change_updated_date(username=username, start_time=start_time)
 
-def update_user(username):
+def update_user(username, full=False):
     logger.log("User update triggered for: " + username)
+    user = user_helper.get_user(username, extended=False)
     last_update = user_helper.get_updated_date(username)
-    if not last_update:
-        full_user_scrape(username)
-        return
-    updated_unix = str(int(last_update.replace(tzinfo=datetime.timezone.utc).timestamp()))
-    current_unix = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
+    full_scrape = not last_update or full
+    if not full_scrape:
+        updated_unix = str(int(last_update.replace(tzinfo=datetime.timezone.utc).timestamp()))
+        current_unix = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
+        if user['progress']: # if there is a value here it means the the initial scrape did not finish
+            logger.log("\tDetected an unfinished ({}%) initial scrape. Finishing it...".format(user['progress']))
+            registered_unix = str(user['registered'])
+            # we can clear the last updated date now to signify an update
+            user_helper.change_updated_date(username, clear_date=True)
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     page = 1
@@ -33,21 +38,32 @@ def update_user(username):
     get_recent_uts = True
     most_recent_uts = None
     while page <= total_pages:
-        req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&from="+updated_unix+"&to="+current_unix+"&limit=500&&extended=1&format=json"
+        if not full_scrape and not user['progress']:
+            req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&from="+updated_unix+"&to="+current_unix+"&page="+str(page)+"&limit=1000&extended=1&format=json"
+        elif user['progress']:
+            req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&from="+registered_unix+"&to="+updated_unix+"&page="+str(page)+"&limit=1000&extended=1&format=json"
+        else:
+            req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&page="+str(page)+"&limit=1000&extended=1&format=json"
         try:
             req = requests.get(req_url).json()
             lastfm = req["recenttracks"]
-        except KeyError:
-            logger.log("KeyError, skipping...")
-            logger.log("Raw output: " + str(lastfm.text))
-            break
         except Exception as e:
-            logger.log("Some other issue occurred on getting this user from Last.fm:", e)
-            break
+            logger.log("\tSome issue occurred on getting this user from Last.fm: " + str(e))
+            if full_scrape or user['progress']:
+                logger.log("\tSomething went during the initial update or fixing failed update, storing earliest grabbed track date as last updated date.")
+                sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
+                cursor.execute(sql)
+                result = list(cursor)
+                user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
+                return
+            return
 
         # get the total pages
         total_pages = int(lastfm["@attr"]["totalPages"])
         tracks_fetched = int(lastfm["@attr"]["total"])
+        if total_pages:
+            logger.log("\tFetching page {}/{} for {}.".format(page, total_pages, username))
+            user_helper.change_update_progress(username, round((page/total_pages)*100, 2))
         if tracks_fetched == 0:
             logger.log("\tNo tracks to fetch, user is up to date!")
             return {'tracks_fetched': -1, "last_update": last_update}
@@ -68,13 +84,13 @@ def update_user(username):
             artist_url = entry['artist']['url']
             album = sql_helper.esc_db(entry['album']['#text'])
             album_url = artist_url + "/" + entry['album']['#text'].replace(" ", "+")
-            track = entry['name']
+            track = sql_helper.esc_db(entry['name'])
+            timestamp = entry['date']['uts']
             image_url = entry['image'][3]['#text']
 
             try:
                 # insert artist record
                 artist_record = {"name": artist, "url": artist_url}
-                # logger.log("Inserting new artist: " + str(artist_record))
                 sql = sql_helper.insert_into_where_not_exists("artists", artist_record, "name")
                 cursor.execute(sql)
                 mdb.commit()
@@ -84,22 +100,6 @@ def update_user(username):
                 result = list(cursor)
                 artist_id = result[0]["id"]
 
-                # insert scrobble record
-                scrobble_record = {
-                    "artist_id": artist_id,
-                    "username": username,
-                    "scrobbles": 0
-                }
-                # logger.log("Inserting new scrobble record: " + str(scrobble_record))
-                sql = sql_helper.insert_into_where_not_exists_2("artist_scrobbles", scrobble_record, "artist_id", "username")
-                cursor.execute(sql)
-                mdb.commit()
-
-                # increment scrobble count
-                sql = "UPDATE `artist_scrobbles` SET scrobbles = scrobbles + 1 WHERE `artist_scrobbles`.`artist_id` = "+str(artist_id)+" AND `artist_scrobbles`.`username` = '"+username+"'"
-                cursor.execute(sql)
-                mdb.commit()
-
                 # insert album record
                 album_record = {
                     "artist_name": artist, 
@@ -107,7 +107,6 @@ def update_user(username):
                     "url": sql_helper.esc_db(album_url),
                     "image_url": image_url
                 }
-                # logger.log("Inserting new artist: " + str(artist_record))
                 sql = sql_helper.insert_into_where_not_exists_2("albums", album_record, "artist_name", "name")
                 cursor.execute(sql)
                 mdb.commit()
@@ -117,24 +116,20 @@ def update_user(username):
                 result = list(cursor)
                 album_id = result[0]["id"]
 
-                # insert scrobble record
+                # insert full track record
                 scrobble_record = {
+                    "artist_id": artist_id,
                     "album_id": album_id,
-                    "username": username,
-                    "scrobbles": 0
+                    "user_id": user['user_id'],
+                    "track": track,
+                    "timestamp": timestamp,
                 }
-                # logger.log("Inserting new scrobble record: " + str(scrobble_record))
-                sql = sql_helper.insert_into_where_not_exists_2("album_scrobbles", scrobble_record, "album_id", "username")
-                cursor.execute(sql)
-                mdb.commit()
-
-                # insert scrobble record
-                sql = "UPDATE `album_scrobbles` SET scrobbles = scrobbles + 1 WHERE `album_scrobbles`.`album_id` = "+str(album_id)+" AND `album_scrobbles`.`username` = '"+username+"'"
+                sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
                 cursor.execute(sql)
                 mdb.commit()
             except mariadb.Error as e:
                 if "albums_ibfk_1" in str(e) and artist != "Various Artists": 
-                    logger.log("Redirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, album_url))
+                    logger.log("\t\tRedirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, album_url))
                     # artist name redirected to different page so not in artist table
                     # add alternate name to artist_redirects table
 
@@ -148,7 +143,7 @@ def update_user(username):
                     if s:
                         artist_name = artist
                         redirected_name = s
-                        logger.log("\tFound Last.fm artist name: {}. Continuing with inserts...".format(redirected_name))
+                        logger.log("\t\t\tFound Last.fm artist name: {}. Continuing with inserts...".format(redirected_name))
                         
                         try:
                             # insert into artist_redirects table
@@ -168,35 +163,38 @@ def update_user(username):
                             result = list(cursor)
                             album_id = result[0]["id"]
 
-                            # insert scrobble record
+                            # insert full track record
                             scrobble_record = {
+                                "artist_id": artist_id,
                                 "album_id": album_id,
-                                "username": username,
-                                "scrobbles": 0
+                                "user_id": user['user_id'],
+                                "track": track,
+                                "timestamp": timestamp
                             }
-                            # logger.log("Inserting new scrobble record: " + str(scrobble_record))
-                            sql = sql_helper.insert_into_where_not_exists_2("album_scrobbles", scrobble_record, "album_id", "username")
-                            cursor.execute(sql)
-                            mdb.commit()
-
-                            # increment scrobble count
-                            sql = "UPDATE `album_scrobbles` SET scrobbles = scrobbles + 1 WHERE `album_scrobbles`.`album_id` = "+str(album_id)+" AND `album_scrobbles`.`username` = '"+username+"'"
+                            sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
                             cursor.execute(sql)
                             mdb.commit()
                         except mariadb.Error as e:
-                            logger.log("\tFailed to insert.")
+                            logger.log("\t\t\tFailed to insert.")
                             break
                 elif artist == "Various Artists":
                     continue
                 else:
                     logger.log("A database error occurred while inserting a record: " + str(e))
-                    logger.log("\tQuery: " + sql)
+                    logger.log("\t\tQuery: " + sql)
                 continue
             except Exception as e:
                 logger.log("An unknown error occured while inserting a record: " + str(e))
                 continue
         page += 1
-    user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(most_recent_uts))
+    if user['progress']:
+        sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
+        cursor.execute(sql)
+        result = list(cursor)
+        user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
+    else:
+        user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(most_recent_uts))
+    user_helper.change_update_progress(username, None, clear_progress=True)
     logger.log("\tFetched {} track(s) for {}.".format(tracks_fetched, username))
     return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}
 

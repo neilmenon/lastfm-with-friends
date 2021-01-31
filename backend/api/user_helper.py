@@ -8,7 +8,7 @@ from . import api_logger as logger
 
 cfg = config.config
 
-def get_user(username):
+def get_user(username, extended=True):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     cursor.execute("SELECT * FROM users WHERE username = '" + str(username) + "';")
@@ -16,6 +16,8 @@ def get_user(username):
     if not result:
         return False
     user_data = result[0]
+    if not extended:
+        return user_data
     cursor.execute("SELECT group_jc FROM user_groups WHERE username = '" + str(username) + "';")
     group_jcs = [k['group_jc'] for k in list(cursor)]
     user_data['groups'] = []
@@ -23,10 +25,10 @@ def get_user(username):
         sql = "SELECT * from groups WHERE join_code = '{}';".format(join_code)
         cursor.execute(sql)
         result = list(cursor)
-        sql = "SELECT username from user_groups WHERE group_jc = '{}';".format(join_code)
+        sql = "SELECT users.user_id FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
         cursor.execute(sql)
         result1 = list(cursor)
-        result1 = [r['username'] for r in result1]
+        result1 = [r['user_id'] for r in result1]
         result[0]['members'] = result1
         user_data['groups'].append(result[0])
     mdb.close()
@@ -72,6 +74,17 @@ def change_updated_date(username, clear_date=False, start_time=None):
         sql = "UPDATE `users` SET `last_update` = '"+str(start_time)+"' WHERE `users`.`username` = '"+ username + "';"
     else:
         sql = "UPDATE `users` SET `last_update` = '"+str(datetime.datetime.utcnow())+"' WHERE `users`.`username` = '"+ username + "';"
+    cursor.execute(sql)
+    mdb.commit()
+    mdb.close()
+
+def change_update_progress(username, progress, clear_progress=False):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    if clear_progress:
+        sql = "UPDATE `users` SET `progress` = 0 WHERE `users`.`username` = '"+ username + "';"
+    else:
+        sql = "UPDATE `users` SET `progress` = "+str(progress)+" WHERE `users`.`username` = '"+ username + "';"
     cursor.execute(sql)
     mdb.commit()
     mdb.close()
