@@ -7,7 +7,7 @@ User=root
 Group=nginx
 WorkingDirectory=/root/projects/lastfm-with-friends/backend
 Environment="PATH=/root/projects/lastfm-with-friends/backend/env/bin"
-ExecStart=/root/projects/lastfm-with-friends/backend/env/bin/uwsgi --ini app.ini
+ExecStart=/root/projects/lastfm-with-friends/backend/env/bin/uwsgi --ini app.ini --enable-threads
 
 [Install]
 WantedBy=multi-user.target

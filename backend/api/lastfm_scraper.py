@@ -181,7 +181,7 @@ def update_user(username, full=False, app=None):
                     continue
                 else:
                     logger.log("A database error occurred while inserting a record: " + str(e), app)
-                    logger.log("\t\tQuery: " + sql)
+                    logger.log("\t\tQuery: " + sql, app)
                 continue
             except Exception as e:
                 logger.log("An unknown error occured while inserting a record: " + str(e), app)
