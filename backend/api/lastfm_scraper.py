@@ -416,10 +416,7 @@ def scrape_artist_images():
         s = soup.find('div', {"class", "header-new-background-image"})
         if s:
             image_url = s.get('content')
-            record = artist
-            record['name'] = sql_helper.esc_db(record['name'])
-            record['image_url'] = image_url
-            sql = sql_helper.replace_into("artists", record)
+            sql = "UPDATE `artists` SET `image_url` = '{}' WHERE `id` = {}".format(image_url, artist['id'])
             cursor.execute(sql)
             mdb.commit()
             logger.log("Added image for " + artist['name'] + ".")

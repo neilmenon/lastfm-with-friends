@@ -1,6 +1,13 @@
 <div *ngIf="signed_in">
+    <div *ngIf="signed_in && user && user.groups.length == 0" class="center-h-v">
+        <h2>Welcome to Last.fm with Friends.</h2>
+        <span *ngIf="!user.last_update">Your scrobbles are currently being fetched in the background.<br>While you wait, you may...<br><br></span>
+        <app-join-group></app-join-group>
+        or<br><br>
+        <button [routerLink]="['groups/create']" color="accent" mat-raised-button type="submit">Create Group</button>
+    </div>
     <div *ngIf="signed_in && user && user.groups.length > 0" class="box">
-        <p>Welcome to Last.fm with Friends!</p>
+        <p>Welcome to Last.fm with Friends.</p>
         <p>
             <strong>My groups:</strong>
             <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> - {{ group.description }}</li>
@@ -9,15 +16,14 @@
             <a [routerLink]="['groups/join']">Join Group</a> | <a [routerLink]="['groups/create']">Create Group</a> 
         </p>
     </div>
-    <div *ngIf="signed_in && user && user.groups.length == 0" class="center-h-v">
-        <h2>Welcome to Last.fm with Friends.</h2>
-        <app-join-group></app-join-group>
-        or<br><br>
-        <button [routerLink]="['groups/create']" color="accent" mat-raised-button type="submit">Create Group</button>
-    </div>
+    
 
     <div *ngFor="let group of user.groups; last as lastChild">
         <app-group-dashboard [group]="group"></app-group-dashboard>
         <hr *ngIf="!lastChild">
     </div>
+</div>
+<div *ngIf="!signed_in" class="center-h-v">
+    <h2>Welcome to Last.fm with Friends.</h2>
+    Sign in with your Last.fm account to get started.
 </div>

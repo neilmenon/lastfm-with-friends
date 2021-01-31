@@ -62,6 +62,7 @@ def get_user_account(username, update=False):
         data['registered'] = user_info['user']['registered']['unixtime']
         data['profile_image'] = user_info['user']['image'][3]['#text']
         data['scrobbles'] = user_info['user']['playcount']
+        data['progress'] = 0
         if update:
             sql = "UPDATE `users` SET `display_name` = '{}', `profile_image` = '{}', `scrobbles` = {} WHERE `username` = '{}'".format(data['display_name'], data['profile_image'], data['scrobbles'], username)
         else:

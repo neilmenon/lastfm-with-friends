@@ -55,6 +55,7 @@ hr {
     -ms-transform: translate(-50%,-50%);
     transform: translate(-50%,-50%);
     text-align: center;
+    width: 100%;
 }
 
 .mat-toolbar.mat-primary {
@@ -240,10 +241,10 @@ hr {
         margin-right: 0;
     }
     .now-playing-container {
-        height: 455px;
+        height: 355px;
     }
     .now-playing-errors {
-        margin-top: 155px;
+        margin-top: 125px;
     }
 }
 

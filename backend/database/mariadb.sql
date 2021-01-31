@@ -143,6 +143,28 @@ CREATE TABLE `sessions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `track_scrobbles`
+--
+
+DROP TABLE IF EXISTS `track_scrobbles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `track_scrobbles` (
+  `artist_id` bigint(20) NOT NULL,
+  `album_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `track` varchar(400) NOT NULL,
+  `timestamp` varchar(191) NOT NULL,
+  PRIMARY KEY (`artist_id`,`album_id`,`user_id`,`track`,`timestamp`),
+  KEY `album_id` (`album_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `track_scrobbles_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `track_scrobbles_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `track_scrobbles_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `user_groups`
 --
 
@@ -173,7 +195,9 @@ CREATE TABLE `users` (
   `display_name` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `registered` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `profile_image` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
+  `scrobbles` bigint(20) NOT NULL,
   `last_update` datetime DEFAULT NULL,
+  `progress` float NOT NULL,
   PRIMARY KEY (`user_id`,`username`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -188,4 +212,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-26 18:46:06
+-- Dump completed on 2021-01-31 14:00:25

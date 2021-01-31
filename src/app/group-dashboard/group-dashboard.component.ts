@@ -61,12 +61,12 @@ export class GroupDashboardComponent implements OnInit {
   @Input() group: any;
 
   ngOnInit(): void {
-    this.nowPlaying();
-    setInterval(() => {
-      if (document.visibilityState == "visible") {
-        this.nowPlaying();
-      }
-    }, 60000)
+      this.nowPlaying();
+      setInterval(() => {
+        if (document.visibilityState == "visible") {
+          this.nowPlaying();
+        }
+      }, 60000)
   }
 
   wkArtistSubmit(formData, users) {
