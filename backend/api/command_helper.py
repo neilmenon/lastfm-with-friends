@@ -67,7 +67,7 @@ def wk_album(query, users):
     artist = result[0]
 
     # find album in the database
-    sql = "SELECT * from albums WHERE artist_name = '{}' AND {} LIKE '%{}%'".format(artist['name'], sql_helper.sanitize_db_field("name"), sql_helper.esc_db(album_query))
+    sql = "SELECT * from albums WHERE artist_name = '{}' AND {} LIKE '%{}%'".format(sql_helper.esc_db(artist['name']), sql_helper.sanitize_db_field("name"), sql_helper.esc_db(album_query))
     cursor.execute(sql)
     result = list(cursor)
     if not result:
@@ -121,7 +121,7 @@ def wk_track(query, users):
 
     # find users who have scrobbled this album
     users_list = ", ".join(str(u) for u in users)
-    sql = "SELECT users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track = '{}' GROUP BY users.username ORDER BY percent DESC".format(users_list, artist['id'], track['name'])
+    sql = "SELECT users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track = '{}' GROUP BY users.username ORDER BY percent DESC".format(users_list, artist['id'], sql_helper.esc_db(track['name']))
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])
