@@ -144,7 +144,7 @@ def nowplaying(join_code):
         try:
             req = requests.get(req_url).json()
             track = req['recenttracks']['track'][0]
-        except IndexError:
+        except (IndexError, KeyError):
             continue
         except Exception as e:
             logger.log("Error getting most recently played track for {}: {}".format(user['username'], e))

@@ -11,7 +11,7 @@
             <div *ngFor="let u of group.users">
                 <img src="{{ u.profile_image }}" width="100px" style="border-radius: 50%;border: 2px solid;"><br>
                 <a href="https://last.fm/user/{{ u.username }}" target="_blank">{{ u.username }}</a> <i class="fa fa-star" style="color: #e9c267;" matTooltip="Owner" matTooltipPosition="above" *ngIf="u.username == group.owner"></i><br>
-                Joined {{ moment(user.joined).locale('en').format('MM/DD/YYYY') }}<br>
+                <span title="{{ moment(u.joined).locale('en') }}">Joined {{ moment(u.joined).locale('en').format('MM/DD/YYYY') }}</span><br>
                 {{ u.scrobbles | number }} scrobbles<br><br>
             </div>
         </div>
