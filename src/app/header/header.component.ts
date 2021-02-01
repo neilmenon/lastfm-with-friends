@@ -54,7 +54,7 @@ export class HeaderComponent {
     this.userService.updateUser().toPromise().then(data => {
       if (data['tracks_fetched'] == -1) {
         this.user.last_update = tmp
-        this.messageService.open("You are already up to date!")
+        this.messageService.open("You are up to date!")
       } else if (data['tracks_fetched'] == 1) {
         this.user.last_update = data['last_update']
         this.messageService.open("Fetched 1 new track for " + this.user.username + ".")
