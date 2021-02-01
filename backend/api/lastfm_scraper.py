@@ -417,13 +417,14 @@ def scrape_artist_images():
         s = soup.find('div', {"class", "header-new-background-image"})
         if s:
             image_url = s.get('content')
-            sql = "UPDATE `artists` SET `image_url` = '{}' WHERE `id` = {}".format(image_url, artist['id'])
-            cursor.execute(sql)
-            mdb.commit()
             logger.log("Added image for " + artist['name'] + ".")
         else:
+            image_url = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
             logger.log("\tImage for " + artist['name'] + " not found.")
             continue
+        sql = "UPDATE `artists` SET `image_url` = '{}' WHERE `id` = {}".format(image_url, artist['id'])
+        cursor.execute(sql)
+        mdb.commit()
     mdb.close()
 
 
