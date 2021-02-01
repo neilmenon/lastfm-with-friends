@@ -6,7 +6,7 @@
         </div>
         <p><strong>Description: </strong>{{ group.description }}</p>
         <p><strong>Join Code: </strong>{{ group.join_code }}</p>
-        <strong>Users: </strong><br><br>
+        <strong>Members ({{ group.users.length }}): </strong><br><br>
         <div class="container" style="flex-wrap: wrap;">
             <div *ngFor="let u of group.users">
                 <img src="{{ u.profile_image }}" width="100px" style="border-radius: 50%;border: 2px solid;"><br>

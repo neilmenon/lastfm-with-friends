@@ -1,7 +1,7 @@
 <div class="center-all group-dashboard-header">
     <h1 class="box-title clickable" [routerLink]="['groups/' + group.join_code]">{{ group.name }}</h1>
     <div class="group-dashboard-subtext">
-        <span><strong>Join Code</strong>: {{ group.join_code }} </span>
+        <span><i class="fa fa-user"></i> {{ group.members.length }} | <strong>Join Code</strong>: {{ group.join_code }}</span>
         <span class="spacer"></span>
         <span><em>{{ group.description }}</em></span>
     </div>
