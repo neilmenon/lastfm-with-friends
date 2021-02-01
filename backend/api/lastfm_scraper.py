@@ -66,6 +66,9 @@ def update_user(username, full=False, app=None):
             user_helper.change_update_progress(username, round((page/total_pages)*100, 2))
         if tracks_fetched == 0:
             logger.log("\tNo tracks to fetch, user is up to date!", app)
+            if user['scrobbles'] == 0: # if user hasn't scrobbled anything yet...
+                user_helper.change_updated_date(username, start_time=datetime.datetime.utcnow())
+                return {'tracks_fetched': -1, "last_update": str(datetime.datetime.utcnow())}
             return {'tracks_fetched': -1, "last_update": last_update}
             break
 
