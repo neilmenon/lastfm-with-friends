@@ -421,7 +421,6 @@ def scrape_artist_images():
         else:
             image_url = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
             logger.log("\tImage for " + artist['name'] + " not found.")
-            continue
         sql = "UPDATE `artists` SET `image_url` = '{}' WHERE `id` = {}".format(image_url, artist['id'])
         cursor.execute(sql)
         mdb.commit()
