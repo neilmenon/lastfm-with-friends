@@ -28,6 +28,7 @@ def is_authenticated(username, session_key):
         if len(result) > 0:
             session = result[0]
             if session['username'] != username: # user does not match session key
+                mdb.close()
                 return False
             # session key is valid; updated last_used field in sessions table then return True
             sql = "UPDATE `sessions` SET `last_used` = '"+str(datetime.datetime.utcnow())+"' WHERE `sessions`.`session_key` = '"+session_key+"'"
@@ -36,6 +37,7 @@ def is_authenticated(username, session_key):
             mdb.close()
             return True
         else: # session key not found in database, user is not authenticated
+            mdb.close()
             return False
     except mariadb.Error as e:
         logger.log("Database error while checking if " + username + " is authenticated: " + str(e))

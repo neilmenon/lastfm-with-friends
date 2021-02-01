@@ -198,6 +198,7 @@ def update_user(username, full=False, app=None):
         user_helper.get_user_account(username, update=True)
     user_helper.change_update_progress(username, None, clear_progress=True)
     logger.log("\tFetched {} track(s) for {}.".format(tracks_fetched, username), app)
+    mdb.close()
     return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}
 
 def scrape_artist_data(username=None):

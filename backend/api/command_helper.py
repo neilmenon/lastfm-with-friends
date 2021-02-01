@@ -22,6 +22,7 @@ def wk_artist(query, users):
         cursor.execute(sql)
         result = list(cursor)
         if not result:
+            mdb.close()
             return None
         redirected_name = result[0]['redirected_name']
         sql = "SELECT * from artists WHERE name = '{}'".format(sql_helper.esc_db(redirected_name))
@@ -36,6 +37,7 @@ def wk_artist(query, users):
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])
+    mdb.close()
     return {'artist': artist, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
 def wk_album(query, users):
@@ -80,6 +82,7 @@ def wk_album(query, users):
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])
+    mdb.close()
     return {'artist': artist, 'album': album, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
 def wk_track(query, users):
@@ -133,6 +136,7 @@ def nowplaying(join_code):
     sql = "SELECT users.username, users.profile_image FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
     cursor.execute(sql)
     users = list(cursor)
+    mdb.close()
     now_playing_users = []
     played_users = []
     for user in users:
