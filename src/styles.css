@@ -9,7 +9,7 @@ body {
     margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif;
     height: 100%;
     background-image: url(/assets/img/background.svg);
-    background-color: #212121;
+    background-color: #222222;
     color: #e2e2e2;
     width: 85%;
     margin: auto;
@@ -67,7 +67,7 @@ hr {
 
 .mat-drawer-container {
     background-image: url(/assets/img/background.svg);
-    background-color: #212121;
+    background-color: #222222;
     color: rgb(226, 226, 226);
 }
 
@@ -139,7 +139,7 @@ hr {
     width: 100%;
     border-collapse: collapse;
     background-image: url(/assets/img/background.svg);
-    background: #212121;
+    background: #222222;
 }
 .command-result > table th {
     /* border: 0.1px solid rgba(191, 191, 191, 0.534); */
@@ -152,7 +152,6 @@ hr {
 }
 .command-result > table > tbody > tr:nth-child(odd) {
     background: rgb(44, 44, 44);
-    /* border: 1px solid #212121; */
 }
 .command-result-summary {
     padding-bottom: 5px;
@@ -254,9 +253,40 @@ hr {
 }
 
 .tooltip {
-    background: #212121;
+    background: #222222;
 }
 
 .full-width {
     width: 100%;
+}
+
+/* SCROLLBARS */
+
+::-webkit-resizer {
+	background: transparent;
+}
+
+::-webkit-scrollbar {
+	width: 5px;
+	background: #222222;
+}
+
+::-webkit-scrollbar:horizontal {
+	height: 5px;
+	background-color: #222222;
+}
+
+::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb,
+ ::-webkit-scrollbar-thumb:horizontal {
+	border-radius: 7px;
+	-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
+	background-color: #7a7a7a;
+}
+
+::-webkit-scrollbar-track-piece {
+	display: none;
 }
