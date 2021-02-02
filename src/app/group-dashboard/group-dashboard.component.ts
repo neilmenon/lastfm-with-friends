@@ -164,8 +164,9 @@ export class GroupDashboardComponent implements OnInit {
     }
   }
 
-  nowPlaying() {
-    this.nowPlayingResults = null
+  nowPlaying(loading=false) {
+    if (loading)
+      this.nowPlayingResults = null
     this.userService.nowPlaying(this.group.join_code).toPromise().then(data => {
       this.nowPlayingResults = data;
     }).catch(error => {
