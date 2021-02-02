@@ -10,7 +10,7 @@
     <div style="position: relative;">
         <h2 style="margin-bottom: 5px;">Listening Activity</h2> 
         <a class="refresh clickable" (click)="messageService.open('Click on an album artwork to see who else knows the release.')"><mat-icon [inline]="true">info</mat-icon></a>
-        <a class="refresh clickable" (click)="nowPlaying(true)" style="right: 16px;"><mat-icon [inline]="true">cached</mat-icon></a>
+        <a class="refresh clickable" (click)="nowPlaying(true)" style="right: 16px;" matTooltip="Manual Refresh" matTooltipPosition="above"><mat-icon [inline]="true">cached</mat-icon></a>
     </div>
     <div class="now-playing-errors" *ngIf="!nowPlayingResults">
         <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="nowPlayingResults === null"></mat-spinner>

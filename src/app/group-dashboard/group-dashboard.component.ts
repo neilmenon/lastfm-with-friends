@@ -67,6 +67,11 @@ export class GroupDashboardComponent implements OnInit {
           this.nowPlaying();
         }
       }, 60000)
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState == "visible") {
+          this.nowPlaying();
+        }
+      })
   }
 
   wkArtistSubmit(formData, users) {
