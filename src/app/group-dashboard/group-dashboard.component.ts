@@ -67,11 +67,14 @@ export class GroupDashboardComponent implements OnInit {
           this.nowPlaying();
         }
       }, 60000)
-      document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState == "visible") {
-          this.nowPlaying();
-        }
-      })
+      /* 
+        Not going the enable the below lines until the nowplaying endpoint hits my database and not Last.fm directly
+       */
+      // document.addEventListener("visibilitychange", () => {
+      //   if (document.visibilityState == "visible") {
+      //     this.nowPlaying();
+      //   }
+      // })
   }
 
   wkArtistSubmit(formData, users) {
