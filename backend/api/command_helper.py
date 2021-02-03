@@ -33,7 +33,7 @@ def wk_artist(query, users):
 
     # find users who have scrobbled this artist
     users_list = ", ".join(str(u) for u in users)
-    sql = 'SELECT users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} GROUP BY users.username ORDER BY percent DESC'.format(users_list, artist['id'])
+    sql = 'SELECT users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'])
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])
@@ -78,7 +78,7 @@ def wk_album(query, users):
 
     # find users who have scrobbled this album
     users_list = ", ".join(str(u) for u in users)
-    sql = 'SELECT users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.album_id = {} GROUP BY users.username ORDER BY percent DESC'.format(users_list, artist['id'], album['id'])
+    sql = 'SELECT users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.album_id = {} GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'], album['id'])
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])
@@ -124,7 +124,7 @@ def wk_track(query, users):
 
     # find users who have scrobbled this album
     users_list = ", ".join(str(u) for u in users)
-    sql = "SELECT users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track = '{}' GROUP BY users.username ORDER BY percent DESC".format(users_list, artist['id'], sql_helper.esc_db(track['name']))
+    sql = "SELECT users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track = '{}' GROUP BY users.username order by scrobbles DESC".format(users_list, artist['id'], sql_helper.esc_db(track['name']))
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])

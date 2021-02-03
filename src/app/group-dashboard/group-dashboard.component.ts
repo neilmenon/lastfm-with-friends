@@ -1,7 +1,5 @@
-import { listLazyRoutes } from '@angular/compiler/src/aot/lazy_routes';
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { Validators } from '@angular/forms';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';

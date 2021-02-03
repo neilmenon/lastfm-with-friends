@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -32,6 +33,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { GroupDetailComponent } from './group-detail/group-detail.component';
 import { JoinGroupComponent } from './join-group/join-group.component';
 import { GroupDashboardComponent } from './group-dashboard/group-dashboard.component';
+import { EditGroupComponent } from './edit-group/edit-group.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +47,7 @@ import { GroupDashboardComponent } from './group-dashboard/group-dashboard.compo
     GroupDetailComponent,
     JoinGroupComponent,
     GroupDashboardComponent,
+    EditGroupComponent,
   ],
   imports: [
     BrowserModule,
@@ -67,13 +70,15 @@ import { GroupDashboardComponent } from './group-dashboard/group-dashboard.compo
     ReactiveFormsModule,
     MatExpansionModule,
     MatProgressBarModule,
+    MatSelectModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},
       {path: 'signout', component: SignoutComponent},
       {path: 'groups/create', component: CreateGroupComponent},
       {path: 'groups/join', component: JoinGroupComponent},
-      {path: 'groups/:joinCode', component: GroupDetailComponent}
+      {path: 'groups/:joinCode', component: GroupDetailComponent},
+      {path: 'groups/:joinCode/edit', component: EditGroupComponent}
     ])
   ],
   providers: [UserService],
