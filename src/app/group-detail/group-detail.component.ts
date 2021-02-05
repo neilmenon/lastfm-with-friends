@@ -57,7 +57,10 @@ export class GroupDetailComponent implements OnInit {
     } else {
       this.deleteConfirmed = true
     }
-    
+  }
+
+  reflectChanges(group: any) {
+    this.group = group
   }
 
 }

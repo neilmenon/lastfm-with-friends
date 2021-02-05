@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { MessageService } from '../message.service';
@@ -11,29 +11,49 @@ import { UserService } from '../user.service';
 })
 export class EditGroupComponent implements OnInit {
   groupForm;
+  editConfirmed: boolean = false;
   constructor( private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService) { 
     this.groupForm = this.formBuilder.group({
       name: ['', Validators.required],
-      description: ['', Validators.required]
+      description: ['', Validators.required],
+      owner: ['', Validators.required]
     });
   }
-
+  
   @Input() group: any;
   @Input() user: any;
-
+  @Output() onGroupChange: EventEmitter<any> = new EventEmitter()
+  
   ngOnInit(): void {
-    
+    let owner = this.group.owner
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    let owner = this.group.owner
     this.groupForm.get('name').setValue(this.group.name)
     this.groupForm.get('description').setValue(this.group.description)
+    this.groupForm.get('owner').setValue(owner)
   }
 
   onSubmit(formData) {
-    if (this.groupForm.status == "VALID") {
-      console.log(formData)
+    if (this.editConfirmed) {
+      if (this.groupForm.status == "VALID") {
+        this.editConfirmed = false
+        this.userService.editGroup(this.group.join_code, formData).toPromise().then(data => {
+          this.messageService.open("Successfully edited " + this.group.name + ".", "right")
+          this.group = data
+          this.onGroupChange.emit(data)
+        }).catch(error => {
+          this.messageService.open("An error occured while trying to edit " + this.group.name + ". Please try again.", "right")
+          console.log(error)
+        })
+      }
+    } else {
+      this.editConfirmed = true
     }
   }
 
+  changingOwnership(): boolean {
+    return this.groupForm.get('owner').value != this.group.owner
+  }
 }

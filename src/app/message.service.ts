@@ -5,15 +5,22 @@ import { MatSnackBar, MatSnackBarHorizontalPosition } from '@angular/material/sn
 })
 export class MessageService {
   message: string;
-  horizontalPosition: MatSnackBarHorizontalPosition = 'center';
-  constructor(private snackBar: MatSnackBar) {}
+  centerPosition: MatSnackBarHorizontalPosition = 'center';
+  leftPosition: MatSnackBarHorizontalPosition = "left";
+  rightPosition: MatSnackBarHorizontalPosition = "right";
+  positions: any = {};
+  constructor(private snackBar: MatSnackBar) {
+    this.positions['left'] = this.leftPosition;
+    this.positions['center'] = this.centerPosition;
+    this.positions['right'] = this.rightPosition;
+  }
   save(message: string) {
     this.message = message;
   }
 
-  open(message: string) {
+  open(message: string, position = "center") {
     this.snackBar.open(message, "Dismiss", {
-      horizontalPosition: this.horizontalPosition,
+      horizontalPosition: this.positions[position],
       duration: 5000
     })
   }

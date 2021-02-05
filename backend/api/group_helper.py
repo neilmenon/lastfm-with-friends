@@ -61,3 +61,11 @@ def get_group(join_code):
     result[0]['users'] = users
     mdb.close()
     return result[0]
+
+def edit_group(join_code, data):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    sql = "UPDATE `groups` SET `name` = '{}', `description` = '{}', `owner` = '{}' WHERE `join_code` = '{}'".format(sql_helper.esc_db(data['name']), sql_helper.esc_db(data['description']), data['owner'], join_code)
+    cursor.execute(sql)
+    mdb.commit()
+    mdb.close()

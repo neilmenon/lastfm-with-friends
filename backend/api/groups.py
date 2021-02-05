@@ -55,6 +55,31 @@ def create():
         response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
         abort(response)
 
+@group_api.route('/api/groups/<string:join_code>/edit', methods=['POST'])
+def edit(join_code):
+    try:
+        params = request.get_json()
+        if not auth_helper.is_authenticated(params['username'], params['session_key']):
+            abort(401)
+        elif not group_helper.get_group(join_code):
+            abort(404)
+        elif not group_helper.get_group(join_code)['owner'] == params['username']:
+            abort(401)
+        data = {
+            'name': params['name'],
+            'description': params['description'],
+            'owner': params['owner']
+        }
+        group_helper.edit_group(join_code, data)
+        return group_helper.get_group(join_code)
+    except mariadb.Error as e:
+        logger.log("Database error while editing group with join code " + join_code + ": " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)
+
 @group_api.route('/api/groups/<string:join_code>', methods=['POST'])
 def get(join_code):
     try:

@@ -9,13 +9,14 @@
         <textarea matInput #description placeholder="Much scrobbles, many music, big friends." type="text" formControlName="description" required maxlength="100"></textarea>
         <mat-hint align="end">{{description.value?.length || 0}}/100</mat-hint>
     </mat-form-field>
-    <button color="accent" mat-raised-button type="submit">Edit</button>
     <mat-form-field appearance="legacy" class="full-width" color="accent">
-        <mat-label>Select</mat-label>
-        <mat-select>
-          <mat-option value="one">First option</mat-option>
-          <mat-option value="two">Second option</mat-option>
+        <mat-label>Group Owner</mat-label>
+        <mat-select formControlName="owner" name="owner">
+          <mat-option *ngFor="let u of group.users" [value]="u.username">{{ u.username }}<span *ngIf="u.username == user.username"> (you)</span></mat-option>
         </mat-select>
       </mat-form-field>
+    <button *ngIf="!editConfirmed" color="accent" mat-raised-button type="submit">Edit</button>
+    <button *ngIf="editConfirmed" color="warn" mat-raised-button type="submit">Confirm Edit</button>
+    <span *ngIf="changingOwnership() && editConfirmed"><br><br>*Warning: you are changing ownership!*</span>
 </form>
 <br>

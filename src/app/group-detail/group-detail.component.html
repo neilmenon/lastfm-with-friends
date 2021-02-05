@@ -25,7 +25,9 @@
             </div>
         </div>
     </div>
-    <!-- <hr style="width: 75%;">
-    <app-edit-group [user]="user" [group]="group"></app-edit-group> -->
+    <div *ngIf="group.owner == user.username">
+        <hr style="width: 75%;">
+        <app-edit-group [user]="user" [group]="group" (onGroupChange)="reflectChanges($event)"></app-edit-group>
+    </div>
     <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="!group" style="padding-bottom: 10px;"></mat-spinner>
 </div>

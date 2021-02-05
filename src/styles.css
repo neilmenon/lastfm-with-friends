@@ -74,6 +74,9 @@ hr {
 .mat-flat-button.mat-primary, .mat-raised-button.mat-primary, .mat-fab.mat-primary, .mat-mini-fab.mat-primary, .primary {
     background-color: #ba0000;
 }
+.mat-flat-button.mat-warn, .mat-raised-button.mat-warn, .mat-fab.mat-warn, .mat-mini-fab.mat-warn, .warn {
+    background-color: #716340;
+}
 .clickable {
     cursor: pointer;
 }

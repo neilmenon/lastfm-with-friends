@@ -73,6 +73,16 @@ export class UserService {
     return this.http.post(config.api_root + '/groups/' + joinCode + '/delete', {'username': this.username, 'session_key': this.session_key})
   }
 
+  editGroup(joinCode:string, formData) {
+    return this.http.post(config.api_root + '/groups/' + joinCode + '/edit', {
+      'username': this.username,
+      'session_key': this.session_key,
+      'name': formData['name'],
+      'description': formData['description'],
+      'owner': formData['owner']
+    })
+  }
+
   wkArtist(query, users) {
     return this.http.post(config.api_root + "/commands/wkartist", {
       'username': this.username,
