@@ -32,6 +32,7 @@ export class GroupDashboardComponent implements OnInit {
 
   // nowplaying
   nowPlayingResults = null;
+  npInterval: any;
   constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService) {
     moment.locale('en-short', {
       relativeTime: {
@@ -61,11 +62,10 @@ export class GroupDashboardComponent implements OnInit {
   ngOnInit(): void {
       this.nowPlaying();
       let counter = 0
-      var npInterval = setInterval(() => {
+      this.npInterval = setInterval(() => {
         if (counter > 720)  { // if open for 2 hours... that's enough
-          clearInterval(npInterval);
-        }
-        if (document.visibilityState == "visible") {
+          clearInterval(this.npInterval);
+        } else if (document.visibilityState == "visible") {
           this.nowPlaying();
         }
         counter++
@@ -76,6 +76,10 @@ export class GroupDashboardComponent implements OnInit {
           this.nowPlaying();
         }
       })
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.npInterval);
   }
 
   wkArtistSubmit(formData, users) {
