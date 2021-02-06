@@ -188,7 +188,7 @@ def nowplaying(join_code=None, database=False):
 def get_nowplaying(join_code):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
-    sql = "SELECT now_playing.* FROM user_groups LEFT JOIN now_playing ON now_playing.username = user_groups.username WHERE user_groups.group_jc = '{}' AND now_playing.timestamp = '0' UNION SELECT * FROM (SELECT now_playing.* FROM user_groups LEFT JOIN now_playing ON now_playing.username = user_groups.username WHERE user_groups.group_jc = '{}' AND now_playing.timestamp != '0' ORDER BY now_playing.timestamp DESC) results".format(join_code, join_code)
+    sql = "SELECT now_playing.* FROM user_groups LEFT JOIN now_playing ON now_playing.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY IF(now_playing.timestamp = 0, 9999999999, now_playing.timestamp) DESC".format(join_code)
     cursor.execute(sql)
     result = list(cursor)
     mdb.close()
