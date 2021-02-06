@@ -1,4 +1,4 @@
--- MariaDB dump 10.18  Distrib 10.5.8-MariaDB, for Win64 (AMD64)
+-- MariaDB dump 10.18  Distrib 10.5.8-MariaDB, for osx10.15 (x86_64)
 --
 -- Host: localhost    Database: lastfm_with_friends
 -- ------------------------------------------------------
@@ -125,6 +125,26 @@ CREATE TABLE `groups` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `now_playing`
+--
+
+DROP TABLE IF EXISTS `now_playing`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `now_playing` (
+  `username` varchar(191) NOT NULL,
+  `artist` varchar(400) NOT NULL,
+  `track` varchar(400) NOT NULL,
+  `album` varchar(400) NOT NULL,
+  `timestamp` int(11) NOT NULL,
+  `url` varchar(191) NOT NULL,
+  `image_url` varchar(191) NOT NULL,
+  PRIMARY KEY (`username`),
+  CONSTRAINT `now_playing_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `sessions`
 --
 
@@ -212,4 +232,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-31 17:34:58
+-- Dump completed on 2021-02-06 12:25:25

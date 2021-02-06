@@ -130,13 +130,16 @@ def wk_track(query, users):
     total_scrobbles = sum([u['scrobbles'] for u in result])
     return {'artist': artist, 'track': track, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
-def nowplaying(join_code):
+def nowplaying(join_code=None, database=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
-    sql = "SELECT users.username, users.profile_image FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
+    if join_code:
+        sql = "SELECT users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC;".format(join_code)
+    else:
+        logger.log("Checking now playing activity for all users...")
+        sql = "SELECT username FROM users;"
     cursor.execute(sql)
     users = list(cursor)
-    mdb.close()
     now_playing_users = []
     played_users = []
     for user in users:
@@ -144,16 +147,17 @@ def nowplaying(join_code):
         try:
             req = requests.get(req_url).json()
             track = req['recenttracks']['track'][0]
-        except (IndexError, KeyError):
+        except (IndexError, KeyError, requests.exceptions.RequestException) as e:
+            logger.log("Error getting most recently played track for {}: {}. Continuing...".format(user['username'], e))
             continue
         except Exception as e:
-            logger.log("Error getting most recently played track for {}: {}".format(user['username'], e))
+            logger.log("[FATAL] Error getting most recently played track for {}: {}".format(user['username'], e))
             return False
         
         tmp_user = user
-        tmp_user['artist'] = track['artist']['#text']
-        tmp_user['track'] = track['name']
-        tmp_user['album'] = track['album']['#text']
+        tmp_user['artist'] = sql_helper.esc_db(track['artist']['#text'])
+        tmp_user['track'] = sql_helper.esc_db(track['name'])
+        tmp_user['album'] = sql_helper.esc_db(track['album']['#text'])
         tmp_user['url'] = track['url']
         tmp_user['image_url'] = track['image'][2]['#text']
 
@@ -167,7 +171,25 @@ def nowplaying(join_code):
             played_users.append(tmp_user)
         else:
             now_playing_users.append(tmp_user)
+
+        if database:
+            sql = sql_helper.replace_into("now_playing", tmp_user)
+            cursor.execute(sql)
+            mdb.commit()
     
     played_users = sorted(played_users, key=itemgetter('timestamp'), reverse=True)
     now_playing_users.extend(played_users)
-    return now_playing_users
+    mdb.close()
+    if database:
+        return True
+    else:
+        return now_playing_users
+
+def get_nowplaying(join_code):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    sql = "SELECT now_playing.* FROM user_groups LEFT JOIN now_playing ON now_playing.username = user_groups.username WHERE user_groups.group_jc = '{}' AND now_playing.timestamp = '0' UNION SELECT * FROM (SELECT now_playing.* FROM user_groups LEFT JOIN now_playing ON now_playing.username = user_groups.username WHERE user_groups.group_jc = '{}' AND now_playing.timestamp != '0' ORDER BY now_playing.timestamp DESC) results".format(join_code, join_code)
+    cursor.execute(sql)
+    result = list(cursor)
+    mdb.close()
+    return result

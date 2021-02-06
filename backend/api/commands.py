@@ -78,9 +78,7 @@ def nowplaying():
     try:
         params = request.get_json()
         if auth_helper.is_authenticated(params['username'], params['session_key']):
-            result = command_helper.nowplaying(params['join_code'])
-            if not result:
-                abort(500)
+            result = command_helper.get_nowplaying(params['join_code'])
             return jsonify(result)
         else:
             abort(401)
@@ -90,4 +88,28 @@ def nowplaying():
         abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)
+
+@command_api.route('/api/commands/nowplayingdb', methods=['POST'])
+def nowplayingdb():
+    try:
+        params = request.get_json()
+        if params:
+            try:
+                secret_key = params['secret_key']
+            except KeyError as e:
+                response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+                abort(response)
+        else:
+            response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+            abort(response)
+        if secret_key != cfg['api']['secret']:
+            abort(401)
+        result = command_helper.nowplaying(database=True)
+        if not result:
+            abort(500)
+        return jsonify({'data': 'success'})
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
         abort(response)

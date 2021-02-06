@@ -60,19 +60,22 @@ export class GroupDashboardComponent implements OnInit {
 
   ngOnInit(): void {
       this.nowPlaying();
-      setInterval(() => {
+      let counter = 0
+      var npInterval = setInterval(() => {
+        if (counter > 720)  { // if open for 2 hours... that's enough
+          clearInterval(npInterval);
+        }
         if (document.visibilityState == "visible") {
           this.nowPlaying();
         }
-      }, 60000)
-      /* 
-        Not going the enable the below lines until the nowplaying endpoint hits my database and not Last.fm directly
-       */
-      // document.addEventListener("visibilitychange", () => {
-      //   if (document.visibilityState == "visible") {
-      //     this.nowPlaying();
-      //   }
-      // })
+        counter++
+      }, 10000)
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState == "visible") {
+          this.nowPlaying();
+        }
+      })
   }
 
   wkArtistSubmit(formData, users) {
