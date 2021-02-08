@@ -54,8 +54,10 @@ def update_user(username, full=False, app=None):
                 sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
                 cursor.execute(sql)
                 result = list(cursor)
-                user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
+                user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp']))) 
+                mdb.close()
                 return
+            mdb.close()
             return
 
         # get the total pages
@@ -69,7 +71,9 @@ def update_user(username, full=False, app=None):
             if user['scrobbles'] == 0: # if user hasn't scrobbled anything yet... set time to 2 weeks before last.fm registration, which is the earliest possible first scrobble
                 earliest_scrobble_time = datetime.datetime.utcfromtimestamp(int(user['registered'])) - datetime.timedelta(days=15)
                 user_helper.change_updated_date(username, start_time=earliest_scrobble_time)
+                mdb.close()
                 return {'tracks_fetched': -1, "last_update": str(earliest_scrobble_time)}
+            mdb.close()
             return {'tracks_fetched': -1, "last_update": last_update}
             break
 
@@ -215,6 +219,7 @@ def scrape_artist_data(username=None):
         users = user_helper.get_users()
         if not users:
             logger.log("No users to scrape artists from!")
+            mdb.close()
             return False
     count = 0
     for user_row in users:
@@ -285,6 +290,7 @@ def scrape_album_data(username=None):
         users = user_helper.get_users()
         if not users:
             logger.log("No users to scrape albums from!")
+            mdb.close()
             return False
     count = 0
     for user_row in users:

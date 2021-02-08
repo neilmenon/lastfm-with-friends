@@ -14,9 +14,11 @@ def get_user(username, extended=True):
     cursor.execute("SELECT * FROM users WHERE username = '" + str(username) + "';")
     result = list(cursor)
     if not result:
+        mdb.close()
         return False
     user_data = result[0]
     if not extended:
+        mdb.close()
         return user_data
     cursor.execute("SELECT group_jc FROM user_groups WHERE username = '" + str(username) + "';")
     group_jcs = [k['group_jc'] for k in list(cursor)]

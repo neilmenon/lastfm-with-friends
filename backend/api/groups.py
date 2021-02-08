@@ -25,6 +25,7 @@ def create():
         if params:
             try:
                 if not auth_helper.is_authenticated(params['username'], params['session_key']):
+                    mdb.close()
                     abort(401)
                 join_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
                 data = {
@@ -35,9 +36,11 @@ def create():
                     "join_code": join_code
                 }
             except KeyError as e:
+                mdb.close()
                 response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
                 abort(response)
         else:
+            mdb.close()
             response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
             abort(response)
         sql = sql_helper.insert_into("groups", data)

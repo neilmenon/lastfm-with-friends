@@ -55,6 +55,7 @@ def get_group(join_code):
     cursor.execute("SELECT * from groups WHERE join_code = '" + join_code + "';")
     result = list(cursor)
     if not result:
+        mdb.close()
         return False
     cursor.execute("SELECT user_groups.username, user_groups.joined, users.profile_image, users.scrobbles FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code))
     users = list(cursor)

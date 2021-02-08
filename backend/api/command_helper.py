@@ -49,6 +49,7 @@ def wk_album(query, users):
         artist_query = query.strip().split(" - ", 1)[0].strip()
         album_query = query.strip().split(" - ", 1)[1].strip()
     except IndexError:
+        mdb.close()
         return False
 
     # find artist in the database
@@ -60,6 +61,7 @@ def wk_album(query, users):
         cursor.execute(sql)
         result = list(cursor)
         if not result:
+            mdb.close()
             return None
         redirected_name = result[0]['redirected_name']
         sql = "SELECT * from artists WHERE name = '{}'".format(sql_helper.esc_db(redirected_name))
@@ -73,6 +75,7 @@ def wk_album(query, users):
     cursor.execute(sql)
     result = list(cursor)
     if not result:
+        mdb.close()
         return None
     album = result[0]
 
@@ -94,6 +97,7 @@ def wk_track(query, users):
         artist_query = query.strip().split(" - ", 1)[0].strip()
         track_query = query.strip().split(" - " , 1)[1].strip()
     except IndexError:
+        mdb.close()
         return False
 
     # find artist in the database
@@ -105,6 +109,7 @@ def wk_track(query, users):
         cursor.execute(sql)
         result = list(cursor)
         if not result:
+            mdb.close()
             return None
         redirected_name = result[0]['redirected_name']
         sql = "SELECT * from artists WHERE name = '{}'".format(sql_helper.esc_db(redirected_name))
@@ -118,6 +123,7 @@ def wk_track(query, users):
     cursor.execute(sql)
     result = list(cursor)
     if not result:
+        mdb.close()
         return None
     track = result[0]
     track['url'] = artist['url'] + "/" + track['album_name'].replace(" ", "+") + "/" + track['name'].replace(" ", "+")
@@ -128,6 +134,7 @@ def wk_track(query, users):
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])
+    mdb.close()
     return {'artist': artist, 'track': track, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
 def nowplaying(join_code=None, database=False):
@@ -152,6 +159,7 @@ def nowplaying(join_code=None, database=False):
             continue
         except Exception as e:
             logger.log("[FATAL] Error getting most recently played track for {}: {}".format(user['username'], e))
+            mdb.close()
             return False
         
         tmp_user = user
