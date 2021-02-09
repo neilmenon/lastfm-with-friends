@@ -198,3 +198,30 @@ def get_nowplaying(join_code):
     result = list(cursor)
     mdb.close()
     return result
+
+def play_history(wk_mode, artist_id, users, track=None, album_id=None, sort_by="track_scrobbles.timestamp", sort_order="DESC", lower_bound=0, upper_bound=50):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    users_list = ", ".join(str(u) for u in users)
+    
+    if wk_mode == "track":
+        sql = "SELECT users.username, artists.name as artist, track_scrobbles.track, albums.name as album, track_scrobbles.timestamp, COUNT(*) OVER() as total FROM `track_scrobbles` LEFT JOIN users ON users.user_id = track_scrobbles.user_id LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND artists.id = {} AND track_scrobbles.track = '{}' ORDER BY {} {} LIMIT {}, {}".format(users_list, artist_id, sql_helper.esc_db(track), sort_by, sort_order, lower_bound, upper_bound)
+    elif wk_mode == "album":
+        sql = "SELECT users.username, artists.name as artist, track_scrobbles.track, albums.name as album, track_scrobbles.timestamp, COUNT(*) OVER() as total FROM `track_scrobbles` LEFT JOIN users ON users.user_id = track_scrobbles.user_id LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND artists.id = {} AND track_scrobbles.album_id = {} ORDER BY {} {} LIMIT {}, {}".format(users_list, artist_id, album_id, sort_by, sort_order, lower_bound, upper_bound)
+    elif wk_mode == "artist":
+        sql = "SELECT users.username, artists.name as artist, track_scrobbles.track, albums.name as album, track_scrobbles.timestamp, COUNT(*) OVER() as total FROM `track_scrobbles` LEFT JOIN users ON users.user_id = track_scrobbles.user_id LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND artists.id = {} ORDER BY {} {} LIMIT {}, {}".format(users_list, artist_id, sort_by, sort_order, lower_bound, upper_bound)
+    else:
+        return False
+    cursor.execute(sql)
+    records = list(cursor)
+    if not records:
+        return None
+    total = records[0]['total']
+    [r.pop("total") for r in records]
+    data = {
+        'records': records,
+        'total': total,
+        'from': lower_bound,
+        'to': upper_bound
+    }
+    return data
