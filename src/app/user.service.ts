@@ -117,4 +117,25 @@ export class UserService {
       'join_code': join_code
     })
   }
+
+  scrobbleHistory(wkMode, wkObject, users, sortBy, sortOrder, limit, offset) {
+    let payload = {
+      'username': this.username,
+      'session_key': this.session_key,
+      'wk_mode': wkMode,
+      'artist_id': wkObject['artist']['id'],
+      'users': users,
+      'sort_by': sortBy,
+      'sort_order': sortOrder,
+      'limit': limit,
+      'offset': offset
+    }
+    if (wkMode == "track") {
+      payload['track'] = wkObject['track']['name']
+    } else if (wkMode == "album") {
+      payload['album_id'] = wkObject['album']['id']
+    }
+    console.log(payload)
+    return this.http.post(config.api_root + "/commands/history", payload)
+  }
 }

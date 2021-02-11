@@ -22,7 +22,7 @@
     
 
     <div *ngFor="let group of user.groups; last as lastChild">
-        <app-group-dashboard [group]="group"></app-group-dashboard>
+        <app-group-dashboard [group]="group" [user]="user"></app-group-dashboard>
         <hr *ngIf="!lastChild">
     </div>
 </div>

@@ -9,6 +9,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -34,6 +36,7 @@ import { GroupDetailComponent } from './group-detail/group-detail.component';
 import { JoinGroupComponent } from './join-group/join-group.component';
 import { GroupDashboardComponent } from './group-dashboard/group-dashboard.component';
 import { EditGroupComponent } from './edit-group/edit-group.component';
+import { ScrobbleHistoryComponent } from './scrobble-history/scrobble-history.component';
 
 @NgModule({
   declarations: [
@@ -48,6 +51,7 @@ import { EditGroupComponent } from './edit-group/edit-group.component';
     JoinGroupComponent,
     GroupDashboardComponent,
     EditGroupComponent,
+    ScrobbleHistoryComponent,
   ],
   imports: [
     BrowserModule,
@@ -71,6 +75,8 @@ import { EditGroupComponent } from './edit-group/edit-group.component';
     MatExpansionModule,
     MatProgressBarModule,
     MatSelectModule,
+    MatPaginatorModule,
+    FormsModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},

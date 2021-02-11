@@ -113,3 +113,28 @@ def nowplayingdb():
         logger.log("Database error: " + str(e))
         response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
         abort(response)
+
+@command_api.route('/api/commands/history', methods=['POST'])
+def history():
+    try:
+        params = request.get_json()
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            wk_mode = params['wk_mode']
+            if wk_mode == "track":
+                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], params['track'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
+            elif wk_mode == "album":
+                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], None, params['album_id'], params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
+            elif wk_mode == "artist":
+                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
+            else:
+                abort(400)
+            return jsonify(result)
+        else:
+            abort(401)
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)

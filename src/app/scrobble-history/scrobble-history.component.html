@@ -1,0 +1,68 @@
+<h2 mat-dialog-title class="center" *ngIf="data.wkMode == 'artist'">Scrobble History for {{ data.wkObject.artist.name }} in {{ data.group.name }}</h2>
+<h2 mat-dialog-title class="center" *ngIf="data.wkMode == 'album'">Scrobble History for {{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }} in {{ data.group.name }}</h2>
+<h2 mat-dialog-title class="center" *ngIf="data.wkMode == 'track'">Scrobble History for {{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }} in {{ data.group.name }}</h2>
+<!-- <mat-form-field>
+    <mat-label>List length</mat-label>
+    <input matInput [(ngModel)]="length" type="number">
+</mat-form-field>
+
+<mat-form-field>
+<mat-label>Page size</mat-label>
+<input matInput [(ngModel)]="pageSize" type="number">
+</mat-form-field>
+<mat-form-field>
+<mat-label>Page size options</mat-label>
+<input matInput [ngModel]="pageSizeOptions" (ngModelChange)="setPageSizeOptions($event)"
+        [ngModelOptions]="{updateOn: 'blur'}" placeholder="Ex. 10,25,50">
+</mat-form-field> -->
+
+
+<mat-form-field color="accent">
+    <mat-label>User</mat-label>
+    <mat-select [(ngModel)]="selectedUser" [(value)]="selectedUser" (selectionChange)="paginationChange(pageEvent, selectedUser, reset=true)">
+        <mat-option value="all">Everyone</mat-option>
+        <mat-option *ngFor="let u of data.wkObject.users" [value]="u.id">{{ u.username }}<span *ngIf="u.username == data.user.username"> (you)</span></mat-option>
+    </mat-select>
+</mat-form-field>
+
+<mat-form-field color="accent">
+    <mat-label>Sort By</mat-label>
+    <mat-select [(ngModel)]="sortBy" (selectionChange)="paginationChange(pageEvent, selectedUser, reset=true)">
+        <mat-option value="track_scrobbles.timestamp">Date</mat-option>
+    </mat-select>
+</mat-form-field>
+
+<mat-form-field color="accent" style="width: 75px;">
+    <mat-label>Sort Order</mat-label>
+    <mat-select [(ngModel)]="sortOrder" [(value)]="sortOrder" (selectionChange)="paginationChange(pageEvent, selectedUser, reset=true)">
+        <mat-option value="ASC">↑ (ASC)</mat-option>
+        <mat-option value="DESC">↓ (DESC)</mat-option>
+    </mat-select>
+</mat-form-field>
+
+<mat-paginator #paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" (page)="pageEvent = $event; paginationChange($event, selectedUser)" color="accent">
+</mat-paginator>
+<div mat-dialog-content class="history-result">
+    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="(!resultsObject) || paginationTriggered" style="padding-bottom: 10px;"></mat-spinner>
+    <table *ngIf="resultsObject">
+        <thead>
+            <tr>
+                <th class="table-border">Date</th>
+                <th class="table-border">User</th>
+                <th class="table-border history-table-artist">Artist</th>
+                <th class="table-border">Track</th>
+                <th class="table-border">Album</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let entry of resultsObject.records; let i = index">
+                <td class="table-border" style="text-align:center" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') >= 24">{{ moment.unix(entry.timestamp).locale('en').format('MM/DD/YY, LT') }}</td>
+                <td class="table-border" style="text-align:center; background: #444444" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') < 24">{{ moment.unix(entry.timestamp).locale('en').fromNow() }}</td>
+                <td class="table-border center">{{ entry.username }}</td>
+                <td class="table-border history-table-artist center">{{ entry.artist }}</td>
+                <td class="table-border">{{ entry.track }}</td>
+                <td class="table-border" [class.center]="data.wkMode == 'album'">{{ entry.album }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,8 +1,10 @@
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
+import {MatDialog, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { FormBuilder } from '@angular/forms';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
+import { ScrobbleHistoryComponent } from '../scrobble-history/scrobble-history.component';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -33,7 +35,7 @@ export class GroupDashboardComponent implements OnInit {
   // nowplaying
   nowPlayingResults = null;
   npInterval: any;
-  constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService) {
+  constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog) {
     moment.locale('en-short', {
       relativeTime: {
         future: 'in %s',
@@ -58,6 +60,7 @@ export class GroupDashboardComponent implements OnInit {
   }
 
   @Input() group: any;
+  @Input() user: any;
 
   ngOnInit(): void {
       this.nowPlaying();
@@ -76,6 +79,15 @@ export class GroupDashboardComponent implements OnInit {
           this.nowPlaying();
         }
       })
+
+      // setTimeout(() => {
+      //   this.dialog.open(ScrobbleHistoryComponent, {
+      //     data: {
+      //       group: this.group
+      //     }
+      //   })
+      // }, 750)
+      
   }
 
   ngOnDestroy() {
@@ -196,6 +208,18 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistSubmit({'query': entry.artist}, this.group.members)
     this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
     this.wkTrackSubmit({'query': trackQuery}, this.group.members)
+  }
+
+  scrobbleHistory(wkMode, wkObject, users) {
+    this.dialog.open(ScrobbleHistoryComponent, {
+      data: {
+        group: this.group,
+        wkMode: wkMode,
+        wkObject: wkObject,
+        users: users,
+        user: this.user
+      }
+    })
   }
 
 }
