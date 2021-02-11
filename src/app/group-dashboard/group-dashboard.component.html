@@ -9,7 +9,7 @@
 <!-- Now Playing -->
 <div class="box center now-playing-container">
     <div style="position: relative;">
-        <h2 style="margin-bottom: 5px;">Listening Activity</h2> 
+        <h2 class="box-title">Listening Activity</h2> 
         <a class="refresh clickable" (click)="messageService.open('Click on an album artwork to see who else knows the release.')"><mat-icon [inline]="true">info</mat-icon></a>
         <!-- <a class="refresh clickable" (click)="nowPlaying(true)" style="right: 16px;" matTooltip="Manual Refresh" matTooltipPosition="above"><mat-icon [inline]="true">cached</mat-icon></a> -->
     </div>
@@ -35,7 +35,10 @@
 <div class="container">
     <!-- wkArtist -->
     <div class="box center command-box" #wkArtist >
-        <h2 class="box-title">Who Knows This Artist</h2>
+        <div style="position: relative;">
+            <h2 class="box-title">Who Knows This Artist</h2> 
+            <a class="refresh clickable" *ngIf="wkArtistResults" (click)="scrobbleHistory('artist', wkArtistResults, group.members)" matTooltip="Group Scrobble History" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+        </div>
         <div class="container">
             <form [formGroup]="wkArtistForm" class="box-form" (ngSubmit)="wkArtistSubmit(wkArtistForm.value, group.members)">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
@@ -80,9 +83,6 @@
                         <td>{{ entry.percent }}</td>
                         <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
                     </tr>
-                    <tr>
-                        <td class="clickable center clear-color" colspan="5" (click)="scrobbleHistory('artist', wkArtistResults, group.members)">Group Scrobble History</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -94,7 +94,10 @@
 
     <!-- wkAlbum -->
     <div class="box center command-box" #wkAlbum >
-        <h2 class="box-title">Who Knows This Album</h2>
+        <div style="position: relative;">
+            <h2 class="box-title">Who Knows This Album</h2> 
+            <a class="refresh clickable" *ngIf="wkAlbumResults" (click)="scrobbleHistory('album', wkAlbumResults, group.members)" matTooltip="Group Scrobble History" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+        </div>
         <div class="container">
             <form [formGroup]="wkAlbumForm" class="box-form" (ngSubmit)="wkAlbumSubmit(wkAlbumForm.value, group.members)">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
@@ -139,9 +142,6 @@
                         <td>{{ entry.percent }}</td>
                         <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
                     </tr>
-                    <tr>
-                        <td class="clickable center clear-color" colspan="5" (click)="scrobbleHistory('album', wkAlbumResults, group.members)">Group Scrobble History</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -153,7 +153,10 @@
 
     <!-- wkTrack -->
     <div class="box center command-box" #wkTrack >
-        <h2 class="box-title">Who Knows This Track</h2>
+        <div style="position: relative;">
+            <h2 class="box-title">Who Knows This Track</h2> 
+            <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+        </div>
         <div class="container">
             <form [formGroup]="wkTrackForm" class="box-form" (ngSubmit)="wkTrackSubmit(wkTrackForm.value, group.members)">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
@@ -197,9 +200,6 @@
                         <td>{{ entry.scrobbles }}</td>
                         <td>{{ entry.percent }}</td>
                         <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
-                    </tr>
-                    <tr>
-                        <td class="clickable center clear-color" colspan="5" (click)="scrobbleHistory('track', wkTrackResults, group.members)">Group Scrobble History</td>
                     </tr>
                 </tbody>
             </table>

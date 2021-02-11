@@ -1,6 +1,6 @@
-<h2 mat-dialog-title class="center" *ngIf="data.wkMode == 'artist'">Scrobble History for <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h2>
-<h2 mat-dialog-title class="center" *ngIf="data.wkMode == 'album'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h2>
-<h2 mat-dialog-title class="center" *ngIf="data.wkMode == 'track'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }}</u> in {{ data.group.name }}</h2>
+<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'artist'">Scrobble History for <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h3>
+<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'album'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h3>
+<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'track'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }}</u> in {{ data.group.name }}</h3>
 <div class="history-options center">
     <mat-form-field color="accent">
         <mat-label>User</mat-label>
@@ -33,7 +33,7 @@
 <div mat-dialog-content class="history-result">
     <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="(!resultsObject) || paginationTriggered" style="padding-bottom: 10px;"></mat-spinner>
     <table *ngIf="resultsObject">
-        <thead>
+        <thead class="sticky-table-header">
             <tr>
                 <th class="table-border">Date</th>
                 <th class="table-border">User</th>
@@ -44,8 +44,8 @@
         </thead>
         <tbody>
             <tr *ngFor="let entry of resultsObject.records; let i = index">
-                <td class="table-border" style="text-align:center" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') >= 24">{{ moment.unix(entry.timestamp).locale('en').format('MM/DD/YY, LT') }}</td>
-                <td class="table-border" style="text-align:center; background: #444444" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') < 24">{{ moment.unix(entry.timestamp).locale('en').fromNow() }}</td>
+                <td class="table-border" style="text-align:center" [title]="moment.unix(entry.timestamp)" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') >= 24">{{ moment.unix(entry.timestamp).locale('en').format('MM/DD/YY, LT') }}</td>
+                <td class="table-border" style="text-align:center; background: #444444" [title]="moment.unix(entry.timestamp)" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') < 24">{{ moment.unix(entry.timestamp).locale('en').fromNow() }}</td>
                 <td class="table-border center"><a href="https://last.fm/user/{{ entry.username }}" target="_blank" class="clear-color">{{ entry.username }}</a></td>
                 <td class="table-border history-table-artist center"><a href="{{ entry.artist_url }}" target="_blank" class="clear-color">{{ entry.artist }}</a></td>
                 <td class="table-border"><a href="{{ entry.track_url }}" target="_blank" class="clear-color">{{ entry.track }}</a></td>

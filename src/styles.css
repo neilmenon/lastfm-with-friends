@@ -91,8 +91,8 @@ hr {
 }
 .refresh {
     position: absolute;
-    top: -11px;
-    right: -8px;
+    top: -10px;
+    right: -10px;
     color: #e2e2e2;
     font-size: 21px;
 }
@@ -168,6 +168,12 @@ hr {
 .table-border {
     border: 0.5px solid #bfbfbf3d;
     padding: 2px 9px;
+}
+.sticky-table-header th {
+    position: sticky;
+    top: -1px;
+    background: #212121;
+    box-shadow: inset 0.5px 0.5px #bfbfbf3d, 0 0.5px #bfbfbf3d;
 }
 .command-result-summary {
     padding-bottom: 5px;
