@@ -80,9 +80,11 @@
                         <td>{{ entry.percent }}</td>
                         <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
                     </tr>
+                    <tr>
+                        <td class="clickable center clear-color" colspan="5" (click)="scrobbleHistory('artist', wkArtistResults, group.members)">Group Scrobble History</td>
+                    </tr>
                 </tbody>
             </table>
-            <span class="clickable" (click)="scrobbleHistory('artist', wkArtistResults, group.members)">Scrobble History</span>
         </div>
         <span *ngIf="wkArtistInit === undefined">No one knows this artist in {{ group.name }}.</span>
         <div *ngIf="!wkArtistResults && wkArtistInit" style="padding-bottom: 10px;">
@@ -138,7 +140,7 @@
                         <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
                     </tr>
                     <tr>
-                        <td class="clickable center" colspan="5" (click)="scrobbleHistory('album', wkAlbumResults, group.members)">Group Scrobble History</td>
+                        <td class="clickable center clear-color" colspan="5" (click)="scrobbleHistory('album', wkAlbumResults, group.members)">Group Scrobble History</td>
                     </tr>
                 </tbody>
             </table>
@@ -196,9 +198,11 @@
                         <td>{{ entry.percent }}</td>
                         <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
                     </tr>
+                    <tr>
+                        <td class="clickable center clear-color" colspan="5" (click)="scrobbleHistory('track', wkTrackResults, group.members)">Group Scrobble History</td>
+                    </tr>
                 </tbody>
             </table>
-            <span class="clickable" (click)="scrobbleHistory('track', wkTrackResults, group.members)">Scrobble History</span>
         </div>
         <span *ngIf="wkTrackInit === undefined">No one knows this track in {{ group.name }}.</span>
         <div *ngIf="!wkTrackResults && wkTrackInit" style="padding-bottom: 10px;">

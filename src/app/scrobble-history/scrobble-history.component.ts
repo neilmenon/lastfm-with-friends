@@ -19,7 +19,7 @@ export class ScrobbleHistoryComponent implements OnInit {
   length = 500;
   pageSize = 50;
   pageIndex = 0;
-  pageSizeOptions: number[] = [25, 50, 100];
+  pageSizeOptions: number[] = [25, 50, 100, 500];
 
   // MatPaginator Output
   pageEvent: PageEvent;
@@ -75,7 +75,6 @@ export class ScrobbleHistoryComponent implements OnInit {
       offset
     ).toPromise().then(data => {
       this.resultsObject = data
-      console.log(data)
       this.length = data['total']
       this.paginationTriggered = false;
     }).catch(error => {

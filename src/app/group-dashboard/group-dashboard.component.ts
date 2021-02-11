@@ -104,6 +104,9 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
       this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
       this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
+      if (data['artist']['fallback']) {
+        this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
+      }
     }).catch(error => {
       this.wkArtistInit = false
       if (error['status'] == 404) {

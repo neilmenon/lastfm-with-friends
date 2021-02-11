@@ -135,7 +135,6 @@ export class UserService {
     } else if (wkMode == "album") {
       payload['album_id'] = wkObject['album']['id']
     }
-    console.log(payload)
     return this.http.post(config.api_root + "/commands/history", payload)
   }
 }

@@ -86,6 +86,9 @@ hr {
 .clear-color {
     color: #e2e2e2;
 }
+.clear-color:hover {
+    color: darkseagreen;
+}
 .refresh {
     position: absolute;
     top: -11px;
@@ -245,6 +248,9 @@ hr {
     margin-top: 2px;
     font-size: 12px;
     line-height: 14px;
+}
+.history-options > mat-form-field {
+    padding: 0px 5px
 }
 
 @media screen and (max-width: 960px) {
