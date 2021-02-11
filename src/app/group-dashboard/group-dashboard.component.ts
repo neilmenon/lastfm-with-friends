@@ -13,7 +13,7 @@ import { ScrobbleHistoryComponent } from '../scrobble-history/scrobble-history.c
 })
 export class GroupDashboardComponent implements OnInit {
   moment: any = moment;
-  
+
   // wkArtist
   @ViewChild('wkArtist', { static: true }) wkArtistDom: ElementRef;
   wkArtistForm;
@@ -79,15 +79,6 @@ export class GroupDashboardComponent implements OnInit {
           this.nowPlaying();
         }
       })
-
-      // setTimeout(() => {
-      //   this.dialog.open(ScrobbleHistoryComponent, {
-      //     data: {
-      //       group: this.group
-      //     }
-      //   })
-      // }, 750)
-      
   }
 
   ngOnDestroy() {
@@ -202,7 +193,7 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  nowPlayingToWk(entry) {
+  nowPlayingToWk(entry, wkArtist: HTMLElement) {
     let albumQuery = entry.artist + " - " + entry.album
     let trackQuery = entry.artist + " - " + entry.track
     this.wkArtistForm.get('query').setValue(entry.artist)
@@ -211,6 +202,7 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistSubmit({'query': entry.artist}, this.group.members)
     this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
     this.wkTrackSubmit({'query': trackQuery}, this.group.members)
+    wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
 
   scrobbleHistory(wkMode, wkObject, users) {

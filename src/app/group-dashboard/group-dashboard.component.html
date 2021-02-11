@@ -23,7 +23,7 @@
         <div *ngFor="let entry of nowPlayingResults" class="now-playing-box">
             <strong><a href="https://last.fm/user/{{ entry.username }}" target="_blank" [class.now-playing-track]="!entry.timestamp">{{ entry.username }}</a></strong>
             <span *ngIf="entry.timestamp" class="recently-played-track" title="{{ moment.unix(entry.timestamp) }}">{{ moment.unix(entry.timestamp).fromNow() }}</span><br>
-            <div class="clickable now-playing-artwork-container" (click)="nowPlayingToWk(entry)"><img src="{{ entry.image_url }}" width="110px"></div>
+            <div class="clickable now-playing-artwork-container" (click)="nowPlayingToWk(entry, wkArtist)"><img src="{{ entry.image_url }}" width="110px"></div>
             <div class="now-playing-details">
                 <span><a href="{{ entry.url }}" target="_blank" class="clear-color"><em>{{ entry.track }}</em></a></span>
                 <span>{{ entry.artist }}</span>
