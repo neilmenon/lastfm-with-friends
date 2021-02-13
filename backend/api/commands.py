@@ -126,6 +126,8 @@ def history():
                 result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], None, params['album_id'], params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
             elif wk_mode == "artist":
                 result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
+            elif wk_mode == "overall":
+                result = command_helper.play_history(wk_mode, None, params['users'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
             else:
                 abort(400)
             return jsonify(result)

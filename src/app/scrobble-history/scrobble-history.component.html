@@ -1,19 +1,27 @@
+<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'overall'">Scrobble History for <u>{{ data.group.name }}</u></h3>
 <h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'artist'">Scrobble History for <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h3>
 <h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'album'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h3>
 <h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'track'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }}</u> in {{ data.group.name }}</h3>
 <div class="history-options center">
     <mat-form-field color="accent">
         <mat-label>User</mat-label>
-        <mat-select [(ngModel)]="selectedUser" [(value)]="selectedUser" (selectionChange)="paginationChange(pageEvent, selectedUser, true)">
+        <mat-select [(ngModel)]="selectedUser" [(value)]="selectedUser" (selectionChange)="paginationChange(pageEvent, selectedUser, true)" *ngIf="data.wkMode != 'overall'; else overallSelect">
             <mat-option value="all">Everyone</mat-option>
             <mat-option *ngFor="let u of data.wkObject.users" [value]="u.id">{{ u.username }}<span *ngIf="u.username == data.user.username"> (you)</span></mat-option>
         </mat-select>
+        <ng-template #overallSelect>
+            <mat-select [(ngModel)]="selectedUser" [(value)]="selectedUser" (selectionChange)="paginationChange(pageEvent, selectedUser, true)">
+                <mat-option value="all">Everyone</mat-option>
+                <mat-option *ngFor="let u of data.group.members" [value]="u.id">{{ u.username }}<span *ngIf="u.username == data.user.username"> (you)</span></mat-option>
+            </mat-select>
+        </ng-template>
     </mat-form-field>
     
     <mat-form-field color="accent">
         <mat-label>Sort By</mat-label>
         <mat-select [(ngModel)]="sortBy" (selectionChange)="paginationChange(pageEvent, selectedUser, true)">
             <mat-option value="track_scrobbles.timestamp">Date</mat-option>
+            <mat-option *ngIf="data.wkMode == 'overall'" value="artists.name">Artist</mat-option>
             <mat-option value="track_scrobbles.track">Track</mat-option>
             <mat-option value="albums.name">Album</mat-option>
         </mat-select>
@@ -37,7 +45,7 @@
             <tr>
                 <th class="table-border">Date</th>
                 <th class="table-border">User</th>
-                <th class="table-border history-table-artist">Artist</th>
+                <th class="table-border" [class.history-table-artist]="data.wkMode != 'overall'">Artist</th>
                 <th class="table-border">Track</th>
                 <th class="table-border">Album</th>
             </tr>
@@ -47,7 +55,7 @@
                 <td class="table-border" style="text-align:center" [title]="moment.unix(entry.timestamp)" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') >= 24">{{ moment.unix(entry.timestamp).locale('en').format('MM/DD/YY, LT') }}</td>
                 <td class="table-border" style="text-align:center; background: #444444" [title]="moment.unix(entry.timestamp)" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') < 24">{{ moment.unix(entry.timestamp).locale('en').fromNow() }}</td>
                 <td class="table-border center"><a href="https://last.fm/user/{{ entry.username }}" target="_blank" class="clear-color">{{ entry.username }}</a></td>
-                <td class="table-border history-table-artist center"><a href="{{ entry.artist_url }}" target="_blank" class="clear-color">{{ entry.artist }}</a></td>
+                <td class="table-border" [class.history-table-artist]="data.wkMode != 'overall'"><a href="{{ entry.artist_url }}" target="_blank" class="clear-color">{{ entry.artist }}</a></td>
                 <td class="table-border"><a href="{{ entry.track_url }}" target="_blank" class="clear-color">{{ entry.track }}</a></td>
                 <td class="table-border" [class.center]="data.wkMode == 'album'"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
             </tr>

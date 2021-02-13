@@ -11,7 +11,7 @@
     <div style="position: relative;">
         <h2 class="box-title">Listening Activity</h2> 
         <a class="refresh clickable" (click)="messageService.open('Click on an album artwork to see who else knows the release.')"><mat-icon [inline]="true">info</mat-icon></a>
-        <!-- <a class="refresh clickable" (click)="nowPlaying(true)" style="right: 16px;" matTooltip="Manual Refresh" matTooltipPosition="above"><mat-icon [inline]="true">cached</mat-icon></a> -->
+        <a class="np-scrobble-history clickable" (click)="scrobbleHistory('overall', null, group.members)" matTooltip="Group Scrobble History — Overall" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
     </div>
     <div class="now-playing-errors" *ngIf="!nowPlayingResults">
         <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="nowPlayingResults === null"></mat-spinner>
@@ -37,7 +37,7 @@
     <div class="box center command-box" #wkArtist >
         <div style="position: relative;">
             <h2 class="box-title">Who Knows This Artist</h2> 
-            <a class="refresh clickable" *ngIf="wkArtistResults" (click)="scrobbleHistory('artist', wkArtistResults, group.members)" matTooltip="Group Scrobble History" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" *ngIf="wkArtistResults" (click)="scrobbleHistory('artist', wkArtistResults, group.members)" matTooltip="Group Scrobble History — Artist" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
         </div>
         <div class="container">
             <form [formGroup]="wkArtistForm" class="box-form" (ngSubmit)="wkArtistSubmit(wkArtistForm.value, group.members)">
@@ -96,7 +96,7 @@
     <div class="box center command-box" #wkAlbum >
         <div style="position: relative;">
             <h2 class="box-title">Who Knows This Album</h2> 
-            <a class="refresh clickable" *ngIf="wkAlbumResults" (click)="scrobbleHistory('album', wkAlbumResults, group.members)" matTooltip="Group Scrobble History" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" *ngIf="wkAlbumResults" (click)="scrobbleHistory('album', wkAlbumResults, group.members)" matTooltip="Group Scrobble History — Album" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
         </div>
         <div class="container">
             <form [formGroup]="wkAlbumForm" class="box-form" (ngSubmit)="wkAlbumSubmit(wkAlbumForm.value, group.members)">
@@ -155,7 +155,7 @@
     <div class="box center command-box" #wkTrack >
         <div style="position: relative;">
             <h2 class="box-title">Who Knows This Track</h2> 
-            <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
         </div>
         <div class="container">
             <form [formGroup]="wkTrackForm" class="box-form" (ngSubmit)="wkTrackSubmit(wkTrackForm.value, group.members)">

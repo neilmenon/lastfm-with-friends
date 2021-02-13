@@ -27,10 +27,9 @@ def get_user(username, extended=True):
         sql = "SELECT * from groups WHERE join_code = '{}';".format(join_code)
         cursor.execute(sql)
         result = list(cursor)
-        sql = "SELECT users.user_id, users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
+        sql = "SELECT users.user_id as id, users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
         cursor.execute(sql)
         result1 = list(cursor)
-        result1 = [r['user_id'] for r in result1]
         result[0]['members'] = result1
         user_data['groups'].append(result[0])
     mdb.close()

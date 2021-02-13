@@ -36,7 +36,7 @@ export class ScrobbleHistoryComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService) { }
 
   ngOnInit(): void {
-    this.getHistoryPage(this.data.group.members, this.sortBy, this.sortOrder, this.pageSize, 0)
+    this.getHistoryPage(this.data.group.members.map(u => u.id), this.sortBy, this.sortOrder, this.pageSize, 0)
   }
 
   paginationChange(pageData, selectedUser, reset=false) {
@@ -48,7 +48,7 @@ export class ScrobbleHistoryComponent implements OnInit {
       }
     }
     if (selectedUser == undefined || selectedUser == "all") {
-      selectedUser = this.data.group.members
+      selectedUser = this.data.group.members.map(u => u.id)
     } else {
       selectedUser = [selectedUser]
     }
@@ -68,7 +68,7 @@ export class ScrobbleHistoryComponent implements OnInit {
     this.userService.scrobbleHistory(
       this.data.wkMode, 
       this.data.wkObject, 
-      users, 
+      users,
       sortBy,
       sortOrder,
       limit,

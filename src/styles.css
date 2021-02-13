@@ -89,14 +89,19 @@ hr {
 .clear-color:hover {
     color: darkseagreen;
 }
-.refresh {
+.refresh, .np-scrobble-history {
     position: absolute;
     top: -10px;
-    right: -10px;
     color: #e2e2e2;
     font-size: 21px;
 }
-.refresh:hover {
+.refresh {
+    right: -10px;
+}
+.np-scrobble-history {
+    right: 14px;
+}
+.refresh:hover, .np-scrobble-history:hover {
     color: darkseagreen;
 }
 
@@ -167,7 +172,11 @@ hr {
 }
 .table-border {
     border: 0.5px solid #bfbfbf3d;
-    padding: 2px 9px;
+    padding: 2px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 350px;
+    text-overflow: ellipsis;
 }
 .sticky-table-header th {
     position: sticky;

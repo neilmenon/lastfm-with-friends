@@ -199,9 +199,9 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistForm.get('query').setValue(entry.artist)
     this.wkAlbumForm.get('query').setValue(albumQuery)
     this.wkTrackForm.get('query').setValue(trackQuery)
-    this.wkArtistSubmit({'query': entry.artist}, this.group.members)
-    this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
-    this.wkTrackSubmit({'query': trackQuery}, this.group.members)
+    this.wkArtistSubmit({'query': entry.artist}, this.group.members.map(u => u.id))
+    this.wkAlbumSubmit({'query': albumQuery}, this.group.members.map(u => u.id))
+    this.wkTrackSubmit({'query': trackQuery}, this.group.members.map(u => u.id))
     wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
 

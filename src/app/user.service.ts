@@ -123,12 +123,14 @@ export class UserService {
       'username': this.username,
       'session_key': this.session_key,
       'wk_mode': wkMode,
-      'artist_id': wkObject['artist']['id'],
       'users': users,
       'sort_by': sortBy,
       'sort_order': sortOrder,
       'limit': limit,
       'offset': offset
+    }
+    if (wkMode != "overall") {
+      payload['artist_id'] = wkObject['artist']['id']
     }
     if (wkMode == "track") {
       payload['track'] = wkObject['track']['name']
