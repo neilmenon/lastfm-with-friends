@@ -89,7 +89,7 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistInit = true
     this.wkArtistResults = null
     this.wkArtistDom.nativeElement.style.background = ''
-    this.userService.wkArtist(formData['query'], users).toPromise().then(data => {
+    this.userService.wkArtist(formData['query'], users.map(u => u.id)).toPromise().then(data => {
       this.wkArtistResults = data
       this.wkArtistDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkArtistResults['artist']['image_url']+')'
       this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
@@ -113,7 +113,7 @@ export class GroupDashboardComponent implements OnInit {
     this.wkAlbumInit = true
     this.wkAlbumResults = null
     this.wkAlbumDom.nativeElement.style.background = ''
-    this.userService.wkAlbum(formData['query'], users).toPromise().then(data => {
+    this.userService.wkAlbum(formData['query'], users.map(u => u.id)).toPromise().then(data => {
       this.wkAlbumResults = data
       this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
       this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
@@ -136,7 +136,7 @@ export class GroupDashboardComponent implements OnInit {
     this.wkTrackInit = true
     this.wkTrackResults = null
     this.wkTrackDom.nativeElement.style.background = ''
-    this.userService.wkTrack(formData['query'], users).toPromise().then(data => {
+    this.userService.wkTrack(formData['query'], users.map(u => u.id)).toPromise().then(data => {
       this.wkTrackResults = data
       this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
       this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
@@ -199,9 +199,9 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistForm.get('query').setValue(entry.artist)
     this.wkAlbumForm.get('query').setValue(albumQuery)
     this.wkTrackForm.get('query').setValue(trackQuery)
-    this.wkArtistSubmit({'query': entry.artist}, this.group.members.map(u => u.id))
-    this.wkAlbumSubmit({'query': albumQuery}, this.group.members.map(u => u.id))
-    this.wkTrackSubmit({'query': trackQuery}, this.group.members.map(u => u.id))
+    this.wkArtistSubmit({'query': entry.artist}, this.group.members)
+    this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
+    this.wkTrackSubmit({'query': trackQuery}, this.group.members)
     wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
 
