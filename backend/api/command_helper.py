@@ -122,8 +122,7 @@ def wk_track(query, users):
             return None
         track = result[0]
     track = result[0]
-    track['url'] = artist['url'] + "/" + track['album_name'].replace(" ", "+") + "/" + track['name'].replace(" ", "+")
-
+    track['url'] = artist['url'] + "/" + track['album_name'].replace(" ", "+").replace("/", "%2F") + "/" + track['name'].replace(" ", "+").replace("/", "%2F")
     # find users who have scrobbled this album
     users_list = ", ".join(str(u) for u in users)
     sql = "SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track = '{}' GROUP BY users.username order by scrobbles DESC".format(users_list, artist['id'], sql_helper.esc_db(track['name']))
@@ -220,7 +219,7 @@ def play_history(wk_mode, artist_id, users, track=None, album_id=None, sort_by="
     total = records[0]['total']
     for r in records:
         r.pop("total")
-        r['track_url'] = r['artist_url'] + "/" + r['album'].replace(" ", "+") + "/" + r['track'].replace(" ", "+")
+        r['track_url'] = r['artist_url'] + "/" + r['album'].replace(" ", "+").replace("/", "%2F") + "/" + r['track'].replace(" ", "+").replace("/", "%2F")
     data = {
         'records': records,
         'total': total,

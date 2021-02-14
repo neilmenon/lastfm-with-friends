@@ -53,8 +53,10 @@
         </thead>
         <tbody>
             <tr *ngFor="let entry of resultsObject.records; let i = index">
-                <td class="table-border" style="text-align:center" [title]="moment.unix(entry.timestamp)" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') >= 24">{{ moment.unix(entry.timestamp).locale('en').format('MM/DD/YY, LT') }}</td>
-                <td class="table-border" style="text-align:center; background: #444444" [title]="moment.unix(entry.timestamp)" *ngIf="moment().diff(moment.unix(entry.timestamp), 'hours') < 24">{{ moment.unix(entry.timestamp).locale('en').fromNow() }}</td>
+                <td class="table-border" style="text-align:center; background: #444444" [title]="moment.unix(entry.timestamp)" *ngIf="(moment().diff(moment.unix(entry.timestamp), 'hours') < 1 && data.wkMode == 'overall') || (moment().diff(moment.unix(entry.timestamp), 'hours') < 24 && data.wkMode != 'overall'); else notOverall">{{ moment.unix(entry.timestamp).locale('en').fromNow() }}</td>
+                <ng-template #notOverall>
+                    <td class="table-border" style="text-align:center" [title]="moment.unix(entry.timestamp)">{{ moment.unix(entry.timestamp).locale('en').format('MM/DD/YY, LT') }}</td>
+                </ng-template>
                 <td class="table-border center"><a href="https://last.fm/user/{{ entry.username }}" target="_blank" class="clear-color">{{ entry.username }}</a></td>
                 <td class="table-border" [class.history-table-artist]="data.wkMode != 'overall'"><a href="{{ entry.artist_url }}" target="_blank" class="clear-color">{{ entry.artist }}</a></td>
                 <td class="table-border"><a href="{{ entry.track_url }}" target="_blank" class="clear-color">{{ entry.track }}</a></td>

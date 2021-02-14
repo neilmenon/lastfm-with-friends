@@ -91,7 +91,7 @@ def update_user(username, full=False, app=None):
             artist = sql_helper.esc_db(entry['artist']["name"])
             artist_url = entry['artist']['url']
             album = sql_helper.esc_db(entry['album']['#text'])
-            album_url = artist_url + "/" + entry['album']['#text'].replace(" ", "+")
+            album_url = artist_url + "/" + entry['album']['#text'].replace(" ", "+").replace("/", "%2F")
             track = sql_helper.esc_db(entry['name'])
             timestamp = entry['date']['uts']
             image_url = entry['image'][3]['#text']
