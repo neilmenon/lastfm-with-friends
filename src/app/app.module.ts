@@ -37,6 +37,7 @@ import { JoinGroupComponent } from './join-group/join-group.component';
 import { GroupDashboardComponent } from './group-dashboard/group-dashboard.component';
 import { EditGroupComponent } from './edit-group/edit-group.component';
 import { ScrobbleHistoryComponent } from './scrobble-history/scrobble-history.component';
+import { UserSettingsComponent } from './user-settings/user-settings.component';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { ScrobbleHistoryComponent } from './scrobble-history/scrobble-history.co
     GroupDashboardComponent,
     EditGroupComponent,
     ScrobbleHistoryComponent,
+    UserSettingsComponent,
   ],
   imports: [
     BrowserModule,
@@ -84,7 +86,8 @@ import { ScrobbleHistoryComponent } from './scrobble-history/scrobble-history.co
       {path: 'groups/create', component: CreateGroupComponent},
       {path: 'groups/join', component: JoinGroupComponent},
       {path: 'groups/:joinCode', component: GroupDetailComponent},
-      {path: 'groups/:joinCode/edit', component: EditGroupComponent}
+      {path: 'groups/:joinCode/edit', component: EditGroupComponent},
+      {path: 'settings', component: UserSettingsComponent}
     ])
   ],
   providers: [UserService],

@@ -51,7 +51,7 @@ export class HeaderComponent {
   updateUser() {
     let tmp = this.user.last_update
     this.user.last_update = null
-    this.userService.updateUser().toPromise().then(data => {
+    this.userService.updateUser(this.user, false).toPromise().then(data => {
       if (data['tracks_fetched'] == -1) {
         this.user.last_update = tmp
         this.messageService.open("You are up to date!")

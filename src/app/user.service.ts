@@ -40,8 +40,13 @@ export class UserService {
     }
   }
 
-  updateUser() {
-    return this.http.post(config.api_root + '/users/update', {'username': this.username, 'session_key': this.session_key})
+  updateUser(userObject: any, fullScrape: boolean) {
+    return this.http.post(config.api_root + '/users/update', {
+      'username': this.username, 
+      'session_key': this.session_key,
+      'user_id': userObject['user_id'],
+      'full_scrape': fullScrape
+    })
   }
 
   createGroup(formData) {

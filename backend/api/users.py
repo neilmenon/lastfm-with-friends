@@ -107,6 +107,8 @@ def update():
         try:
             username = params['username']
             session_key = params['session_key']
+            full_scrape = params['full_scrape']
+            user_id = params['user_id']
         except KeyError as e:
             response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
             abort(response)
@@ -115,7 +117,11 @@ def update():
         abort(response)
     if not auth_helper.is_authenticated(username, session_key):
         abort(401)
-    response = lastfm_scraper.update_user(username)
+    if full_scrape:
+        user_helper.wipe_scrobbles(user_id)
+        response = lastfm_scraper.update_user(username, full=True, app=current_app._get_current_object())
+    else:
+        response = lastfm_scraper.update_user(username)
     if response:
         return jsonify(response)
     else:

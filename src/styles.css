@@ -83,7 +83,7 @@ hr {
 .spacer {
     flex: 1 1 auto;
 }
-.clear-color {
+.clear-color, .clear-color-full {
     color: #e2e2e2;
 }
 .clear-color:hover {

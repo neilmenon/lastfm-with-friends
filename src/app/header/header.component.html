@@ -29,7 +29,7 @@
             <span class="navbar-menu-updated" *ngIf="user.last_update && !user.progress" [matTooltip]="moment(user.last_update).locale('en')" matTooltipPosition="above" matTooltipClass="tooltip">Last fetched track was played<br> {{ moment(user.last_update).locale('en').fromNow() }}</span>
           </span>
           <button mat-menu-item *ngIf="user.last_update" (click)="updateUser()">Update</button>
-          <button mat-menu-item>Settings</button>
+          <button mat-menu-item [routerLink]="['/settings']">Settings</button>
           <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
         </mat-menu>
       </a>
@@ -62,7 +62,7 @@
               <span class="navbar-menu-updated" *ngIf="user.last_update && !user.progress" [matTooltip]="moment(user.last_update).locale('en')" matTooltipPosition="above" matTooltipClass="tooltip">Last fetched track was played<br> {{ moment(user.last_update).locale('en').fromNow() }}</span>
             </span>
             <button mat-menu-item *ngIf="user.last_update" (click)="updateUser()">Update</button>
-            <button mat-menu-item>Settings</button>
+            <button mat-menu-item [routerLink]="['/settings']">Settings</button>
             <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
           </mat-menu>
         </a>

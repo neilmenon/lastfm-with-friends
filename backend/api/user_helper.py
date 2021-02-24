@@ -104,3 +104,10 @@ def get_updated_date(username):
     result = list(cursor)
     mdb.close()
     return result[0]['last_update']
+
+def wipe_scrobbles(user_id):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("DELETE FROM track_scrobbles WHERE user_id = {};".format(user_id))
+    mdb.commit()
+    mdb.close()

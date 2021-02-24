@@ -1,0 +1,8 @@
+.settings {
+    max-width: 50%;
+}
+@media screen and (max-width: 600px) {
+    .settings {
+        max-width: 90%;
+    }
+}
