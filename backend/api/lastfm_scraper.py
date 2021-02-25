@@ -23,6 +23,7 @@ def update_user(username, full=False, app=None):
     user = user_helper.get_user(username, extended=False)
     last_update = user_helper.get_updated_date(username)
     full_scrape = not last_update or full
+    failed_update = False
     if not full_scrape:
         updated_unix = str(int(last_update.replace(tzinfo=datetime.timezone.utc).timestamp()))
         current_unix = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
@@ -31,6 +32,8 @@ def update_user(username, full=False, app=None):
             registered_unix = str(user['registered'])
             # we can clear the last updated date now to signify an update
             user_helper.change_updated_date(username, clear_date=True)
+    else: # if full scrape, we always clear this date
+        user_helper.change_updated_date(username, clear_date=True)
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     page = 1
@@ -47,18 +50,30 @@ def update_user(username, full=False, app=None):
         try:
             req = requests.get(req_url).json()
             lastfm = req["recenttracks"]
+        except KeyError as e:
+            logger.log("\tSome Last.fm issue occurred on getting this user from Last.fm: " + str(e), app)
+            logger.log("\tTrying to fetch this next page again...", app)
+            try:
+               req = requests.get(req_url).json()
+               lastfm = req["recenttracks"] 
+            except Exception as e:
+                logger.log("\tFailed to fetch a second time. {}. Aborting...".format(str(e)), app)
+                failed_update = True
         except Exception as e:
-            logger.log("\tSome issue occurred on getting this user from Last.fm: " + str(e), app)
-            if full_scrape or user['progress']:
-                logger.log("\tSomething went during the initial update or fixing failed update, storing earliest grabbed track date as last updated date.", app)
-                sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
-                cursor.execute(sql)
-                result = list(cursor)
-                user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp']))) 
+            logger.log("\tSome otherissue occurred on getting this user from Last.fm: " + str(e), app)
+            failed_update = True
+        finally:
+            if failed_update:
+                if full_scrape or user['progress']:
+                    logger.log("\tSomething went during the initial update or fixing failed update, storing earliest grabbed track date as last updated date.", app)
+                    sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
+                    cursor.execute(sql)
+                    result = list(cursor)
+                    user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp']))) 
+                    mdb.close()
+                    return
                 mdb.close()
                 return
-            mdb.close()
-            return
 
         # get the total pages
         total_pages = int(lastfm["@attr"]["totalPages"])

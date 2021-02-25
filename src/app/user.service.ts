@@ -49,6 +49,14 @@ export class UserService {
     })
   }
 
+  deleteUser(userObject) {
+    return this.http.post(config.api_root + '/users/delete', {
+      'username': this.username, 
+      'session_key': this.session_key,
+      'user_id': userObject['user_id'],
+    })
+  }
+
   createGroup(formData) {
     return this.http.post(config.api_root + '/groups', {
       'name': formData['name'], 

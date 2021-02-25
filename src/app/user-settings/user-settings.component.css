@@ -1,8 +1,16 @@
 .settings {
     max-width: 50%;
 }
+.settings-option {
+    padding-bottom: 10px;
+}
+@media screen and (max-width: 960px) {
+    .settings {
+        max-width: 80%;
+    }
+}
 @media screen and (max-width: 600px) {
     .settings {
-        max-width: 90%;
+        max-width: 100%;
     }
 }

@@ -111,3 +111,22 @@ def wipe_scrobbles(user_id):
     cursor.execute("DELETE FROM track_scrobbles WHERE user_id = {};".format(user_id))
     mdb.commit()
     mdb.close()
+
+def delete_user(user_id, username):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM user_groups WHERE username = '{}';".format(username))
+    result = list(cursor)
+    if result: # user needs to have manually left all groups first
+        mdb.close()
+        return False
+    cursor.execute("DELETE FROM track_scrobbles WHERE user_id = {};".format(user_id))
+    mdb.commit()
+    cursor.execute("DELETE FROM now_playing WHERE username = '{}';".format(username))
+    mdb.commit()
+    cursor.execute("DELETE FROM sessions WHERE username = '{}';".format(user_id))
+    mdb.commit()
+    cursor.execute("DELETE FROM users WHERE user_id = {};".format(user_id))
+    mdb.commit()
+    mdb.close()
+    return True

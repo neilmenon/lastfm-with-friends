@@ -1,12 +1,34 @@
 <div class="box center">
     <div class="settings center-all">
-        <h1 class="clear-color-full">Settings</h1>
-        <h3 class="box-title">Full Scrape</h3>
-        <p>
-            Flushes all of your scrobbles from the database and fetches them anew from Last.fm. 
-            This process can take time and should only be used if there is a data discrepancy between Last.fm and the app.
-        </p>
-        <button color="primary" mat-raised-button type="submit">Trigger Full Scrape</button>
-        <br><br>
+        <div class="settings-option">
+            <h1 class="clear-color-full">Settings</h1>
+            <h3 class="box-title">Full Scrape</h3>
+            <p>
+                Flushes all of your scrobbles from our database and fetches them anew from Last.fm. 
+                This process can take time and should only be used if there is a data discrepancy between Last.fm and the app (for example, edited or deleted scrobbles).
+            </p>
+            <button color="accent" mat-raised-button type="submit" *ngIf="!confirmFullScrape && !fullScrapeInProgress" (click)="fullScrape()">Trigger Full Scrape</button>
+            <button color="warn" mat-raised-button type="submit" *ngIf="confirmFullScrape && !fullScrapeInProgress" (click)="fullScrape()">Confirm</button>
+            <div *ngIf="fullScrapeInProgress">
+                <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="fullScrapeInProgress"></mat-spinner>
+                A full scrape is in progress. View its status in the menu.<br>
+            </div>
+        </div>
+        <hr>
+        <div class="settings-option">
+            <h3 class="box-title">Delete Account</h3>
+            <p>
+                Permanently deletes all of your data from our database (session keys, user data, and scrobbles).
+                Your Last.fm account and data is not affected by this action.
+                You are welcomed and encouraged to re-link your Last.fm account at any point in the future!
+            </p>
+            <p>
+                <button color="primary" mat-raised-button type="submit" *ngIf="!confirmDeleteAccount" (click)="deleteAccount()">Delete Account</button>
+                <button color="warn" mat-raised-button type="submit" *ngIf="confirmDeleteAccount" (click)="deleteAccount()">Confirm Delete</button>
+            </p>
+            <p style="font-size: 12px;">
+                <strong><u>Note</u></strong>: you must leave (change ownership, or delete if you are the owner) all groups you have joined before using this action!
+            </p>
+        </div>
     </div>
 </div>

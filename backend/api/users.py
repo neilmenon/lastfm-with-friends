@@ -148,3 +148,27 @@ def globalupdate():
         return jsonify(response)
     else:
         abort(500)
+
+@user_api.route('/api/users/delete', methods=['POST'])
+def delete():
+    params = request.get_json()
+    if params:
+        try:
+            username = params['username']
+            session_key = params['session_key']
+            user_id = params['user_id']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if not auth_helper.is_authenticated(username, session_key):
+        abort(401)
+    try:
+        result = user_helper.delete_user(user_id, username)
+    except Exception:
+        abort(500)
+    if not result:
+        abort(409)
+    return jsonify({"data": "success"})
