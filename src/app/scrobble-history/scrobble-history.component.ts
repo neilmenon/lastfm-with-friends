@@ -17,9 +17,9 @@ export class ScrobbleHistoryComponent implements OnInit {
 
   // MatPaginator Inputs
   length = 500;
-  pageSize = 50;
+  pageSize = 100;
   pageIndex = 0;
-  pageSizeOptions: number[] = [25, 50, 100, 500];
+  pageSizeOptions: number[] = [50, 100, 250, 500];
 
   // MatPaginator Output
   pageEvent: PageEvent;
@@ -40,6 +40,7 @@ export class ScrobbleHistoryComponent implements OnInit {
   }
 
   paginationChange(pageData, selectedUser, reset=false) {
+    this.resultsObject = null
     if (pageData === undefined) {
       pageData = {
         'pageSize': this.pageSize,

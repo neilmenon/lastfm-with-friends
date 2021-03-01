@@ -41,6 +41,8 @@ def find_artist(query):
     return artist
 
 def wk_artist(query, users):
+    if not query:
+        return None
     artist = find_artist(query)
     if not artist:
         return None

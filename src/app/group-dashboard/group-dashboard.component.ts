@@ -124,7 +124,7 @@ export class GroupDashboardComponent implements OnInit {
       if (error['status'] == 404) {
         this.wkAlbumInit = undefined;
       } else if(error['status'] == 400) {
-        this.messageService.open("Improperly formatted query. Enter your query as Artist - Album")
+        this.messageService.open("Improperly formatted query (format: Artist - Album)")
       } else {
         this.messageService.open("An error occured submitting your request. Please try again.")
         console.log(error)
@@ -147,7 +147,7 @@ export class GroupDashboardComponent implements OnInit {
       if (error['status'] == 404) {
         this.wkTrackInit = undefined;
       } else if(error['status'] == 400) {
-        this.messageService.open("Improperly formatted query. Enter your query as Artist - Track")
+        this.messageService.open("Improperly formatted query (format: Artist - Track)")
       } else {
         this.messageService.open("An error occured submitting your request. Please try again.")
         console.log(error)
