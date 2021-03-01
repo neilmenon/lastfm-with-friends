@@ -140,3 +140,28 @@ def history():
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
+
+@command_api.route('/api/commands/wktop', methods=['POST'])
+def wk_top():
+    try:
+        params = request.get_json()
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            if params['wk_mode'] == "artist":
+                result = command_helper.wk_top(params['wk_mode'], params['users'], params['artist_id'])
+            elif params['wk_mode'] == "album":
+                result = command_helper.wk_top(params['wk_mode'], params['users'], params['artist_id'], params['album_id'])
+            else:
+                abort(409)
+            
+            if result == None:
+                abort(404)
+            return jsonify(result)
+        else:
+            abort(401)
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)

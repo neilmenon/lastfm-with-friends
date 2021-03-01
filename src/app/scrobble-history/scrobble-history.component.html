@@ -60,7 +60,7 @@
                 <td class="table-border center"><a href="https://last.fm/user/{{ entry.username }}" target="_blank" class="clear-color">{{ entry.username }}</a></td>
                 <td class="table-border" [class.history-table-artist]="data.wkMode != 'overall'"><a href="{{ entry.artist_url }}" target="_blank" class="clear-color">{{ entry.artist }}</a></td>
                 <td class="table-border"><a href="{{ entry.track_url }}" target="_blank" class="clear-color">{{ entry.track }}</a></td>
-                <td class="table-border" [class.center]="data.wkMode == 'album'"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
+                <td class="table-border"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
             </tr>
         </tbody>
     </table>

@@ -40,6 +40,20 @@ def find_artist(query):
     mdb.close()
     return artist
 
+def find_album_tracks(album_id):
+    # find the tracks that are associated with this album
+    # need to do this because, technically, tracks can appear in several albums, but Last.fm still counts them all towards
+    # the album being viewed
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    sql = "SELECT track from track_scrobbles WHERE album_id = {} GROUP BY track".format(album_id)
+    cursor.execute(sql)
+    result = list(cursor)
+    album_tracks_list = ', '.join('"' + str(sql_helper.esc_db(track)) + '"' for track in [r['track'] for r in result])
+    logger.log(album_tracks_list)
+    mdb.close()
+    return album_tracks_list
+
 def wk_artist(query, users):
     if not query:
         return None
@@ -87,9 +101,12 @@ def wk_album(query, users):
             return None
     album = result[0]
 
+    # find album tracks from this album
+    album_tracks_list = find_album_tracks(album['id'])
+
     # find users who have scrobbled this album
     users_list = ", ".join(str(u) for u in users)
-    sql = 'SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.album_id = {} GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'], album['id'])
+    sql = 'SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, users.scrobbles as total, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'], album_tracks_list)
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])
@@ -207,7 +224,8 @@ def play_history(wk_mode, artist_id, users, track=None, album_id=None, sort_by="
     if wk_mode == "track":
         sql = "SELECT users.username, artists.name as artist, artists.url as artist_url, albums.url as album_url, track_scrobbles.track, albums.name as album, track_scrobbles.timestamp, COUNT(*) OVER() as total FROM `track_scrobbles` LEFT JOIN users ON users.user_id = track_scrobbles.user_id LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND artists.id = {} AND track_scrobbles.track = '{}' ORDER BY {} {}, track_scrobbles.timestamp DESC LIMIT {} OFFSET {}".format(users_list, artist_id, sql_helper.esc_db(track), sort_by, sort_order, limit, offset)
     elif wk_mode == "album":
-        sql = "SELECT users.username, artists.name as artist, artists.url as artist_url, albums.url as album_url, track_scrobbles.track, albums.name as album, track_scrobbles.timestamp, COUNT(*) OVER() as total FROM `track_scrobbles` LEFT JOIN users ON users.user_id = track_scrobbles.user_id LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND artists.id = {} AND track_scrobbles.album_id = {} ORDER BY {} {}, track_scrobbles.timestamp DESC LIMIT {} OFFSET {}".format(users_list, artist_id, album_id, sort_by, sort_order, limit, offset)
+        album_tracks_list = find_album_tracks(album_id)
+        sql = "SELECT users.username, artists.name as artist, artists.url as artist_url, albums.url as album_url, track_scrobbles.track, albums.name as album, track_scrobbles.timestamp, COUNT(*) OVER() as total FROM `track_scrobbles` LEFT JOIN users ON users.user_id = track_scrobbles.user_id LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND artists.id = {} AND track_scrobbles.track IN ({}) ORDER BY {} {}, track_scrobbles.timestamp DESC LIMIT {} OFFSET {}".format(users_list, artist_id, album_tracks_list, sort_by, sort_order, limit, offset)
     elif wk_mode == "artist":
         sql = "SELECT users.username, artists.name as artist, artists.url as artist_url, albums.url as album_url, track_scrobbles.track, albums.name as album, track_scrobbles.timestamp, COUNT(*) OVER() as total FROM `track_scrobbles` LEFT JOIN users ON users.user_id = track_scrobbles.user_id LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND artists.id = {} ORDER BY {} {}, track_scrobbles.timestamp DESC LIMIT {} OFFSET {}".format(users_list, artist_id, sort_by, sort_order, limit, offset)
     elif wk_mode == "overall":
@@ -230,3 +248,25 @@ def play_history(wk_mode, artist_id, users, track=None, album_id=None, sort_by="
     }
     mdb.close()
     return data
+
+def wk_top(wk_mode, users, artist_id, album_id=None):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    users_list = ", ".join(str(u) for u in users)
+
+    if wk_mode == "artist":
+        sql = "SELECT albums.name as album, albums.id as album_id, albums.url as album_url, albums.image_url, COUNT(*) as scrobbles FROM track_scrobbles LEFT JOIN artists on artists.id = track_scrobbles.artist_id LEFT JOIN albums on albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} GROUP BY track_scrobbles.album_id ORDER BY scrobbles DESC".format(users_list, artist_id)
+    elif wk_mode == "album":
+        album_tracks_list = find_album_tracks(album_id)
+        sql = "SELECT albums.name as album, albums.id as album_id, track_scrobbles.track, albums.url as album_url, albums.image_url, COUNT(*) as scrobbles FROM track_scrobbles LEFT JOIN artists on artists.id = track_scrobbles.artist_id LEFT JOIN albums on albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) GROUP BY track_scrobbles.track ORDER BY scrobbles DESC".format(users_list, artist_id, album_tracks_list)
+    logger.log(sql)
+    cursor.execute(sql)
+    records = list(cursor)
+    if not records:
+        return None
+    elif wk_mode == "album":
+        for r in records:
+            r['track_url'] = r['album_url'] + "/" + r['track'].replace(" ", "+").replace("/", "%2F")
+    mdb.close()
+    
+    return records
