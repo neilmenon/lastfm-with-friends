@@ -38,6 +38,7 @@ import { GroupDashboardComponent } from './group-dashboard/group-dashboard.compo
 import { EditGroupComponent } from './edit-group/edit-group.component';
 import { ScrobbleHistoryComponent } from './scrobble-history/scrobble-history.component';
 import { UserSettingsComponent } from './user-settings/user-settings.component';
+import { WhoKnowsTopComponent } from './who-knows-top/who-knows-top.component';
 
 @NgModule({
   declarations: [
@@ -54,6 +55,7 @@ import { UserSettingsComponent } from './user-settings/user-settings.component';
     EditGroupComponent,
     ScrobbleHistoryComponent,
     UserSettingsComponent,
+    WhoKnowsTopComponent,
   ],
   imports: [
     BrowserModule,

@@ -49,8 +49,7 @@ def find_album_tracks(album_id):
     sql = "SELECT track from track_scrobbles WHERE album_id = {} GROUP BY track".format(album_id)
     cursor.execute(sql)
     result = list(cursor)
-    album_tracks_list = ', '.join('"' + str(sql_helper.esc_db(track)) + '"' for track in [r['track'] for r in result])
-    logger.log(album_tracks_list)
+    album_tracks_list = ', '.join('"' + str(sql_helper.esc_db(track)).replace('"', '\\"') + '"' for track in [r['track'] for r in result])
     mdb.close()
     return album_tracks_list
 
