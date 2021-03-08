@@ -72,7 +72,7 @@
                         <th>User</th>
                         <th class="clickable" title="Click to sort" (click)="sort('scrobbles', 'wkArtist')">Scrobbles</th>
                         <th class="clickable" title="Percent of the user's total number of scrobbles (click to sort)" (click)="sort('percent', 'wkArtist')">%</th>
-                        <th></th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,7 +81,9 @@
                         <td>{{ entry.username }}</td>
                         <td>{{ entry.scrobbles }}</td>
                         <td>{{ entry.percent }}</td>
-                        <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
+                        <td class="wk-actions">
+                            <a (click)="whoKnowsTop('artist', wkArtistResults, group.members, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
+                        </td> 
                     </tr>
                 </tbody>
             </table>
@@ -131,7 +133,7 @@
                         <th>User</th>
                         <th class="clickable" title="Click to sort" (click)="sort('scrobbles', 'wkAlbum')">Scrobbles</th>
                         <th class="clickable" title="Percent of the user's total number of scrobbles (click to sort)" (click)="sort('percent', 'wkAlbum')">%</th>
-                        <th></th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -140,7 +142,9 @@
                         <td>{{ entry.username }}</td>
                         <td>{{ entry.scrobbles }}</td>
                         <td>{{ entry.percent }}</td>
-                        <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
+                        <td class="wk-actions">
+                            <a (click)="whoKnowsTop('album', wkAlbumResults, group.members, entry)" matTooltip="Top Scrobbles — Album" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -190,7 +194,7 @@
                         <th>User</th>
                         <th class="clickable" title="Click to sort" (click)="sort('scrobbles', 'wkTrack')">Scrobbles</th>
                         <th class="clickable" title="Percent of the user's total number of scrobbles (click to sort)" (click)="sort('percent', 'wkTrack')">%</th>
-                        <th></th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -199,7 +203,9 @@
                         <td>{{ entry.username }}</td>
                         <td>{{ entry.scrobbles }}</td>
                         <td>{{ entry.percent }}</td>
-                        <td><a href="https://www.last.fm/user/{{ entry.username }}" target="_blank" class="lastfm-icon"><i class="fab fa-lastfm"></i></a></td>
+                        <td class="wk-actions">
+                            <a (click)="whoKnowsTop('artist', wkTrackResults, group.members, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
+                        </td>                     
                     </tr>
                 </tbody>
             </table>

@@ -152,4 +152,17 @@ export class UserService {
     }
     return this.http.post(config.api_root + "/commands/history", payload)
   }
+
+  whoKnowsTop(wkMode, users, artistId, albumId=null, trackMode=false) {
+    let payload = {
+      'username': this.username,
+      'session_key': this.session_key,
+      'wk_mode': wkMode,
+      'users': users,
+      'artist_id': artistId,
+      'album_id': albumId,
+      'track_mode': trackMode
+    }
+    return this.http.post(config.api_root + "/commands/wktop", payload)
+  }
 }

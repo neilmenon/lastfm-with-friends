@@ -248,13 +248,16 @@ def play_history(wk_mode, artist_id, users, track=None, album_id=None, sort_by="
     mdb.close()
     return data
 
-def wk_top(wk_mode, users, artist_id, album_id=None):
+def wk_top(wk_mode, users, artist_id, album_id=None, track_mode=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     users_list = ", ".join(str(u) for u in users)
 
     if wk_mode == "artist":
-        sql = "SELECT albums.name as album, albums.id as album_id, albums.url as album_url, albums.image_url, COUNT(*) as scrobbles FROM track_scrobbles LEFT JOIN artists on artists.id = track_scrobbles.artist_id LEFT JOIN albums on albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} GROUP BY track_scrobbles.album_id ORDER BY scrobbles DESC".format(users_list, artist_id)
+        if track_mode:
+            sql = "SELECT track_scrobbles.track, albums.name as album, albums.id as album_id, albums.url as album_url, albums.image_url, COUNT(*) as scrobbles FROM track_scrobbles LEFT JOIN artists on artists.id = track_scrobbles.artist_id LEFT JOIN albums on albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} GROUP BY track_scrobbles.track ORDER BY scrobbles DESC".format(users_list, artist_id)
+        else:
+            sql = "SELECT albums.name as album, albums.id as album_id, albums.url as album_url, albums.image_url, COUNT(*) as scrobbles FROM track_scrobbles LEFT JOIN artists on artists.id = track_scrobbles.artist_id LEFT JOIN albums on albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} GROUP BY track_scrobbles.album_id ORDER BY scrobbles DESC".format(users_list, artist_id)
     elif wk_mode == "album":
         album_tracks_list = find_album_tracks(album_id)
         sql = "SELECT albums.name as album, albums.id as album_id, track_scrobbles.track, albums.url as album_url, albums.image_url, COUNT(*) as scrobbles FROM track_scrobbles LEFT JOIN artists on artists.id = track_scrobbles.artist_id LEFT JOIN albums on albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) GROUP BY track_scrobbles.track ORDER BY scrobbles DESC".format(users_list, artist_id, album_tracks_list)
@@ -263,7 +266,7 @@ def wk_top(wk_mode, users, artist_id, album_id=None):
     records = list(cursor)
     if not records:
         return None
-    elif wk_mode == "album":
+    elif wk_mode == "album" or track_mode:
         for r in records:
             r['track_url'] = r['album_url'] + "/" + r['track'].replace(" ", "+").replace("/", "%2F")
     mdb.close()

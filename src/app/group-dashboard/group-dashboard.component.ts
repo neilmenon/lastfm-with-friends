@@ -5,6 +5,7 @@ import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
 import { ScrobbleHistoryComponent } from '../scrobble-history/scrobble-history.component';
+import { WhoKnowsTopComponent } from '../who-knows-top/who-knows-top.component';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -213,6 +214,19 @@ export class GroupDashboardComponent implements OnInit {
         wkObject: wkObject,
         users: users,
         user: this.user
+      }
+    })
+  }
+
+  whoKnowsTop(wkMode, wkObject, users, selectedUser) {
+    this.dialog.open(WhoKnowsTopComponent, {
+      data : {
+        group: this.group,
+        wkMode: wkMode,
+        wkObject: wkObject,
+        users: users,
+        user: this.user,
+        selectedUser: selectedUser
       }
     })
   }

@@ -147,7 +147,7 @@ def wk_top():
         params = request.get_json()
         if auth_helper.is_authenticated(params['username'], params['session_key']):
             if params['wk_mode'] == "artist":
-                result = command_helper.wk_top(params['wk_mode'], params['users'], params['artist_id'])
+                result = command_helper.wk_top(params['wk_mode'], params['users'], params['artist_id'], params['album_id'], params['track_mode'])
             elif params['wk_mode'] == "album":
                 result = command_helper.wk_top(params['wk_mode'], params['users'], params['artist_id'], params['album_id'])
             else:
