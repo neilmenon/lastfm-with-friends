@@ -8,7 +8,13 @@
     </div>
     <div *ngIf="user && user.groups.length > 0">
         <div class="box">
-            <p>Welcome to Last.fm with Friends.</p>
+            <p>Welcome to Last.fm with Friends. </p>
+            <p *ngIf="commit; else noCommit">
+                Last commit was <span style="text-decoration: underline;" [matTooltip]="moment(commit.committer.date)" matTooltipPosition="above">{{ moment(commit.committer.date).locale('en-us').fromNow() }}</span> by {{ commit.committer.name }}: <a href="{{ commit.html_url }}" target="_blank">{{ commit.message }}</a>
+            </p>
+            <ng-template #noCommit>
+                <p>Getting latest commit...</p>
+            </ng-template>
             <p>
                 <strong>My groups:</strong>
                 <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> - {{ group.description }}</li>
