@@ -194,7 +194,7 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  nowPlayingToWk(entry, wkArtist: HTMLElement) {
+  nowPlayingToWk(entry, wkArtist: HTMLElement=null) {
     let albumQuery = entry.artist + " - " + entry.album
     let trackQuery = entry.artist + " - " + entry.track
     this.wkArtistForm.get('query').setValue(entry.artist)
@@ -203,11 +203,12 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistSubmit({'query': entry.artist}, this.group.members)
     this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
     this.wkTrackSubmit({'query': trackQuery}, this.group.members)
-    wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
+    if (wkArtist)
+      wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
 
   scrobbleHistory(wkMode, wkObject, users) {
-    this.dialog.open(ScrobbleHistoryComponent, {
+    let dialogRef = this.dialog.open(ScrobbleHistoryComponent, {
       data: {
         group: this.group,
         wkMode: wkMode,
@@ -215,6 +216,16 @@ export class GroupDashboardComponent implements OnInit {
         users: users,
         user: this.user
       }
+    })
+    let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
+      this.nowPlayingToWk(entry)
+    })
+    let wkTopSub = dialogRef.componentInstance.wkFromTopDialog.subscribe(data => {
+      this.whoKnowsTop(data.wkMode, data.wkObject, data.users, data.selectedUser)
+    })
+    dialogRef.afterClosed().subscribe(() => {
+      wkSub.unsubscribe()
+      wkTopSub.unsubscribe()
     })
   }
 
@@ -224,7 +235,6 @@ export class GroupDashboardComponent implements OnInit {
         group: this.group,
         wkMode: wkMode,
         wkObject: wkObject,
-        users: users,
         user: this.user,
         selectedUser: selectedUser
       }

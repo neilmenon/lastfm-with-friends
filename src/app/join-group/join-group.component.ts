@@ -12,6 +12,7 @@ import { UserService } from '../user.service';
 })
 export class JoinGroupComponent implements OnInit {
   joinForm;
+  joinLoading: boolean = false;
   constructor( 
     private formBuilder: FormBuilder, 
     private messageService: MessageService, 
@@ -28,10 +29,13 @@ export class JoinGroupComponent implements OnInit {
 
   onSubmit(formData) {
     if (this.joinForm.status == "VALID") {
+      this.joinLoading = true
       this.userService.joinGroup(formData['joinCode']).toPromise().then(data => {
+        this.joinLoading = false
         this.messageService.save("You have joined " + data['name'] + ".")
         this.router.navigate(['groups/' + data['join_code']])
       }).catch(error => {
+        this.joinLoading = false
         console.log(error)
         if (error['status'] == 409) {
           this.messageService.open("You are already in this group.")

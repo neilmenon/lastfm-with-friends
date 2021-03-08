@@ -29,7 +29,10 @@
         <tbody>
             <tr *ngFor="let entry of resultsObject; let i = index">
                 <td class="table-border" *ngIf="trackMode"><a href="{{ entry.track_url }}" target="_blank" class="clear-color">{{ entry.track }}</a></td>
-                <td class="table-border" [class.center]="data.wkMode == 'album'"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
+                <td class="table-border" [class.center]="data.wkMode == 'album'" *ngIf="entry.album == ''; else normalAlbum" style="color: #bfbfbf;" matTooltip="Album name was not specified when these tracks were scrobbled." matTooltipPosition="above">Unknown Album*</td>
+                <ng-template #normalAlbum>
+                    <td class="table-border" [class.center]="data.wkMode == 'album'"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
+                </ng-template>
                 <td class="table-border center">{{ entry.scrobbles }}</td>
             </tr>
         </tbody>

@@ -3,6 +3,7 @@
     <mat-label>Join Code</mat-label>
     <input matInput name="joinCode" placeholder="" type="text" formControlName="joinCode" required>
     </mat-form-field>
-    <button color="accent" mat-raised-button type="submit">Join Group</button>
+    <button color="accent" mat-raised-button type="submit" *ngIf="!joinLoading">Join Group</button>
+    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="joinLoading"></mat-spinner>
 </form>
 <br>

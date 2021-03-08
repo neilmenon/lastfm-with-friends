@@ -49,6 +49,7 @@
                 <th class="table-border" [class.history-table-artist]="data.wkMode != 'overall'">Artist</th>
                 <th class="table-border">Track</th>
                 <th class="table-border">Album</th>
+                <th class="table-border">&nbsp;Actions&nbsp;</th>
             </tr>
         </thead>
         <tbody>
@@ -57,10 +58,17 @@
                 <ng-template #notOverall>
                     <td class="table-border" style="text-align:center" [title]="moment.unix(entry.timestamp)">{{ moment.unix(entry.timestamp).locale('en').format('MM/DD/YY, LT') }}</td>
                 </ng-template>
-                <td class="table-border center"><a href="https://last.fm/user/{{ entry.username }}" target="_blank" class="clear-color">{{ entry.username }}</a></td>
+                <td class="table-border center" (click)="wkTrigger(entry)"><a href="https://last.fm/user/{{ entry.username }}" target="_blank" class="clear-color">{{ entry.username }}</a></td>
                 <td class="table-border" [class.history-table-artist]="data.wkMode != 'overall'"><a href="{{ entry.artist_url }}" target="_blank" class="clear-color">{{ entry.artist }}</a></td>
                 <td class="table-border"><a href="{{ entry.track_url }}" target="_blank" class="clear-color">{{ entry.track }}</a></td>
-                <td class="table-border"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
+                <td class="table-border" *ngIf="entry.album == ''; else normalAlbum" style="color: #bfbfbf;" matTooltip="Album name was not specified when this track was scrobbled." matTooltipPosition="above">Unknown Album*</td>
+                <ng-template #normalAlbum>
+                    <td class="table-border"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
+                </ng-template>
+                <td class="table-border center wk-actions" style="font-size: 16px;">
+                    <a (click)="wkTrigger(entry)" matTooltip="Who Knows — Artist/Album/Track" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">help_center</mat-icon></a>
+                    <a (click)="wkTopTrigger('artist', data.wkObject, data.group.members, {'id': entry.user_id, 'username': entry.username}, entry)" matTooltip="Top Scrobbles of {{ entry.artist }} —  {{ entry.username }}" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
+                </td>
             </tr>
         </tbody>
     </table>

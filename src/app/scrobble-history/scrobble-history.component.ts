@@ -1,5 +1,5 @@
-import { Component, OnInit, Inject, ViewChild } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, OnInit, Inject, ViewChild, EventEmitter, Output } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
@@ -27,13 +27,16 @@ export class ScrobbleHistoryComponent implements OnInit {
   sortBy: any = "track_scrobbles.timestamp";
   sortOrder: any = "DESC";
   paginationTriggered: boolean = false;
+
+  @Output() wkFromDialog: EventEmitter<any> = new EventEmitter(true)
+  @Output() wkFromTopDialog: EventEmitter<any> = new EventEmitter(true)
   setPageSizeOptions(setPageSizeOptionsInput: string) {
     if (setPageSizeOptionsInput) {
       this.pageSizeOptions = setPageSizeOptionsInput.split(',').map(str => +str);
     }
   }
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService, public dialogRef: MatDialogRef<ScrobbleHistoryComponent>) { }
 
   ngOnInit(): void {
     this.getHistoryPage(this.data.group.members.map(u => u.id), this.sortBy, this.sortOrder, this.pageSize, 0)
@@ -83,6 +86,31 @@ export class ScrobbleHistoryComponent implements OnInit {
       console.log(error)
       this.paginationTriggered = false;
     })
+  }
+
+  wkTrigger(data) {
+    this.wkFromDialog.emit(data)
+    this.dialogRef.close()
+  }
+
+  wkTopTrigger(wkMode, wkObject, users, selectedUser, entry) {
+    let payload: Object = {};
+    payload['wkMode'] = wkMode
+    payload['users'] = users
+    payload['selectedUser'] = selectedUser
+    if (wkObject == null) {
+      this.userService.wkArtist(entry.artist, users.map(u => u.id)).toPromise().then(data => {
+        payload['wkObject'] = data
+        this.wkFromTopDialog.emit(payload)
+        this.dialogRef.close()
+      }).catch(error => {
+        this.messageService.open("Error getting top scrobbles. Please try again.")
+      })
+    } else {
+      payload['wkObject'] = wkObject
+      this.wkFromTopDialog.emit(payload)
+      this.dialogRef.close()
+    }
   }
 
 }

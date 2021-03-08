@@ -24,6 +24,7 @@ export class WhoKnowsTopComponent implements OnInit {
   }
 
   whoKnowsTop(wkMode, users, artistId, albumId=null, trackMode=false) {
+    this.resultsObject = null
     this.userService.whoKnowsTop(wkMode, users, artistId, albumId, trackMode).toPromise().then(data => {
       this.resultsObject = data
     }).catch(error => {

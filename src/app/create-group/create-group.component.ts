@@ -13,6 +13,7 @@ import { UserService } from '../user.service';
 })
 export class CreateGroupComponent implements OnInit {
   groupForm;
+  createLoading: boolean = false;
   constructor( private formBuilder: FormBuilder, private messageService: MessageService, private userService: UserService, public router: Router) { 
     this.groupForm = this.formBuilder.group({
       name: ['', Validators.required],
@@ -25,10 +26,13 @@ export class CreateGroupComponent implements OnInit {
 
   onSubmit(formData) {
     if (this.groupForm.status == "VALID") {
+      this.createLoading = true
       this.userService.createGroup(formData).toPromise().then(data => {
+        this.createLoading = false
         this.messageService.save('Successfully created group '+data['name']+'.')
         this.router.navigate(['groups/' + data['join_code']])
       }).catch(error => {
+        this.createLoading = false
         this.messageService.open("Error creating group!")
         console.log(error)
       })
