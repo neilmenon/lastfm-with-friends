@@ -1,5 +1,5 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
@@ -16,7 +16,8 @@ export class WhoKnowsTopComponent implements OnInit {
   trackMode: boolean = true;
   selectedUser: any;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService) { }
+  @Output() wkFromDialog: EventEmitter<any> = new EventEmitter(true)
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService, public dialogRef: MatDialogRef<WhoKnowsTopComponent>) { }
 
   ngOnInit(): void {
     this.whoKnowsTop(this.data.wkMode, [this.data.selectedUser.id], this.data.wkObject.artist.id, this.data.wkMode == "album" ? this.data.wkObject.album.id : null, true)
@@ -31,6 +32,13 @@ export class WhoKnowsTopComponent implements OnInit {
       this.messageService.open("Error getting top scrobbles. Please try again.")
       console.log(error)
     })
+  }
+
+  wkTrigger(data) {
+    data['artist'] = this.data.wkObject.artist.name
+    console.log(data)
+    this.wkFromDialog.emit(data)
+    this.dialogRef.close()
   }
 
 }

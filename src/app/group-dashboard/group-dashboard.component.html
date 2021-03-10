@@ -82,7 +82,7 @@
                         <td>{{ entry.scrobbles }}</td>
                         <td>{{ entry.percent }}</td>
                         <td class="wk-actions">
-                            <a (click)="whoKnowsTop('artist', wkArtistResults, group.members, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
+                            <a (click)="whoKnowsTop('artist', wkArtistResults, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
                         </td> 
                     </tr>
                 </tbody>
@@ -143,7 +143,7 @@
                         <td>{{ entry.scrobbles }}</td>
                         <td>{{ entry.percent }}</td>
                         <td class="wk-actions">
-                            <a (click)="whoKnowsTop('album', wkAlbumResults, group.members, entry)" matTooltip="Top Scrobbles — Album" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
+                            <a (click)="whoKnowsTop('album', wkAlbumResults, entry)" matTooltip="Top Scrobbles — Album" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
                         </td>
                     </tr>
                 </tbody>
@@ -204,7 +204,7 @@
                         <td>{{ entry.scrobbles }}</td>
                         <td>{{ entry.percent }}</td>
                         <td class="wk-actions">
-                            <a (click)="whoKnowsTop('artist', wkTrackResults, group.members, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
+                            <a (click)="whoKnowsTop('artist', wkTrackResults, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
                         </td>                     
                     </tr>
                 </tbody>

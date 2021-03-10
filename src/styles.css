@@ -348,6 +348,10 @@ div.history-options-container > mat-paginator {
     background: #333;
 }
 /* SCROLLBARS */
+.wk-actions-dialog {
+    font-size: 18px;
+    padding: 1px 0px 0px 0px!important;
+}
 
 ::-webkit-resizer {
 	background: transparent;

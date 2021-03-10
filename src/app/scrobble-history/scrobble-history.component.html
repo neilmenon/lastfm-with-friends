@@ -65,7 +65,7 @@
                 <ng-template #normalAlbum>
                     <td class="table-border"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
                 </ng-template>
-                <td class="table-border center wk-actions" style="font-size: 16px;">
+                <td class="table-border center wk-actions-dialog">
                     <a (click)="wkTrigger(entry)" matTooltip="Who Knows — Artist/Album/Track" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">help_center</mat-icon></a>
                     <a (click)="wkTopTrigger('artist', data.wkObject, data.group.members, {'id': entry.user_id, 'username': entry.username}, entry)" matTooltip="Top Scrobbles of {{ entry.artist }} —  {{ entry.username }}" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
                 </td>

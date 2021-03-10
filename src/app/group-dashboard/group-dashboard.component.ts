@@ -196,13 +196,15 @@ export class GroupDashboardComponent implements OnInit {
 
   nowPlayingToWk(entry, wkArtist: HTMLElement=null) {
     let albumQuery = entry.artist + " - " + entry.album
-    let trackQuery = entry.artist + " - " + entry.track
     this.wkArtistForm.get('query').setValue(entry.artist)
     this.wkAlbumForm.get('query').setValue(albumQuery)
-    this.wkTrackForm.get('query').setValue(trackQuery)
     this.wkArtistSubmit({'query': entry.artist}, this.group.members)
     this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
-    this.wkTrackSubmit({'query': trackQuery}, this.group.members)
+    if (entry.track !== undefined) {
+      let trackQuery = entry.artist + " - " + entry.track
+      this.wkTrackForm.get('query').setValue(trackQuery)
+      this.wkTrackSubmit({'query': trackQuery}, this.group.members)
+    }
     if (wkArtist)
       wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
@@ -221,7 +223,7 @@ export class GroupDashboardComponent implements OnInit {
       this.nowPlayingToWk(entry)
     })
     let wkTopSub = dialogRef.componentInstance.wkFromTopDialog.subscribe(data => {
-      this.whoKnowsTop(data.wkMode, data.wkObject, data.users, data.selectedUser)
+      this.whoKnowsTop(data.wkMode, data.wkObject, data.selectedUser)
     })
     dialogRef.afterClosed().subscribe(() => {
       wkSub.unsubscribe()
@@ -229,8 +231,8 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  whoKnowsTop(wkMode, wkObject, users, selectedUser) {
-    this.dialog.open(WhoKnowsTopComponent, {
+  whoKnowsTop(wkMode, wkObject, selectedUser) {
+    let dialogRef = this.dialog.open(WhoKnowsTopComponent, {
       data : {
         group: this.group,
         wkMode: wkMode,
@@ -238,6 +240,12 @@ export class GroupDashboardComponent implements OnInit {
         user: this.user,
         selectedUser: selectedUser
       }
+    })
+    let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
+      this.nowPlayingToWk(entry)
+    })
+    dialogRef.afterClosed().subscribe(() => {
+      wkSub.unsubscribe()
     })
   }
 

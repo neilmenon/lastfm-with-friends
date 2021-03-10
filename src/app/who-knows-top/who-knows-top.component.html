@@ -24,6 +24,7 @@
                 <th class="table-border" *ngIf="trackMode">Track</th>
                 <th class="table-border">Album</th>
                 <th class="table-border">&nbsp;Scrobbles&nbsp;</th>
+                <th class="table-border">&nbsp;Actions&nbsp;</th>
             </tr>
         </thead>
         <tbody>
@@ -34,6 +35,9 @@
                     <td class="table-border" [class.center]="data.wkMode == 'album'"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
                 </ng-template>
                 <td class="table-border center">{{ entry.scrobbles }}</td>
+                <td class="table-border center wk-actions-dialog">
+                    <a (click)="wkTrigger(entry)" [matTooltip]="trackMode ? 'Who Knows — Artist/Album/Track' : 'Who Knows — Artist/Album'" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">help_center</mat-icon></a>
+                </td>
             </tr>
         </tbody>
     </table>
