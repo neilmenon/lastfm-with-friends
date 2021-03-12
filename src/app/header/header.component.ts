@@ -16,6 +16,7 @@ export class HeaderComponent {
   signed_in: boolean = undefined;
   user: any = undefined;
   moment: any = moment;
+  userUpdateInterval: any = 30000;
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(map(result => result.matches), shareReplay());
 
   constructor(private breakpointObserver: BreakpointObserver, private userService: UserService, public dialog: MatDialog, private messageService: MessageService) {
@@ -23,14 +24,7 @@ export class HeaderComponent {
     if (this.signed_in) {
       this.userService.getUser().toPromise().then(data => {
         this.user = data
-        setInterval(() => {
-          if (document.visibilityState == "visible") {
-            this.userService.getUser(true).toPromise().then(data => {
-              console.log("Checking for user update...")
-              this.user = data
-            })
-          }
-        }, 30000)
+        this.checkUserUpdate()
       }).catch(error => {
         if (error['status'] == 404) {
           this.userService.clearLocalData()
@@ -40,6 +34,22 @@ export class HeaderComponent {
       })
     } else {
       this.user = null;
+    }
+  }
+
+  checkUserUpdate() {
+    if (document.visibilityState == "visible") {
+      this.userService.getUser(true).toPromise().then(data => {
+        this.user = data
+        this.userUpdateInterval = this.userService.getUpdateInterval()
+        if (!this.user.last_update) {
+          this.userUpdateInterval = this.userService.setUpdateInterval(5000)
+        } else {
+          this.userUpdateInterval = this.userService.setUpdateInterval(30000)
+        }
+        console.log("Checking for user update @ interval of " + this.userUpdateInterval + " ms.")
+        window.setTimeout(() => { this.checkUserUpdate() }, this.userUpdateInterval)
+      })
     }
   }
 

@@ -10,10 +10,20 @@ export class UserService {
   username: string = localStorage.getItem("lastfm_username");
   session_key: string = localStorage.getItem("lastfm_session");
   user: Observable<any>;
+  updateInterval: any = 30000;
   constructor(private http: HttpClient, public messageService: MessageService) { }
 
   isSignedIn() {
     return (localStorage.getItem("lastfm_username") != null) && (localStorage.getItem("lastfm_session") != null);
+  }
+
+  setUpdateInterval(updateInterval:any) {
+    this.updateInterval = updateInterval
+    return this.updateInterval
+  }
+
+  getUpdateInterval() {
+    return this.updateInterval
   }
 
   clearLocalData() {

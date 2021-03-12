@@ -13,9 +13,12 @@
         <a class="refresh clickable" (click)="messageService.open('Click on an album artwork to see who else knows the release.')"><mat-icon [inline]="true">info</mat-icon></a>
         <a class="np-scrobble-history clickable" (click)="scrobbleHistory('overall', null, group.members)" matTooltip="Group Scrobble History — Overall" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
     </div>
-    <div class="now-playing-errors" *ngIf="!nowPlayingResults">
-        <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="nowPlayingResults === null"></mat-spinner>
-        <span *ngIf="nowPlayingResults === undefined">Error getting user activity data. Please refresh.</span>
+    <div class="now-playing-errors" *ngIf="!nowPlayingResults || nowPlayingTimeoutReached">
+        <span *ngIf="nowPlayingTimeoutReached; else errorBlock">Listening activity interval expired. Please refresh.</span>
+        <ng-template #errorBlock>
+            <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="nowPlayingResults === null"></mat-spinner>
+            <span *ngIf="nowPlayingResults === undefined">Error getting user activity data. Please refresh.</span>
+        </ng-template>
     </div>
     <div>
     </div>

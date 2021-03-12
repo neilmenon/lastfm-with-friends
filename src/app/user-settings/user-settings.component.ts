@@ -53,6 +53,7 @@ export class UserSettingsComponent implements OnInit {
   fullScrape() {
     if (this.confirmFullScrape) {
       this.fullScrapeInProgress = true
+      this.userService.setUpdateInterval(5000)
       this.userService.updateUser(this.user, true).toPromise().then(data => {
         this.messageService.open("Full scrape complete!")
         this.fullScrapeInProgress = false;

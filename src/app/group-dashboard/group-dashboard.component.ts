@@ -36,6 +36,7 @@ export class GroupDashboardComponent implements OnInit {
   // nowplaying
   nowPlayingResults = null;
   npInterval: any;
+  nowPlayingTimeoutReached: boolean = false;
   constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog) {
     moment.locale('en-short', {
       relativeTime: {
@@ -64,22 +65,32 @@ export class GroupDashboardComponent implements OnInit {
   @Input() user: any;
 
   ngOnInit(): void {
-      this.nowPlaying();
-      let counter = 0
-      this.npInterval = setInterval(() => {
-        if (counter > 720)  { // if open for 2 hours... that's enough
-          clearInterval(this.npInterval);
-        } else if (document.visibilityState == "visible") {
-          this.nowPlaying();
-        }
-        counter++
-      }, 10000)
-
+      this.nowPlayingStartInterval();
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState == "visible") {
-          this.nowPlaying();
+          if (this.nowPlayingTimeoutReached) { // they revisited tab, start interval again
+            this.nowPlayingTimeoutReached = false;
+            this.nowPlayingStartInterval();
+          } else {
+            this.nowPlaying();
+          }
         }
       })
+  }
+
+  nowPlayingStartInterval() {
+    this.nowPlaying()
+    let counter = 0
+    this.npInterval = setInterval(() => {
+      if (counter >= 1080)  { // if open for 3 hours (180 iters * 10 seconds)... that's enough
+        clearInterval(this.npInterval);
+        this.nowPlayingTimeoutReached = true
+        this.nowPlayingResults = []
+      } else if (document.visibilityState == "visible") {
+        this.nowPlaying();
+      }
+      counter++
+    }, 10000)
   }
 
   ngOnDestroy() {
