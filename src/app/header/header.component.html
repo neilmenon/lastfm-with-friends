@@ -56,8 +56,8 @@
                 {{ user.username }}
               </span>
               <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMMM Do, YYYY') }}</span>
-              <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles ({{ user.progress }}%)</span>
-              <span class="navbar-menu-updating" *ngIf="user.last_update && user.progress">Failed at {{ user.progress }}%, finish w/ Update</span>
+              <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles ({{ user.progress.toFixed(2) }}%)</span>
+              <span class="navbar-menu-updating" *ngIf="user.last_update && user.progress">Failed at {{ user.progress.toFixed(2) }}%, finish w/ Update</span>
               <mat-progress-bar mode="determinate" color="warn" [value]="user.progress" *ngIf="user.progress"></mat-progress-bar>
               <span class="navbar-menu-updated" *ngIf="user.last_update && !user.progress" [matTooltip]="moment(user.last_update).locale('en')" matTooltipPosition="above" matTooltipClass="tooltip">Last fetched track was played<br> {{ moment(user.last_update).locale('en').fromNow() }}</span>
             </span>

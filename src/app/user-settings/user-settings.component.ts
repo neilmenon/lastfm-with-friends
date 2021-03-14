@@ -31,11 +31,12 @@ export class UserSettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    this.userService.setRapidRefresh(true)
   }
 
   ngOnDestroy() {
     clearInterval(this.updateInterval)
+    this.userService.setRapidRefresh(false)
   }
 
   userInterval() {
@@ -44,7 +45,7 @@ export class UserSettingsComponent implements OnInit {
         this.userService.getUser(true).toPromise().then(data => {
           this.user = data
           this.fullScrapeInProgress = this.user.last_update && !this.user.progress? false : true
-          console.log("Getting user data from Settings page...")
+          console.log("Getting user data for Settings page...")
         })
       }
     }, 10000)
@@ -53,7 +54,6 @@ export class UserSettingsComponent implements OnInit {
   fullScrape() {
     if (this.confirmFullScrape) {
       this.fullScrapeInProgress = true
-      this.userService.setUpdateInterval(5000)
       this.userService.updateUser(this.user, true).toPromise().then(data => {
         this.messageService.open("Full scrape complete!")
         this.fullScrapeInProgress = false;

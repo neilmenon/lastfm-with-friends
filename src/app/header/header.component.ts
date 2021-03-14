@@ -41,15 +41,17 @@ export class HeaderComponent {
     if (document.visibilityState == "visible") {
       this.userService.getUser(true).toPromise().then(data => {
         this.user = data
-        this.userUpdateInterval = this.userService.getUpdateInterval()
-        if (!this.user.last_update) {
-          this.userUpdateInterval = this.userService.setUpdateInterval(5000)
+        if (!this.user.last_update || this.userService.isRapidRefresh()) {
+          this.userUpdateInterval = 5000
         } else {
-          this.userUpdateInterval = this.userService.setUpdateInterval(30000)
+          this.userUpdateInterval = 30000
         }
-        console.log("Checking for user update @ interval of " + this.userUpdateInterval + " ms.")
         window.setTimeout(() => { this.checkUserUpdate() }, this.userUpdateInterval)
+        console.log("Checking for user update @ interval of " + this.userUpdateInterval + " ms.")
       })
+    } else {
+      window.setTimeout(() => { this.checkUserUpdate() }, 5000)
+      console.log("[tab unfocused] Checking if tab in focus @ interval of 5000 ms.")
     }
   }
 
