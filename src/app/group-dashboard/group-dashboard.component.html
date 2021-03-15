@@ -35,7 +35,7 @@
         </div>
     </div>
 </div>
-<div class="container">
+<div class="dash-grid-container">
     <!-- wkArtist -->
     <div class="box center command-box" #wkArtist >
         <div style="position: relative;">
@@ -217,5 +217,33 @@
         <div *ngIf="!wkTrackResults && wkTrackInit" style="padding-bottom: 10px;">
             <mat-spinner diameter="25" color="accent" class="center-all"></mat-spinner>
         </div>
+    </div>
+    
+    <!-- scrobbleLeaderboard -->
+    <div class="box center command-box" #scrobbleLeaderboard >
+        <div style="position: relative;">
+            <h2 class="box-title">Scrobble Leaderboard</h2> 
+            <!-- <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a> -->
+        </div>
+        <span>Coming soon.</span>
+        
+    </div>
+    
+    <!-- placeholder -->
+    <div class="box center command-box">
+        <div style="position: relative;">
+            <h2 class="box-title">Individual & Group Charts</h2> 
+            <!-- <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a> -->
+        </div>
+        <span>Coming soon.</span>
+    </div>
+
+    <!-- placeholder -->
+    <div class="box center command-box">
+        <div style="position: relative;">
+            <h2 class="box-title">Discovery Leaderboard</h2> 
+            <!-- <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a> -->
+        </div>
+        <span>Coming soon.</span>
     </div>
 </div>

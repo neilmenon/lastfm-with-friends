@@ -1,3 +1,21 @@
 .wk-actions {
     font-size: 18px;
 }
+.dash-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+.dash-grid-container > div:not(:nth-child(3n)) {
+    margin-right: 15px;
+}
+@media screen and (max-width: 960px) {
+    .dash-grid-container {
+        display: block;
+    }
+    .dash-grid-container > div {
+        flex: none;
+    }
+    .dash-grid-container > div:not(:last-child) {
+        margin-right: 0;
+    }
+}
