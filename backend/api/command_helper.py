@@ -261,7 +261,6 @@ def wk_top(wk_mode, users, artist_id, album_id=None, track_mode=False):
     elif wk_mode == "album":
         album_tracks_list = find_album_tracks(album_id)
         sql = "SELECT albums.name as album, albums.id as album_id, track_scrobbles.track, albums.url as album_url, albums.image_url, COUNT(*) as scrobbles FROM track_scrobbles LEFT JOIN artists on artists.id = track_scrobbles.artist_id LEFT JOIN albums on albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) GROUP BY track_scrobbles.track ORDER BY scrobbles DESC".format(users_list, artist_id, album_tracks_list)
-    logger.log(sql)
     cursor.execute(sql)
     records = list(cursor)
     if not records:
@@ -272,3 +271,15 @@ def wk_top(wk_mode, users, artist_id, album_id=None, track_mode=False):
     mdb.close()
     
     return records
+
+def scrobble_leaderboard(users, start_range, end_range):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    users_list = ", ".join(str(u) for u in users)
+
+    sql = "SELECT users.username, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN users on users.user_id = track_scrobbles.user_id WHERE from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC".format(start_range, end_range, users_list)
+    cursor.execute(sql)
+    leaderboard = list(cursor)
+
+    mdb.close()
+    return {'leaderboard': leaderboard, 'start_range': start_range, 'end_range': end_range}

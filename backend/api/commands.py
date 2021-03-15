@@ -165,3 +165,20 @@ def wk_top():
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
+
+@command_api.route('/api/commands/scrobble-leaderboard', methods=['POST'])
+def leaderboard():
+    try:
+        params = request.get_json()
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            result = command_helper.scrobble_leaderboard(params['users'], params['start_range'], params['end_range'])
+            return jsonify(result)
+        else:
+            abort(401)
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)
