@@ -6,6 +6,9 @@ import { UserService } from '../user.service';
 import * as moment from 'moment';
 import { ScrobbleHistoryComponent } from '../scrobble-history/scrobble-history.component';
 import { WhoKnowsTopComponent } from '../who-knows-top/who-knows-top.component';
+import { MatSliderChange } from '@angular/material/slider';
+import { BehaviorSubject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -37,6 +40,25 @@ export class GroupDashboardComponent implements OnInit {
   nowPlayingResults = null;
   npInterval: any;
   nowPlayingTimeoutReached: boolean = false;
+
+  // scrobbleLeaderboard
+  @ViewChild('scrobbleLeaderboard', { static: true }) leaderboardDom: ElementRef;
+  leaderboardSliderMappings: any = [
+    {'label': '24 hours', 'days': 1},
+    {'label': '7 days', 'days': 7},
+    {'label': '14 days', 'days': 14},
+    {'label': '30 days', 'days': 30},
+    {'label': '60 days', 'days': 60},
+    {'label': '90 days', 'days': 90},
+    {'label': '180 days', 'days': 180},
+    {'label': '365 days', 'days': 365},
+    {'label': 'All time', 'days': -1}
+  ];
+  leaderboardSelectedIndex: number = 1; // real-time slider value
+  leaderboardLoadedIndex: number = 1; // http request-dependent value
+  leaderboardObject: any;
+  leaderboardLoading: boolean = true;
+  valueSubject = new BehaviorSubject<number>(1);
   constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog) {
     moment.locale('en-short', {
       relativeTime: {
@@ -74,6 +96,15 @@ export class GroupDashboardComponent implements OnInit {
           } else {
             this.nowPlaying();
           }
+        }
+      })
+      this.valueSubject.pipe(debounceTime(1000)).subscribe(value => {
+        if (value == this.leaderboardSliderMappings.length-1) { // All time
+          this.scrobbleLeaderboard(value, this.group.members.map(u => u.id))
+        } else {
+          let endRange = moment.utc()
+          let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
+          this.scrobbleLeaderboard(value, this.group.members.map(u => u.id), startRange, endRange)
         }
       })
   }
@@ -258,6 +289,29 @@ export class GroupDashboardComponent implements OnInit {
     dialogRef.afterClosed().subscribe(() => {
       wkSub.unsubscribe()
     })
+  }
+
+  scrobbleLeaderboard(indexValue, users, startRange=null, endRange=null) {
+    this.userService.scrobbleLeaderboard(users, startRange, endRange).toPromise().then(data => {
+      this.leaderboardLoadedIndex = indexValue;
+      this.leaderboardObject = data
+      this.leaderboardLoading = false
+      this.leaderboardDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.leaderboardObject.leaderboard[0]['profile_image']+')'
+      this.leaderboardDom.nativeElement.style.backgroundPosition = 'center'
+      this.leaderboardDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+      this.leaderboardDom.nativeElement.style.backgroundSize = 'cover'
+    }).catch(error => {
+      this.messageService.open("There was an issue getting the scrobble leaderboard. Please try again")
+      console.log(error)
+      this.leaderboardLoading = false
+      this.leaderboardLoadedIndex = indexValue;
+    })
+  }
+
+  onleaderboardSliderChange(event: MatSliderChange) {
+    this.leaderboardLoading = true;
+    this.leaderboardSelectedIndex = event.value
+    this.valueSubject.next(event.value);
   }
 
 }

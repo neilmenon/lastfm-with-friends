@@ -98,6 +98,19 @@ hr {
 .refresh {
     right: -10px;
 }
+.left-cmd-buttons {
+    position: absolute;
+    font-size: 21px;
+    top: -10px;
+    left: -10px;
+}
+.left-cmd-buttons > span {
+    font-size: 13px;
+    line-height: 20.5px;
+    position: absolute;
+    white-space: nowrap;
+    left: 24px;
+}
 .np-scrobble-history {
     right: 14px;
 }
@@ -347,6 +360,12 @@ div.history-options-container > mat-paginator {
 .mat-select-panel .mat-option:not(.mat-option-multiple), .mat-select-panel .mat-option.mat-selected:not(.mat-option-multiple) {
     background: #333;
 }
+
+.mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
+    border-color: transparent!important;
+    background-color: #b0bec5!important;
+}
+
 /* SCROLLBARS */
 .wk-actions-dialog {
     font-size: 18px;

@@ -82,7 +82,7 @@
                     <tr *ngFor="let entry of wkArtistResults.users; let i = index">
                         <td>{{ i+1 }}</td>
                         <td>{{ entry.username }}</td>
-                        <td>{{ entry.scrobbles }}</td>
+                        <td>{{ entry.scrobbles | number }}</td>
                         <td>{{ entry.percent }}</td>
                         <td class="wk-actions">
                             <a (click)="whoKnowsTop('artist', wkArtistResults, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
@@ -143,7 +143,7 @@
                     <tr *ngFor="let entry of wkAlbumResults.users; let i = index">
                         <td>{{ i+1 }}</td>
                         <td>{{ entry.username }}</td>
-                        <td>{{ entry.scrobbles }}</td>
+                        <td>{{ entry.scrobbles | number }}</td>
                         <td>{{ entry.percent }}</td>
                         <td class="wk-actions">
                             <a (click)="whoKnowsTop('album', wkAlbumResults, entry)" matTooltip="Top Scrobbles — Album" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
@@ -204,7 +204,7 @@
                     <tr *ngFor="let entry of wkTrackResults.users; let i = index">
                         <td>{{ i+1 }}</td>
                         <td>{{ entry.username }}</td>
-                        <td>{{ entry.scrobbles }}</td>
+                        <td>{{ entry.scrobbles | number }}</td>
                         <td>{{ entry.percent }}</td>
                         <td class="wk-actions">
                             <a (click)="whoKnowsTop('artist', wkTrackResults, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
@@ -223,9 +223,43 @@
     <div class="box center command-box" #scrobbleLeaderboard >
         <div style="position: relative;">
             <h2 class="box-title">Scrobble Leaderboard</h2> 
-            <!-- <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a> -->
+            <div class="left-cmd-buttons">
+                <mat-icon [inline]="true">access_time</mat-icon>
+                <span>{{ leaderboardSliderMappings[leaderboardSelectedIndex].label }}</span>
+            </div>
+            <div class="refresh">
+                <mat-spinner *ngIf="leaderboardLoading" style="right: 26px;" diameter="19" color="accent"></mat-spinner>
+            </div>
+            <a class="refresh clickable" matTooltip="Custom Date Range — Coming Soon!" matTooltipPosition="above"><mat-icon [inline]="true">date_range</mat-icon></a>
         </div>
-        <span>Coming soon.</span>
+        <div>
+            <mat-slider invert [max]="leaderboardSliderMappings.length-1" (input)="onleaderboardSliderChange($event)" [value]="leaderboardSelectedIndex" style="width: 100%;"></mat-slider>
+        </div>
+        <div class="command-result" *ngIf="leaderboardObject">
+            <div class="command-result-summary">
+                <a href="https://www.last.fm/user/{{ leaderboardObject.leaderboard[0].username }}" target="_blank">
+                    {{ leaderboardObject.leaderboard[0].username }}<br>
+                </a>
+                <span *ngIf="leaderboardLoadedIndex != leaderboardSliderMappings.length-1">{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks in the last <span style="text-decoration: underline;">{{ leaderboardSliderMappings[leaderboardLoadedIndex].label }}</span>!</span>
+                <span *ngIf="leaderboardLoadedIndex == leaderboardSliderMappings.length-1">{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks <span style="text-decoration: underline;">overall</span>!</span>
+            </div>
+            <table class="results-table" *ngIf="leaderboardObject.leaderboard">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th>Scrobbles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let entry of leaderboardObject.leaderboard; let i = index">
+                        <td>{{ i+1 }}</td>
+                        <td>{{ entry.username }}</td>
+                        <td>{{ entry.scrobbles | number }}</td>                    
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         
     </div>
     

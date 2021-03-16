@@ -175,4 +175,14 @@ export class UserService {
     }
     return this.http.post(config.api_root + "/commands/wktop", payload)
   }
+
+  scrobbleLeaderboard(users, startRange, endRange) {
+    return this.http.post(config.api_root + "/commands/scrobble-leaderboard", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'users': users,
+      'start_range': startRange,
+      'end_range': endRange
+    })
+  }
 }
