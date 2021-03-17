@@ -305,7 +305,7 @@ export class GroupDashboardComponent implements OnInit {
       endFinal = endRange
     }
     this.userService.scrobbleLeaderboard(users, startFinal, endFinal).toPromise().then(data => {
-      this.leaderboardLoadedIndex = indexValue ? indexValue : this.leaderboardLoadedIndex;
+      this.leaderboardLoadedIndex = indexValue !== null ? indexValue : this.leaderboardLoadedIndex;
       this.leaderboardObject = data
       this.leaderboardLoading = false
       if (this.leaderboardObject.leaderboard.length > 0) {
@@ -325,7 +325,7 @@ export class GroupDashboardComponent implements OnInit {
       this.messageService.open("There was an issue getting the scrobble leaderboard. Please try again")
       console.log(error)
       this.leaderboardLoading = false
-      this.leaderboardLoadedIndex = indexValue ? indexValue : this.leaderboardLoadedIndex;
+      this.leaderboardLoadedIndex = indexValue !== null ? indexValue : this.leaderboardLoadedIndex;
     })
   }
 
