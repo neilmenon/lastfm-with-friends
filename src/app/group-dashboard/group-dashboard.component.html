@@ -225,25 +225,31 @@
             <h2 class="box-title">Scrobble Leaderboard</h2> 
             <div class="left-cmd-buttons">
                 <mat-icon [inline]="true">access_time</mat-icon>
-                <span>{{ leaderboardSliderMappings[leaderboardSelectedIndex].label }}</span>
+                <span *ngIf="!isCustomDateRange">{{ leaderboardSliderMappings[leaderboardSelectedIndex].label }}</span>
+                <span *ngIf="isCustomDateRange">{{ customStartDate.format('MM/DD/YY') }} - {{ customEndDate.format('MM/DD/YY') }}</span>
             </div>
             <div class="refresh">
                 <mat-spinner *ngIf="leaderboardLoading" style="right: 26px;" diameter="19" color="accent"></mat-spinner>
             </div>
-            <a class="refresh clickable" matTooltip="Custom Date Range — Coming Soon!" matTooltipPosition="above"><mat-icon [inline]="true">date_range</mat-icon></a>
+            <a class="refresh clickable" matTooltip="Custom Date Range — Coming Soon!" matTooltipPosition="above" (click)="customDateRange()"><mat-icon [inline]="true">date_range</mat-icon></a>
         </div>
         <div>
             <mat-slider invert [max]="leaderboardSliderMappings.length-1" (input)="onleaderboardSliderChange($event)" [value]="leaderboardSelectedIndex" style="width: 100%;"></mat-slider>
         </div>
         <div class="command-result" *ngIf="leaderboardObject">
-            <div class="command-result-summary">
+            <div class="command-result-summary" *ngIf="leaderboardObject.leaderboard.length > 0">
                 <a href="https://www.last.fm/user/{{ leaderboardObject.leaderboard[0].username }}" target="_blank">
                     {{ leaderboardObject.leaderboard[0].username }}<br>
                 </a>
-                <span *ngIf="leaderboardLoadedIndex != leaderboardSliderMappings.length-1">{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks in the last <span style="text-decoration: underline;">{{ leaderboardSliderMappings[leaderboardLoadedIndex].label }}</span>!</span>
-                <span *ngIf="leaderboardLoadedIndex == leaderboardSliderMappings.length-1">{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks <span style="text-decoration: underline;">overall</span>!</span>
+                <div *ngIf="!isCustomDateRange; else customText">
+                    <span *ngIf="leaderboardLoadedIndex != leaderboardSliderMappings.length-1">{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks in the last <span style="text-decoration: underline;">{{ leaderboardSliderMappings[leaderboardLoadedIndex].label }}</span>!</span>
+                    <span *ngIf="leaderboardLoadedIndex == leaderboardSliderMappings.length-1">{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks <span style="text-decoration: underline;">overall</span>!</span>
+                </div>
+                <ng-template #customText>
+                    <span>{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks between <span style="text-decoration: underline;">{{ customStartDate.format('MM/DD/YY') }}</span> and <span style="text-decoration: underline;">{{ customEndDate.format('MM/DD/YY') }}</span>!</span>
+                </ng-template>
             </div>
-            <table class="results-table" *ngIf="leaderboardObject.leaderboard">
+            <table class="results-table" *ngIf="leaderboardObject.leaderboard.length > 0; else noScrobbles">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -259,6 +265,9 @@
                     </tr>
                 </tbody>
             </table>
+            <ng-template #noScrobbles>
+                No one has scrobbled any tracks in this time period.
+            </ng-template>
         </div>
         
     </div>
@@ -267,7 +276,6 @@
     <div class="box center command-box">
         <div style="position: relative;">
             <h2 class="box-title">Individual & Group Charts</h2> 
-            <!-- <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a> -->
         </div>
         <span>Coming soon.</span>
     </div>
@@ -276,7 +284,6 @@
     <div class="box center command-box">
         <div style="position: relative;">
             <h2 class="box-title">Discovery Leaderboard</h2> 
-            <!-- <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a> -->
         </div>
         <span>Coming soon.</span>
     </div>

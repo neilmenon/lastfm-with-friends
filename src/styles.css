@@ -361,6 +361,11 @@ div.history-options-container > mat-paginator {
     background: #333;
 }
 
+.mat-datepicker-content {
+    background-image: url(/assets/img/background.svg);
+    background-color: #222222;
+}
+
 .mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
     border-color: transparent!important;
     background-color: #b0bec5!important;

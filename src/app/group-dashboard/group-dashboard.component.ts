@@ -9,6 +9,7 @@ import { WhoKnowsTopComponent } from '../who-knows-top/who-knows-top.component';
 import { MatSliderChange } from '@angular/material/slider';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { CustomDateRangeComponent } from '../custom-date-range/custom-date-range.component';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -59,6 +60,9 @@ export class GroupDashboardComponent implements OnInit {
   leaderboardObject: any;
   leaderboardLoading: boolean = true;
   valueSubject = new BehaviorSubject<number>(1);
+  customStartDate: moment.Moment;
+  customEndDate: moment.Moment;
+  isCustomDateRange: boolean = false;
   constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog) {
     moment.locale('en-short', {
       relativeTime: {
@@ -291,27 +295,60 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  scrobbleLeaderboard(indexValue, users, startRange=null, endRange=null) {
-    this.userService.scrobbleLeaderboard(users, startRange, endRange).toPromise().then(data => {
-      this.leaderboardLoadedIndex = indexValue;
+  scrobbleLeaderboard(indexValue, users, startRange=null, endRange=null, custom:boolean=false) {
+    let startFinal, endFinal
+    if (custom) {
+      startFinal = startRange.format()
+      endFinal = endRange.format()
+    } else {
+      startFinal = startRange
+      endFinal = endRange
+    }
+    this.userService.scrobbleLeaderboard(users, startFinal, endFinal).toPromise().then(data => {
+      this.leaderboardLoadedIndex = indexValue ? indexValue : this.leaderboardLoadedIndex;
       this.leaderboardObject = data
       this.leaderboardLoading = false
-      this.leaderboardDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.leaderboardObject.leaderboard[0]['profile_image']+')'
-      this.leaderboardDom.nativeElement.style.backgroundPosition = 'center'
-      this.leaderboardDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-      this.leaderboardDom.nativeElement.style.backgroundSize = 'cover'
+      if (this.leaderboardObject.leaderboard.length > 0) {
+        this.leaderboardDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.leaderboardObject.leaderboard[0]['profile_image']+')'
+        this.leaderboardDom.nativeElement.style.backgroundPosition = 'center'
+        this.leaderboardDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+        this.leaderboardDom.nativeElement.style.backgroundSize = 'cover'
+      } else {
+        this.leaderboardDom.nativeElement.style.backgroundImage = 'none'
+      }
+      if (custom) {
+        this.isCustomDateRange = true
+        this.customStartDate = startRange
+        this.customEndDate = endRange
+      }
     }).catch(error => {
       this.messageService.open("There was an issue getting the scrobble leaderboard. Please try again")
       console.log(error)
       this.leaderboardLoading = false
-      this.leaderboardLoadedIndex = indexValue;
+      this.leaderboardLoadedIndex = indexValue ? indexValue : this.leaderboardLoadedIndex;
     })
   }
 
   onleaderboardSliderChange(event: MatSliderChange) {
     this.leaderboardLoading = true;
     this.leaderboardSelectedIndex = event.value
+    this.isCustomDateRange = false;
     this.valueSubject.next(event.value);
+  }
+
+  customDateRange() {
+    let dialogRef = this.dialog.open(CustomDateRangeComponent, {
+      data: {
+        'title': 'Scrobble Leaderboard'
+      }
+    })
+    let dateSub = dialogRef.componentInstance.submitDateRange.subscribe((data) => {
+      this.leaderboardLoading = true
+      this.scrobbleLeaderboard(null, this.group.members.map(u => u.id), data.startDate, data.endDate, true)
+    })
+    dialogRef.afterClosed().subscribe(() => {
+      dateSub.unsubscribe()
+    })
   }
 
 }

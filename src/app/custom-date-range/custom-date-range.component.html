@@ -1,0 +1,13 @@
+<div class="center">
+    <h3 mat-dialog-title>Custom Date Range for <u>{{ data.title }}</u></h3>
+    
+    <mat-form-field appearance="fill" color="accent">
+        <mat-label>Enter a date range</mat-label>
+        <mat-date-range-input [rangePicker]="picker">
+          <input matStartDate placeholder="Start date" (dateChange)="onDateChange($event, 'start')">
+          <input matEndDate placeholder="End date" (dateChange)="onDateChange($event, 'end')">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+</div>

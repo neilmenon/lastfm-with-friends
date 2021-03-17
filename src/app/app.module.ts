@@ -25,6 +25,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { LastfmauthComponent } from './lastfmauth/lastfmauth.component';
 import { HomeComponent } from './home/home.component';
 import { MessagesComponent } from './messages/messages.component';
@@ -39,6 +41,7 @@ import { EditGroupComponent } from './edit-group/edit-group.component';
 import { ScrobbleHistoryComponent } from './scrobble-history/scrobble-history.component';
 import { UserSettingsComponent } from './user-settings/user-settings.component';
 import { WhoKnowsTopComponent } from './who-knows-top/who-knows-top.component';
+import { CustomDateRangeComponent } from './custom-date-range/custom-date-range.component';
 
 @NgModule({
   declarations: [
@@ -56,6 +59,7 @@ import { WhoKnowsTopComponent } from './who-knows-top/who-knows-top.component';
     ScrobbleHistoryComponent,
     UserSettingsComponent,
     WhoKnowsTopComponent,
+    CustomDateRangeComponent,
   ],
   imports: [
     BrowserModule,
@@ -81,6 +85,8 @@ import { WhoKnowsTopComponent } from './who-knows-top/who-knows-top.component';
     MatSelectModule,
     MatPaginatorModule,
     FormsModule,
+    MatDatepickerModule,
+    MatMomentDateModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},
