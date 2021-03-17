@@ -231,7 +231,7 @@
             <div class="refresh">
                 <mat-spinner *ngIf="leaderboardLoading" style="right: 26px;" diameter="19" color="accent"></mat-spinner>
             </div>
-            <a class="refresh clickable" matTooltip="Custom Date Range — Coming Soon!" matTooltipPosition="above" (click)="customDateRange()"><mat-icon [inline]="true">date_range</mat-icon></a>
+            <a class="refresh clickable" matTooltip="Custom Date Range" matTooltipPosition="above" (click)="customDateRange()"><mat-icon [inline]="true">date_range</mat-icon></a>
         </div>
         <div>
             <mat-slider invert [max]="leaderboardSliderMappings.length-1" (input)="onleaderboardSliderChange($event)" [value]="leaderboardSelectedIndex" style="width: 100%;"></mat-slider>
