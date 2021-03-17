@@ -246,7 +246,7 @@
                     <span *ngIf="leaderboardLoadedIndex == leaderboardSliderMappings.length-1">{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks <span style="text-decoration: underline;">overall</span>!</span>
                 </div>
                 <ng-template #customText>
-                    <span>{{ leaderboardObject.leaderboard[0].username }} has scrobbled the most tracks between <span style="text-decoration: underline;">{{ customStartDate.format('MM/DD/YY') }}</span> and <span style="text-decoration: underline;">{{ customEndDate.format('MM/DD/YY') }}</span>!</span>
+                    <span>{{ leaderboardObject.leaderboard[0].username }} scrobbled the most tracks between <span style="text-decoration: underline;">{{ customStartDate.format('MM/DD/YY') }}</span> and <span style="text-decoration: underline;">{{ customEndDate.format('MM/DD/YY') }}</span>!</span>
                 </ng-template>
             </div>
             <table class="results-table" *ngIf="leaderboardObject.leaderboard.length > 0; else noScrobbles">
@@ -266,7 +266,7 @@
                 </tbody>
             </table>
             <ng-template #noScrobbles>
-                No one has scrobbled any tracks in this time period.
+                No one scrobbled any tracks in this time period.
             </ng-template>
         </div>
         
