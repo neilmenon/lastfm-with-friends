@@ -1,33 +1,37 @@
 <div class="box center">
-    <div *ngIf="group">
-        <h2>{{ group.name }}</h2>
-        <div *ngIf="group.owner == user.username && deleteConfirmed" style="padding-bottom: 15px;">
-            <button color="primary" mat-raised-button (click)="deleteGroup()">Confirm Delete</button>
-        </div>
-        <p><strong>Description: </strong>{{ group.description }}</p>
-        <p><strong>Join Code: </strong>{{ group.join_code }}</p>
-        <strong>Members ({{ group.users.length }}): </strong><br><br>
-        <div class="container" style="flex-wrap: wrap;">
-            <div *ngFor="let u of group.users">
-                <img src="{{ u.profile_image }}" width="100px" style="border-radius: 50%;border: 2px solid;"><br>
-                <a href="https://last.fm/user/{{ u.username }}" target="_blank">{{ u.username }}</a> <i class="fa fa-star" style="color: #e9c267;" matTooltip="Owner" matTooltipPosition="above" *ngIf="u.username == group.owner"></i><br>
-                <span title="{{ moment(u.joined).locale('en') }}">Joined {{ moment(u.joined).locale('en').format('MM/DD/YYYY') }}</span><br>
-                {{ u.scrobbles | number }} scrobbles<br><br>
+    <div *ngIf="group && user; else loading">
+        <div>
+            <h2>{{ group.name }}</h2>
+            <div *ngIf="group.owner == user.username && deleteConfirmed" style="padding-bottom: 15px;">
+                <button color="primary" mat-raised-button (click)="deleteGroup()">Confirm Delete</button>
+            </div>
+            <p><strong>Description: </strong>{{ group.description }}</p>
+            <p><strong>Join Code: </strong>{{ group.join_code }}</p>
+            <strong>Members ({{ group.users.length }}): </strong><br><br>
+            <div class="container" style="flex-wrap: wrap;">
+                <div *ngFor="let u of group.users">
+                    <img src="{{ u.profile_image }}" width="100px" style="border-radius: 50%;border: 2px solid;"><br>
+                    <a href="https://last.fm/user/{{ u.username }}" target="_blank">{{ u.username }}</a> <i class="fa fa-star" style="color: #e9c267;" matTooltip="Owner" matTooltipPosition="above" *ngIf="u.username == group.owner"></i><br>
+                    <span title="{{ moment(u.joined).locale('en') }}">Joined {{ moment(u.joined).locale('en').format('MM/DD/YYYY') }}</span><br>
+                    {{ u.scrobbles | number }} scrobbles<br><br>
+                </div>
+            </div>
+            <div class="group-actions">
+                <div><button color="accent" mat-raised-button [routerLink]="['']">Visit Dashboard</button></div>
+                <div *ngIf="group.owner !== user.username">
+                    <button color="accent" mat-raised-button (click)="leaveGroup()">Leave Group</button>
+                </div>
+                <div *ngIf="group.owner == user.username && !deleteConfirmed">
+                    <button color="primary" mat-raised-button (click)="deleteGroup()">Delete Group</button>
+                </div>
             </div>
         </div>
-        <div class="group-actions">
-            <div><button color="accent" mat-raised-button [routerLink]="['']">Visit Dashboard</button></div>
-            <div *ngIf="group.owner !== user.username">
-                <button color="accent" mat-raised-button (click)="leaveGroup()">Leave Group</button>
-            </div>
-            <div *ngIf="group.owner == user.username && !deleteConfirmed">
-                <button color="primary" mat-raised-button (click)="deleteGroup()">Delete Group</button>
-            </div>
+        <div *ngIf="group.owner == user.username">
+            <hr style="width: 75%;">
+            <app-edit-group [user]="user" [group]="group" (onGroupChange)="reflectChanges($event)"></app-edit-group>
         </div>
     </div>
-    <div *ngIf="group.owner == user.username">
-        <hr style="width: 75%;">
-        <app-edit-group [user]="user" [group]="group" (onGroupChange)="reflectChanges($event)"></app-edit-group>
-    </div>
-    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="!group" style="padding-bottom: 10px;"></mat-spinner>
+    <ng-template #loading>
+        <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="!group" style="padding-bottom: 10px;"></mat-spinner>
+    </ng-template>
 </div>

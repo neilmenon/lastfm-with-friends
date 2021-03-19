@@ -40,7 +40,7 @@
     <div class="box center command-box" #wkArtist >
         <div style="position: relative;">
             <h2 class="box-title">Who Knows This Artist</h2> 
-            <a class="refresh clickable" *ngIf="wkArtistResults" (click)="scrobbleHistory('artist', wkArtistResults, group.members)" matTooltip="Group Scrobble History — Artist" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" *ngIf="wkArtistResults && wkArtistResults.users.length > 0" (click)="scrobbleHistory('artist', wkArtistResults, group.members)" matTooltip="Group Scrobble History — Artist" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
         </div>
         <div class="container">
             <form [formGroup]="wkArtistForm" class="box-form" (ngSubmit)="wkArtistSubmit(wkArtistForm.value, group.members)">
@@ -67,8 +67,9 @@
                 <span *ngIf="wkArtistResults.users.length == 1">
                     Only {{ wkArtistResults.users[0].username }} knows {{ wkArtistResults.artist.name }} in {{ group.name  }}!
                 </span>
+                <span *ngIf="wkArtistResults.users.length == 0">No one knows {{ wkArtistResults.artist.name }} in {{ group.name }}.</span>
             </div>
-            <table class="results-table" >
+            <table class="results-table" *ngIf="wkArtistResults.users.length > 0">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -101,7 +102,7 @@
     <div class="box center command-box" #wkAlbum >
         <div style="position: relative;">
             <h2 class="box-title">Who Knows This Album</h2> 
-            <a class="refresh clickable" *ngIf="wkAlbumResults" (click)="scrobbleHistory('album', wkAlbumResults, group.members)" matTooltip="Group Scrobble History — Album" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" *ngIf="wkAlbumResults && wkAlbumResults.users.length > 0" (click)="scrobbleHistory('album', wkAlbumResults, group.members)" matTooltip="Group Scrobble History — Album" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
         </div>
         <div class="container">
             <form [formGroup]="wkAlbumForm" class="box-form" (ngSubmit)="wkAlbumSubmit(wkAlbumForm.value, group.members)">
@@ -128,8 +129,9 @@
                 <span *ngIf="wkAlbumResults.users.length == 1">
                     Only {{ wkAlbumResults.users[0].username }} knows {{ wkAlbumResults.album.name }} in {{ group.name  }}!
                 </span>
+                <span *ngIf="wkAlbumResults.users.length == 0">No one knows {{ wkAlbumResults.artist.name }} - {{ wkAlbumResults.album.name }} in {{ group.name }}.</span>
             </div>
-            <table class="results-table" >
+            <table class="results-table" *ngIf="wkAlbumResults.users.length > 0">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -162,7 +164,7 @@
     <div class="box center command-box" #wkTrack >
         <div style="position: relative;">
             <h2 class="box-title">Who Knows This Track</h2> 
-            <a class="refresh clickable" *ngIf="wkTrackResults" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" *ngIf="wkTrackResults && wkTrackResults.users.length > 0" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
         </div>
         <div class="container">
             <form [formGroup]="wkTrackForm" class="box-form" (ngSubmit)="wkTrackSubmit(wkTrackForm.value, group.members)">
@@ -189,6 +191,7 @@
                 <span *ngIf="wkTrackResults.users.length == 1">
                     Only {{ wkTrackResults.users[0].username }} knows {{ wkTrackResults.track.name }} in {{ group.name  }}!
                 </span>
+                <span *ngIf="wkTrackResults.users.length == 0">No one knows {{ wkTrackResults.artist.name }} - {{ wkTrackResults.track.name }} in {{ group.name }}.</span>
             </div>
             <table class="results-table" >
                 <thead>
