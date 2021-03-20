@@ -8,12 +8,15 @@ from . import api_logger as logger
 
 cfg = config.config
 
-def find_artist(query):
+def find_artist(query, skip_sanitize=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     fallback = False
     # find artist in the database
-    sanitized_query = sql_helper.sanitize_query(query)
+    if not skip_sanitize:
+        sanitized_query = sql_helper.sanitize_query(query)
+    else:
+        sanitized_query = query
     sql = "SELECT * from artists WHERE UPPER({}) = UPPER('{}')".format(sql_helper.sanitize_db_field("name"), sanitized_query)
     cursor.execute(sql)
     result = list(cursor)
@@ -290,3 +293,51 @@ def scrobble_leaderboard(users, start_range, end_range):
 
     mdb.close()
     return {'leaderboard': leaderboard, 'start_range': start_range, 'end_range': end_range}
+
+def wk_autocomplete(wk_mode, query):
+    if len(query.strip()) < 2:
+        return []
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+
+    sanitized_query = sql_helper.sanitize_query(query)
+
+    if wk_mode == "artist":
+        sql = "SELECT name from artists WHERE {} LIKE '%{}%' LIMIT 10".format(sql_helper.sanitize_db_field("name"), sanitized_query)
+        cursor.execute(sql)
+        artists = list(cursor)
+        suggestions = [r["name"] for r in artists]
+    else: # album or track
+        release_query = ""
+        typing_release = True
+        try:
+            artist_query = sanitized_query.strip().split(" - ", 1)[0].strip()
+            release_query = sanitized_query.strip().split(" - ", 1)[1].strip()
+        except IndexError: # means the user is still typing the artist's name
+            typing_release = False
+        if typing_release:
+            if release_query:
+                valid_artist = find_artist(artist_query, skip_sanitize=True)
+                if valid_artist:
+                    if wk_mode == "album":
+                        sql = "SELECT name from albums WHERE artist_name = '{}' AND {} LIKE '%{}%' LIMIT 10".format(sql_helper.esc_db(valid_artist['name']), sql_helper.sanitize_db_field("name"), sql_helper.esc_db(release_query))
+                        cursor.execute(sql)
+                        albums = list(cursor)
+                        suggestions = [valid_artist['name'] + " - " + a['name'] for a in albums]
+                    else: # track
+                        sql = "SELECT DISTINCT track as name FROM track_scrobbles WHERE artist_id = {} AND {} LIKE '%{}%' LIMIT 10".format(valid_artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(release_query))
+                        cursor.execute(sql)
+                        tracks = list(cursor)
+                        suggestions = [valid_artist['name'] + " - " + t['name'] for t in tracks]
+                else:
+                    suggestions = []
+            else:
+                suggestions = []
+        else:
+            sql = "SELECT name from artists WHERE {} LIKE '%{}%' LIMIT 10".format(sql_helper.sanitize_db_field("name"), sanitized_query)
+            cursor.execute(sql)
+            artists = list(cursor)
+            suggestions = [r["name"] for r in artists]
+    
+    mdb.close()
+    return suggestions
