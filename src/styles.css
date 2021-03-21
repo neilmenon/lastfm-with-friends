@@ -130,6 +130,7 @@ hr {
 .box-button {
     margin-top: 7px;
     margin-left: 7px;
+    display: none;
 }
 .box-form {
     display: inherit;
@@ -369,6 +370,18 @@ div.history-options-container > mat-paginator {
 .mat-slider-min-value:not(.mat-slider-thumb-label-showing) .mat-slider-thumb {
     border-color: transparent!important;
     background-color: #b0bec5!important;
+}
+.mat-autocomplete-panel {
+    background-image: url(/assets/img/background.svg);
+    background-color: #222222;
+}
+.mat-autocomplete-panel > mat-option {
+    height: 32px;
+    font-size: 13px;
+}
+.mat-autocomplete-panel .mat-option.mat-selected:not(.mat-active):not(:hover) {
+    background: transparent;
+    color: darkseagreen!important;
 }
 
 /* SCROLLBARS */

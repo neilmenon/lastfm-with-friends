@@ -27,6 +27,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { LastfmauthComponent } from './lastfmauth/lastfmauth.component';
 import { HomeComponent } from './home/home.component';
 import { MessagesComponent } from './messages/messages.component';
@@ -87,6 +88,7 @@ import { CustomDateRangeComponent } from './custom-date-range/custom-date-range.
     FormsModule,
     MatDatepickerModule,
     MatMomentDateModule,
+    MatAutocompleteModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},

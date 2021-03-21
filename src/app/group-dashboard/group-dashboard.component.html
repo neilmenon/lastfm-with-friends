@@ -45,7 +45,10 @@
         <div class="container">
             <form [formGroup]="wkArtistForm" class="box-form" (ngSubmit)="wkArtistSubmit(wkArtistForm.value, group.members)">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
-                    <input matInput name="name" placeholder="Foals, Coldplay, etc." type="text" formControlName="query">
+                    <input matInput name="name" placeholder="Coldplay, etc." type="text" formControlName="query" [matAutocomplete]="wkArtistAuto" (ngModelChange)="wkAutocomplete('artist', $event)">
+                    <mat-autocomplete #wkArtistAuto="matAutocomplete" (optionSelected)="wkArtistSubmit({'query': $event.option.value}, group.members)">
+                        <mat-option *ngFor="let s of wkArtistSuggestions.suggestions" [value]="s">{{ s }}</mat-option>
+                    </mat-autocomplete>
                 </mat-form-field>
                 <div class="box-button">
                     <button color="accent" mat-raised-button type="submit"><mat-icon>search</mat-icon></button>
@@ -62,7 +65,7 @@
                         wkArtistResults.users.length == wkArtistResults.total_users ? 
                         "Everyone knows " +  wkArtistResults.artist.name + " in " + group.name 
                         : wkArtistResults.users.length + " out of " + wkArtistResults.total_users + " users know " + wkArtistResults.artist.name  + " in " + group.name
-                    }}, for a total of {{ wkArtistResults.total_scrobbles }} scrobbles.
+                    }}, for a total of {{ wkArtistResults.total_scrobbles | number }} scrobbles.
                 </span>
                 <span *ngIf="wkArtistResults.users.length == 1">
                     Only {{ wkArtistResults.users[0].username }} knows {{ wkArtistResults.artist.name }} in {{ group.name  }}!
@@ -107,7 +110,10 @@
         <div class="container">
             <form [formGroup]="wkAlbumForm" class="box-form" (ngSubmit)="wkAlbumSubmit(wkAlbumForm.value, group.members)">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
-                    <input matInput name="name" placeholder="Foals - Holy Fire, Coldplay - Mylo Xyloto, etc." type="text" formControlName="query">
+                    <input #wkAlbumInput matInput name="name" placeholder="Coldplay - Mylo Xyloto, etc." type="text" formControlName="query" [matAutocomplete]="wkAlbumAuto" (ngModelChange)="wkAutocomplete('album', $event)">
+                    <mat-autocomplete #wkAlbumAuto="matAutocomplete" (optionSelected)="wkAlbumSubmit({'query': $event.option.value}, group.members, wkAlbumSuggestions.partial_result)">
+                        <mat-option *ngFor="let s of wkAlbumSuggestions.suggestions" [value]="s" >{{ wkAlbumSuggestions.partial_result ? s.replace(' - ', '') : s }}</mat-option>
+                    </mat-autocomplete>
                 </mat-form-field>
                 <div class="box-button">
                     <button color="accent" mat-raised-button type="submit"><mat-icon>search</mat-icon></button>
@@ -124,7 +130,7 @@
                         wkAlbumResults.users.length == wkAlbumResults.total_users ? 
                         "Everyone knows " +  wkAlbumResults.album.name + " in " + group.name 
                         : wkAlbumResults.users.length + " out of " + wkAlbumResults.total_users + " users know " + wkAlbumResults.album.name  + " in " + group.name
-                    }}, for a total of {{ wkAlbumResults.total_scrobbles }} scrobbles.
+                    }}, for a total of {{ wkAlbumResults.total_scrobbles | number }} scrobbles.
                 </span>
                 <span *ngIf="wkAlbumResults.users.length == 1">
                     Only {{ wkAlbumResults.users[0].username }} knows {{ wkAlbumResults.album.name }} in {{ group.name  }}!
@@ -169,7 +175,10 @@
         <div class="container">
             <form [formGroup]="wkTrackForm" class="box-form" (ngSubmit)="wkTrackSubmit(wkTrackForm.value, group.members)">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
-                    <input matInput name="name" placeholder="Foals - Black Gold, Coldplay - Viva La Vida, etc." type="text" formControlName="query">
+                    <input #wkTrackInput matInput name="name" placeholder="Coldplay - Paradise, etc." type="text" formControlName="query" [matAutocomplete]="wkTrackAuto" (ngModelChange)="wkAutocomplete('track', $event)">
+                    <mat-autocomplete #wkTrackAuto="matAutocomplete" (optionSelected)="wkTrackSubmit({'query': $event.option.value}, group.members, wkTrackSuggestions.partial_result)">
+                        <mat-option *ngFor="let s of wkTrackSuggestions.suggestions" [value]="s">{{ wkTrackSuggestions.partial_result ? s.replace(' - ', '') : s }}</mat-option>
+                    </mat-autocomplete>
                 </mat-form-field>
                 <div class="box-button">
                     <button color="accent" mat-raised-button type="submit"><mat-icon>search</mat-icon></button>
@@ -186,7 +195,7 @@
                         wkTrackResults.users.length == wkTrackResults.total_users ? 
                         "Everyone knows " +  wkTrackResults.track.name + " in " + group.name 
                         : wkTrackResults.users.length + " out of " + wkTrackResults.total_users + " users know " + wkTrackResults.track.name  + " in " + group.name
-                    }}, for a total of {{ wkTrackResults.total_scrobbles }} scrobbles.
+                    }}, for a total of {{ wkTrackResults.total_scrobbles | number }} scrobbles.
                 </span>
                 <span *ngIf="wkTrackResults.users.length == 1">
                     Only {{ wkTrackResults.users[0].username }} knows {{ wkTrackResults.track.name }} in {{ group.name  }}!

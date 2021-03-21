@@ -10,6 +10,7 @@ import { MatSliderChange } from '@angular/material/slider';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { CustomDateRangeComponent } from '../custom-date-range/custom-date-range.component';
+import { MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -63,6 +64,14 @@ export class GroupDashboardComponent implements OnInit {
   customStartDate: moment.Moment;
   customEndDate: moment.Moment;
   isCustomDateRange: boolean = false;
+
+  // wkAutocomplete
+  @ViewChild('wkAlbumInput', { read : MatAutocompleteTrigger}) wkAlbumInput: MatAutocompleteTrigger;
+  @ViewChild('wkTrackInput', { read : MatAutocompleteTrigger}) wkTrackInput: MatAutocompleteTrigger;
+  wkAutoSubject = new BehaviorSubject<Object>(null);
+  wkArtistSuggestions: any = {'suggestions': [], 'partial_result': false};
+  wkAlbumSuggestions: any = {'suggestions': [], 'partial_result': false};
+  wkTrackSuggestions: any = {'suggestions': [], 'partial_result': false};
   constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog) {
     moment.locale('en-short', {
       relativeTime: {
@@ -102,6 +111,7 @@ export class GroupDashboardComponent implements OnInit {
           }
         }
       })
+      // leaderboard slider change
       this.valueSubject.pipe(debounceTime(1000)).subscribe(value => {
         if (value == this.leaderboardSliderMappings.length-1) { // All time
           this.scrobbleLeaderboard(value, this.group.members.map(u => u.id))
@@ -109,6 +119,20 @@ export class GroupDashboardComponent implements OnInit {
           let endRange = moment.utc()
           let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
           this.scrobbleLeaderboard(value, this.group.members.map(u => u.id), startRange, endRange)
+        }
+      })
+      // wk autocomplete
+      this.wkAutoSubject.pipe(debounceTime(500)).subscribe(value => {
+        if (value) {
+          this.userService.wkAutocomplete(value['wkMode'], value['query']).toPromise().then(data => {
+            if (value['wkMode'] == "artist") {
+              this.wkArtistSuggestions = data
+            } else if (value['wkMode'] == "album") {
+              this.wkAlbumSuggestions = data
+            } else { // track
+              this.wkTrackSuggestions = data
+            }
+          })
         }
       })
   }
@@ -156,50 +180,62 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  wkAlbumSubmit(formData, users) {
-    this.wkAlbumInit = true
-    this.wkAlbumResults = null
-    this.wkAlbumDom.nativeElement.style.background = ''
-    this.userService.wkAlbum(formData['query'], users.map(u => u.id)).toPromise().then(data => {
-      this.wkAlbumResults = data
-      this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
-      this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
-      this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-      this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
-    }).catch(error => {
-      this.wkAlbumInit = false
-      if (error['status'] == 404) {
-        this.wkAlbumInit = undefined;
-      } else if(error['status'] == 400) {
-        this.messageService.open("Improperly formatted query (format: Artist - Album)")
-      } else {
-        this.messageService.open("An error occured submitting your request. Please try again.")
-        console.log(error)
-      }
-    })
+  wkAlbumSubmit(formData, users, partialResult=false) {
+    if (!partialResult) {
+      this.wkAlbumInit = true
+      this.wkAlbumResults = null
+      this.wkAlbumDom.nativeElement.style.background = ''
+      this.userService.wkAlbum(formData['query'], users.map(u => u.id)).toPromise().then(data => {
+        this.wkAlbumResults = data
+        this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
+        this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
+        this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+        this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
+      }).catch(error => {
+        this.wkAlbumInit = false
+        if (error['status'] == 404) {
+          this.wkAlbumInit = undefined;
+        } else if(error['status'] == 400) {
+          this.messageService.open("Improperly formatted query (format: Artist - Album)")
+        } else {
+          this.messageService.open("An error occured submitting your request. Please try again.")
+          console.log(error)
+        }
+      })
+    } else {
+      setTimeout(() => {
+        this.wkAlbumInput.openPanel()
+      }, 750)
+    }
   }
 
-  wkTrackSubmit(formData, users) {
-    this.wkTrackInit = true
-    this.wkTrackResults = null
-    this.wkTrackDom.nativeElement.style.background = ''
-    this.userService.wkTrack(formData['query'], users.map(u => u.id)).toPromise().then(data => {
-      this.wkTrackResults = data
-      this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
-      this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
-      this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-      this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
-    }).catch(error => {
-      this.wkTrackInit = false
-      if (error['status'] == 404) {
-        this.wkTrackInit = undefined;
-      } else if(error['status'] == 400) {
-        this.messageService.open("Improperly formatted query (format: Artist - Track)")
-      } else {
-        this.messageService.open("An error occured submitting your request. Please try again.")
-        console.log(error)
-      }
-    })
+  wkTrackSubmit(formData, users, partialResult=false) {
+    if (!partialResult) {
+      this.wkTrackInit = true
+      this.wkTrackResults = null
+      this.wkTrackDom.nativeElement.style.background = ''
+      this.userService.wkTrack(formData['query'], users.map(u => u.id)).toPromise().then(data => {
+        this.wkTrackResults = data
+        this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
+        this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
+        this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+        this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
+      }).catch(error => {
+        this.wkTrackInit = false
+        if (error['status'] == 404) {
+          this.wkTrackInit = undefined;
+        } else if(error['status'] == 400) {
+          this.messageService.open("Improperly formatted query (format: Artist - Track)")
+        } else {
+          this.messageService.open("An error occured submitting your request. Please try again.")
+          console.log(error)
+        }
+      })
+    } else {
+      setTimeout(() => {
+        this.wkTrackInput.openPanel()
+      }, 750)
+    }
   }
 
   sort(column, command) {
@@ -349,6 +385,10 @@ export class GroupDashboardComponent implements OnInit {
     dialogRef.afterClosed().subscribe(() => {
       dateSub.unsubscribe()
     })
+  }
+
+  wkAutocomplete(wkMode, event) {
+    this.wkAutoSubject.next({'wkMode': wkMode, 'query': event})
   }
 
 }

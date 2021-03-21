@@ -301,6 +301,7 @@ def wk_autocomplete(wk_mode, query):
     cursor = mdb.cursor(dictionary=True)
 
     sanitized_query = sql_helper.sanitize_query(query)
+    partial_result = False
 
     if wk_mode == "artist":
         sql = "SELECT name from artists WHERE {} LIKE '%{}%' LIMIT 10".format(sql_helper.sanitize_db_field("name"), sanitized_query)
@@ -311,33 +312,37 @@ def wk_autocomplete(wk_mode, query):
         release_query = ""
         typing_release = True
         try:
-            artist_query = sanitized_query.strip().split(" - ", 1)[0].strip()
-            release_query = sanitized_query.strip().split(" - ", 1)[1].strip()
+            artist_query = sanitized_query.split(" - ", 1)[0].strip()
+            release_query = sanitized_query.split(" - ", 1)[1].strip()
         except IndexError: # means the user is still typing the artist's name
             typing_release = False
         if typing_release:
-            if release_query:
-                valid_artist = find_artist(artist_query, skip_sanitize=True)
-                if valid_artist:
-                    if wk_mode == "album":
+            valid_artist = find_artist(artist_query, skip_sanitize=True)
+            if valid_artist:
+                if wk_mode == "album":
+                    if release_query:
                         sql = "SELECT name from albums WHERE artist_name = '{}' AND {} LIKE '%{}%' LIMIT 10".format(sql_helper.esc_db(valid_artist['name']), sql_helper.sanitize_db_field("name"), sql_helper.esc_db(release_query))
-                        cursor.execute(sql)
-                        albums = list(cursor)
-                        suggestions = [valid_artist['name'] + " - " + a['name'] for a in albums]
-                    else: # track
+                    else:
+                        sql = "SELECT name from albums WHERE artist_name = '{}' LIMIT 10".format(sql_helper.esc_db(valid_artist['name']))
+                    cursor.execute(sql)
+                    albums = list(cursor)
+                    suggestions = [valid_artist['name'] + " - " + a['name'] for a in albums]
+                else: # track
+                    if release_query:
                         sql = "SELECT DISTINCT track as name FROM track_scrobbles WHERE artist_id = {} AND {} LIKE '%{}%' LIMIT 10".format(valid_artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(release_query))
-                        cursor.execute(sql)
-                        tracks = list(cursor)
-                        suggestions = [valid_artist['name'] + " - " + t['name'] for t in tracks]
-                else:
-                    suggestions = []
+                    else:
+                        sql = "SELECT track as name, COUNT(*) as scrobbles FROM track_scrobbles WHERE artist_id = {} GROUP BY track ORDER BY scrobbles DESC LIMIT 10".format(valid_artist['id'])
+                    cursor.execute(sql)
+                    tracks = list(cursor)
+                    suggestions = [valid_artist['name'] + " - " + t['name'] for t in tracks]
             else:
                 suggestions = []
         else:
             sql = "SELECT name from artists WHERE {} LIKE '%{}%' LIMIT 10".format(sql_helper.sanitize_db_field("name"), sanitized_query)
             cursor.execute(sql)
             artists = list(cursor)
-            suggestions = [r["name"] for r in artists]
+            suggestions = [r["name"] + " - " for r in artists]
+            partial_result = True
     
     mdb.close()
-    return suggestions
+    return {'suggestions': suggestions, 'partial_result': partial_result}

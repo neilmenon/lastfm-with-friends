@@ -185,4 +185,13 @@ export class UserService {
       'end_range': endRange
     })
   }
+
+  wkAutocomplete(wkMode, query) {
+    return this.http.post(config.api_root + "/commands/wkautocomplete", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'wk_mode': wkMode,
+      'query': query
+    })
+  }
 }
