@@ -277,6 +277,9 @@ export class GroupDashboardComponent implements OnInit {
   }
 
   nowPlayingToWk(entry, wkArtist: HTMLElement=null) {
+    this.wkArtistSuggestions = {'suggestions': [], 'partial_result': false}
+    this.wkAlbumSuggestions = {'suggestions': [], 'partial_result': false}
+    this.wkTrackSuggestions = {'suggestions': [], 'partial_result': false}
     let albumQuery = entry.artist + " - " + entry.album
     this.wkArtistForm.get('query').setValue(entry.artist)
     this.wkAlbumForm.get('query').setValue(albumQuery)
