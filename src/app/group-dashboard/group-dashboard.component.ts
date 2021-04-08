@@ -67,6 +67,7 @@ export class GroupDashboardComponent implements OnInit {
   isCustomDateRange: boolean = false;
 
   // wkAutocomplete
+  @ViewChild('wkArtistInput', { read : MatAutocompleteTrigger}) wkArtistInput: MatAutocompleteTrigger;
   @ViewChild('wkAlbumInput', { read : MatAutocompleteTrigger}) wkAlbumInput: MatAutocompleteTrigger;
   @ViewChild('wkTrackInput', { read : MatAutocompleteTrigger}) wkTrackInput: MatAutocompleteTrigger;
   @ViewChild('wkArtistInput', { static: false }) private wkArtistInputRaw: ElementRef;
@@ -172,12 +173,17 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
       this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
       if (this.detectorService.isMobile()) {
+        this.wkArtistInput.closePanel()
         this.wkArtistInputRaw.nativeElement.blur();  
       }
       if (data['artist']['fallback']) {
         this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
       }
     }).catch(error => {
+      if (this.detectorService.isMobile()) {
+        this.wkArtistInput.closePanel()
+        this.wkArtistInputRaw.nativeElement.blur();  
+      }
       this.wkArtistInit = false
       if (error['status'] == 404) {
         this.wkArtistInit = undefined;
@@ -200,9 +206,14 @@ export class GroupDashboardComponent implements OnInit {
         this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
         this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
         if (this.detectorService.isMobile()) {
+          this.wkAlbumInput.closePanel()
           this.wkAlbumInputRaw.nativeElement.blur();
         }
       }).catch(error => {
+        if (this.detectorService.isMobile()) {
+          this.wkAlbumInput.closePanel()
+          this.wkAlbumInputRaw.nativeElement.blur();
+        }
         this.wkAlbumInit = false
         if (error['status'] == 404) {
           this.wkAlbumInit = undefined;
@@ -232,9 +243,14 @@ export class GroupDashboardComponent implements OnInit {
         this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
         this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
         if (this.detectorService.isMobile()) {
+          this.wkTrackInput.closePanel()
           this.wkTrackInputRaw.nativeElement.blur();
         }
       }).catch(error => {
+        if (this.detectorService.isMobile()) {
+          this.wkTrackInput.closePanel()
+          this.wkTrackInputRaw.nativeElement.blur();
+        }
         this.wkTrackInit = false
         if (error['status'] == 404) {
           this.wkTrackInit = undefined;
