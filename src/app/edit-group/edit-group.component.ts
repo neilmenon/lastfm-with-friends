@@ -12,6 +12,7 @@ import { UserService } from '../user.service';
 export class EditGroupComponent implements OnInit {
   groupForm;
   editConfirmed: boolean = false;
+  loadingEdit: boolean = false;
   constructor( private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService) { 
     this.groupForm = this.formBuilder.group({
       name: ['', Validators.required],
@@ -39,12 +40,15 @@ export class EditGroupComponent implements OnInit {
     if (this.editConfirmed) {
       if (this.groupForm.status == "VALID") {
         this.editConfirmed = false
+        this.loadingEdit = true
         this.userService.editGroup(this.group.join_code, formData).toPromise().then(data => {
           this.messageService.open("Successfully edited " + this.group.name + ".", "right")
           this.group = data
+          this.loadingEdit = false
           this.onGroupChange.emit(data)
         }).catch(error => {
           this.messageService.open("An error occured while trying to edit " + this.group.name + ". Please try again.", "right")
+          this.loadingEdit = false
           console.log(error)
         })
       }

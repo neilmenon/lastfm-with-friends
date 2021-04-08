@@ -14,6 +14,7 @@ export class GroupDetailComponent implements OnInit {
   user;
   moment: any = moment;
   deleteConfirmed: boolean = false;
+  leaveConfirmed: boolean = false;
   constructor(private route: ActivatedRoute, private userService: UserService, private messageService: MessageService, public router: Router) {
     this.route.paramMap.subscribe(params => {
       this.userService.getGroup(params.get('joinCode')).toPromise().then(data => {
@@ -35,13 +36,18 @@ export class GroupDetailComponent implements OnInit {
   }
 
   leaveGroup() {
-    this.userService.leaveGroup(this.group['join_code']).toPromise().then(data => {
-      this.messageService.save("You have left the group " + this.group['name'] + ".")
-      this.router.navigate(['/'])
-    }).catch(error => {
-      this.messageService.open("Unable to leave group. Please try again.")
-      console.log(error)
-    })
+    if (this.leaveConfirmed) {
+      this.userService.leaveGroup(this.group['join_code']).toPromise().then(data => {
+        this.messageService.save("You have left the group " + this.group['name'] + ".")
+        this.router.navigate(['/'])
+      }).catch(error => {
+        this.messageService.open("Unable to leave group. Please try again.")
+        this.leaveConfirmed = false
+        console.log(error)
+      })
+    } else {
+      this.leaveConfirmed = true
+    }
   }
 
   deleteGroup() {

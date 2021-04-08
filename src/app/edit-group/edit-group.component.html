@@ -15,8 +15,9 @@
           <mat-option *ngFor="let u of group.users" [value]="u.username">{{ u.username }}<span *ngIf="u.username == user.username"> (you)</span></mat-option>
         </mat-select>
       </mat-form-field>
-    <button *ngIf="!editConfirmed" color="accent" mat-raised-button type="submit">Edit</button>
-    <button *ngIf="editConfirmed" color="warn" mat-raised-button type="submit">Confirm Edit</button>
+    <button *ngIf="!editConfirmed && !loadingEdit" color="accent" mat-raised-button type="submit">Edit</button>
+    <button *ngIf="editConfirmed && !loadingEdit" color="warn" mat-raised-button type="submit">Confirm Edit</button>
+    <mat-spinner *ngIf="loadingEdit" diameter="25" color="accent" class="center-all" style="padding-bottom: 11px;"></mat-spinner>
     <span *ngIf="changingOwnership() && editConfirmed"><br><br>*Warning: you are changing ownership!*</span>
 </form>
 <br>
