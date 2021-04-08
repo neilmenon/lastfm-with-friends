@@ -23,6 +23,7 @@
     "@angular/platform-browser-dynamic": "~11.0.4",
     "@angular/router": "~11.0.4",
     "moment": "^2.29.1",
+    "ngx-device-detector": "^2.0.6",
     "rxjs": "~6.6.0",
     "ts-md5": "^1.2.7",
     "tslib": "^2.0.0",

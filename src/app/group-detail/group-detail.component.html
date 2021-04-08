@@ -1,6 +1,6 @@
 <div class="box center">
     <div *ngIf="group && user; else loading">
-        <div>
+        <div id="group-detail">
             <h2>{{ group.name }}</h2>
             <div *ngIf="group.owner == user.username && deleteConfirmed" style="padding-bottom: 15px;">
                 <button color="primary" mat-raised-button (click)="deleteGroup()">Confirm Delete</button>

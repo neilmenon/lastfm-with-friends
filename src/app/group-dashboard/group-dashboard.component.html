@@ -45,7 +45,7 @@
         <div class="container">
             <form [formGroup]="wkArtistForm" class="box-form" (ngSubmit)="wkArtistSubmit(wkArtistForm.value, group.members)">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
-                    <input matInput name="name" placeholder="Coldplay, etc." type="text" formControlName="query" [matAutocomplete]="wkArtistAuto" (ngModelChange)="wkAutocomplete('artist', $event)">
+                    <input matInput #wkArtistInput name="name" placeholder="Coldplay, etc." type="text" formControlName="query" [matAutocomplete]="wkArtistAuto" (ngModelChange)="wkAutocomplete('artist', $event)">
                     <mat-autocomplete #wkArtistAuto="matAutocomplete" (optionSelected)="wkArtistSubmit({'query': $event.option.value}, group.members)">
                         <mat-option *ngFor="let s of wkArtistSuggestions.suggestions" [value]="s">{{ s }}</mat-option>
                     </mat-autocomplete>

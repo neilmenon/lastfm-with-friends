@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
-import {MatDialog, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder } from '@angular/forms';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
@@ -10,7 +10,8 @@ import { MatSliderChange } from '@angular/material/slider';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { CustomDateRangeComponent } from '../custom-date-range/custom-date-range.component';
-import { MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { DeviceDetectorService } from 'ngx-device-detector';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -19,7 +20,7 @@ import { MatAutocompleteSelectedEvent, MatAutocompleteTrigger } from '@angular/m
 })
 export class GroupDashboardComponent implements OnInit {
   moment: any = moment;
-
+  deviceInfo: any = null;
   // wkArtist
   @ViewChild('wkArtist', { static: true }) wkArtistDom: ElementRef;
   wkArtistForm;
@@ -68,11 +69,14 @@ export class GroupDashboardComponent implements OnInit {
   // wkAutocomplete
   @ViewChild('wkAlbumInput', { read : MatAutocompleteTrigger}) wkAlbumInput: MatAutocompleteTrigger;
   @ViewChild('wkTrackInput', { read : MatAutocompleteTrigger}) wkTrackInput: MatAutocompleteTrigger;
+  @ViewChild('wkArtistInput', { static: false }) private wkArtistInputRaw: ElementRef;
+  @ViewChild('wkAlbumInput', { static: false }) private wkAlbumInputRaw: ElementRef;
+  @ViewChild('wkTrackInput', { static: false }) private wkTrackInputRaw: ElementRef;
   wkAutoSubject = new BehaviorSubject<Object>(null);
   wkArtistSuggestions: any = {'suggestions': [], 'partial_result': false};
   wkAlbumSuggestions: any = {'suggestions': [], 'partial_result': false};
   wkTrackSuggestions: any = {'suggestions': [], 'partial_result': false};
-  constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog) {
+  constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog, private detectorService: DeviceDetectorService) {
     moment.locale('en-short', {
       relativeTime: {
         future: 'in %s',
@@ -100,6 +104,7 @@ export class GroupDashboardComponent implements OnInit {
   @Input() user: any;
 
   ngOnInit(): void {
+      this.deviceInfo = this.detectorService.getDeviceInfo()
       this.nowPlayingStartInterval();
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState == "visible") {
@@ -166,6 +171,9 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
       this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
       this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
+      if (this.detectorService.isMobile()) {
+        this.wkArtistInputRaw.nativeElement.blur();  
+      }
       if (data['artist']['fallback']) {
         this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
       }
@@ -191,6 +199,9 @@ export class GroupDashboardComponent implements OnInit {
         this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
         this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
         this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
+        if (this.detectorService.isMobile()) {
+          this.wkAlbumInputRaw.nativeElement.blur();
+        }
       }).catch(error => {
         this.wkAlbumInit = false
         if (error['status'] == 404) {
@@ -220,6 +231,9 @@ export class GroupDashboardComponent implements OnInit {
         this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
         this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
         this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
+        if (this.detectorService.isMobile()) {
+          this.wkTrackInputRaw.nativeElement.blur();
+        }
       }).catch(error => {
         this.wkTrackInit = false
         if (error['status'] == 404) {

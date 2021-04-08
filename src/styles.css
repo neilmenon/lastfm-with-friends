@@ -319,11 +319,10 @@ div.history-options-container > mat-paginator {
 }
 
 @media screen and (max-width: 960px) {
-    .container {
+    .container:not(.now-playing-container > .container):not(#group-detail > .container) {
         display: block;
-        
     }
-    .container > div {
+    .container:not(.now-playing-container > .container):not(#group-detail > .container) > div {
         flex: none;
     }
     .container > div:not(:last-child) {
