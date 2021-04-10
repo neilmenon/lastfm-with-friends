@@ -202,3 +202,26 @@ def wk_autocomplete():
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
+
+@command_api.route('/api/commands/artist_redirects', methods=['POST'])
+def artist_redirects():
+    try:
+        params = request.get_json()
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            artist_string = params['artist_string']
+        else:
+            abort(401)
+        response = command_helper.check_artist_redirect(artist_string)
+        if response == False:
+            abort(404)
+        elif response == None:
+            abort(500)
+        else:
+            return jsonify(response)
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)

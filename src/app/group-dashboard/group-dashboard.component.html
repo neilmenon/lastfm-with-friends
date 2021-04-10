@@ -28,9 +28,9 @@
             <span *ngIf="entry.timestamp" class="recently-played-track" title="{{ moment.unix(entry.timestamp) }}">{{ moment.unix(entry.timestamp).fromNow() }}</span><br>
             <div class="clickable now-playing-artwork-container" (click)="nowPlayingToWk(entry, wkArtist)"><img src="{{ entry.image_url }}" width="110px"></div>
             <div class="now-playing-details">
-                <span><a href="{{ entry.url }}" target="_blank" class="clear-color"><em>{{ entry.track }}</em></a></span>
-                <span>{{ entry.artist }}</span>
-                <span>{{ entry.album }}</span>
+                <span><a href="{{ entry.url }}" target="_blank" title="{{ entry.track }}" class="clear-color"><em>{{ entry.track }}</em></a></span>
+                <span title="{{ entry.artist }}">{{ entry.artist }}</span>
+                <span title="{{ entry.album }}">{{ entry.album }}</span>
             </div>
         </div>
     </div>

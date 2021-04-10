@@ -12,6 +12,7 @@ def find_artist(query, skip_sanitize=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     fallback = False
+    redirect = False
     # find artist in the database
     if not skip_sanitize:
         sanitized_query = sql_helper.sanitize_query(query)
@@ -33,6 +34,7 @@ def find_artist(query, skip_sanitize=False):
             if not result:
                 mdb.close()
                 return None
+            redirect = True
             redirected_name = result[0]['redirected_name']
             sql = "SELECT * from artists WHERE name = '{}'".format(sql_helper.esc_db(redirected_name))
             cursor.execute(sql)
@@ -40,6 +42,7 @@ def find_artist(query, skip_sanitize=False):
         fallback = True
     artist = result[0]
     artist['fallback'] = fallback
+    artist['redirect'] = redirect
     mdb.close()
     return artist
 
@@ -157,16 +160,20 @@ def wk_track(query, users):
     mdb.close()
     return {'artist': artist, 'track': track, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
-def nowplaying(join_code=None, database=False):
+def nowplaying(join_code=None, database=False, single_user=None):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
-    if join_code:
-        sql = "SELECT users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC;".format(join_code)
+    if not single_user:
+        if join_code:
+            sql = "SELECT users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC;".format(join_code)
+        else:
+            logger.log("Checking now playing activity for all users...")
+            sql = "SELECT username FROM users;"
+        cursor.execute(sql)
+        users = list(cursor)
     else:
-        logger.log("Checking now playing activity for all users...")
-        sql = "SELECT username FROM users;"
-    cursor.execute(sql)
-    users = list(cursor)
+        logger.log("Checking now playing for individual user {}".format(single_user))
+        users = [{'username': single_user}]
     now_playing_users = []
     played_users = []
     for user in users:
@@ -347,3 +354,44 @@ def wk_autocomplete(wk_mode, query):
     
     mdb.close()
     return {'suggestions': suggestions, 'partial_result': partial_result}
+
+def check_artist_redirect(artist_string):
+    artist_string = artist_string.strip()
+    req_url = "http://ws.audioscrobbler.com/2.0/?method=artist.getcorrection&artist={}&api_key={}&format=json".format(artist_string, cfg['api']['key'])
+    try:
+        lastfm = requests.get(req_url).json()
+        correction = lastfm['corrections']
+    except (IndexError, KeyError, requests.exceptions.RequestException) as e:
+        logger.log("Error checking for artist redirect for {}: {}.".format(artist_string, e))
+        return None
+    except Exception as e:
+        logger.log("Another error occured checking for artist redirect for {}: {}.".format(artist_string, e))
+        return None
+    
+    try:
+        if correction['correction']['artist']['name'].lower() == artist_string.lower(): # no redirect exists for this artist
+            return False
+        else: # the redirect exists! store it in the database and return it to the user
+            artist_name = correction['correction']['artist']['name']
+            artist_in_db = find_artist(artist_name)
+            if artist_in_db:
+                if artist_in_db['fallback'] or artist_in_db['redirect']:
+                    return False
+            else:
+                return False
+            
+            mdb = mariadb.connect(**(cfg['sql']))
+            cursor = mdb.cursor(dictionary=True)
+
+            data = {'artist_name': artist_string, 'redirected_name': artist_name}
+            sql = sql_helper.insert_into_where_not_exists("artist_redirects", data, "artist_name")
+            cursor.execute(sql)
+            mdb.commit()
+            mdb.close()
+            return {'artist': artist_name}
+    except (KeyError, TypeError) as e: # this probably means the artist doesn't even exist in Last.fm's db either
+        try:
+            mdb.close()
+        except Exception:
+            pass
+        return False

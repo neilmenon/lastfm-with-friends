@@ -9,6 +9,7 @@ from . import auth_helper
 from . import user_helper
 from . import api_logger as logger
 from . import lastfm_scraper
+from . import command_helper
 cfg = config.config
 
 user_api = Blueprint('users', __name__)
@@ -121,6 +122,7 @@ def update():
         user_helper.wipe_scrobbles(user_id)
         response = lastfm_scraper.update_user(username, full=True, app=current_app._get_current_object())
     else:
+        command_helper.nowplaying(database=True, single_user=username)
         response = lastfm_scraper.update_user(username)
     if response:
         return jsonify(response)
