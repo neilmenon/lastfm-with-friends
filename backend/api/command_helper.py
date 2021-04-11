@@ -28,7 +28,7 @@ def find_artist(query, skip_sanitize=False):
         result = list(cursor)
         if not result:
             # check artist redirects
-            sql = "SELECT * from artist_redirects WHERE {} LIKE '%{}%'".format(sql_helper.sanitize_db_field("artist_name"), sql_helper.esc_db(query))
+            sql = "SELECT * from artist_redirects WHERE UPPER({}) = UPPER('{}')".format(sql_helper.sanitize_db_field("artist_name"), sql_helper.esc_db(sanitized_query))
             cursor.execute(sql)
             result = list(cursor)
             if not result:
