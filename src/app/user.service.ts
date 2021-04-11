@@ -194,4 +194,12 @@ export class UserService {
       'query': query
     })
   }
+
+  artistRedirects(artistString) {
+    return this.http.post(config.api_root + "/commands/artistredirects", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'artist_string': artistString,
+    })
+  }
 }

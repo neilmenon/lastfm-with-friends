@@ -26,6 +26,7 @@ export class GroupDashboardComponent implements OnInit {
   wkArtistForm;
   wkArtistResults;
   wkArtistInit: boolean = false;
+  wkArtistRedirectLoading: boolean = false;
 
   // wkAlbum
   @ViewChild('wkAlbum', { static: true }) wkAlbumDom: ElementRef;
@@ -176,8 +177,10 @@ export class GroupDashboardComponent implements OnInit {
         this.wkArtistInput.closePanel()
         this.wkArtistInputRaw.nativeElement.blur();  
       }
-      if (data['artist']['fallback']) {
+      if (data['artist']['fallback'] && !data['artist']['redirect']) {
         this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
+      } else if (data['artist']['redirect']) {
+        this.messageService.open("Redirected to " + data['artist']['name'] + ".")
       }
     }).catch(error => {
       if (this.detectorService.isMobile()) {
@@ -191,6 +194,24 @@ export class GroupDashboardComponent implements OnInit {
         this.messageService.open("An error occured submitting your request. Please try again.")
         console.log(error)
       }
+    })
+  }
+
+  artistRedirects(artistString) {
+    this.wkArtistRedirectLoading = true
+    this.userService.artistRedirects(artistString['query']).toPromise().then(data => {
+      this.wkArtistRedirectLoading = false
+      if (data['artist']) {
+        this.messageService.open("A redirect to \"" + data['artist'] + "\" was found. Adding to database...")
+        setTimeout(() => {
+          this.wkArtistSubmit(artistString, this.group.members)
+        }, 3000)
+      } else {
+        this.messageService.open("An artist redirect for \"" + artistString['query'] + "\" was not found on Last.fm.")
+      }
+    }).catch(error => {
+      this.wkArtistRedirectLoading = false
+      this.messageService.open("An error occured while checking Last.fm for an artist redirect. Please try again.")
     })
   }
 

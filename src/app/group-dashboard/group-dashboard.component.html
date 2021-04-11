@@ -95,7 +95,11 @@
                 </tbody>
             </table>
         </div>
-        <span *ngIf="wkArtistInit === undefined">No one knows this artist in {{ group.name }}.</span>
+        <span *ngIf="wkArtistInit === undefined">
+            No one knows this artist in {{ group.name }}.<br>
+            Alternate artist spelling? Click <a class="clickable" (click)="artistRedirects(wkArtistForm.value)">here</a> to validate and add it.
+            <mat-spinner *ngIf="wkArtistRedirectLoading" diameter="19" color="accent" class="center-all"></mat-spinner>
+        </span>
         <div *ngIf="!wkArtistResults && wkArtistInit" style="padding-bottom: 10px;">
             <mat-spinner diameter="25" color="accent" class="center-all"></mat-spinner>
         </div>

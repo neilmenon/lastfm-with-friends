@@ -203,7 +203,7 @@ def wk_autocomplete():
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
 
-@command_api.route('/api/commands/artist_redirects', methods=['POST'])
+@command_api.route('/api/commands/artistredirects', methods=['POST'])
 def artist_redirects():
     try:
         params = request.get_json()
@@ -213,7 +213,7 @@ def artist_redirects():
             abort(401)
         response = command_helper.check_artist_redirect(artist_string)
         if response == False:
-            abort(404)
+            return jsonify({'artist': None})
         elif response == None:
             abort(500)
         else:

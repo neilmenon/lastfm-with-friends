@@ -383,7 +383,7 @@ def check_artist_redirect(artist_string):
             mdb = mariadb.connect(**(cfg['sql']))
             cursor = mdb.cursor(dictionary=True)
 
-            data = {'artist_name': artist_string, 'redirected_name': artist_name}
+            data = {'artist_name': sql_helper.esc_db(artist_string), 'redirected_name': sql_helper.esc_db(artist_name)}
             sql = sql_helper.insert_into_where_not_exists("artist_redirects", data, "artist_name")
             cursor.execute(sql)
             mdb.commit()
