@@ -395,3 +395,31 @@ def check_artist_redirect(artist_string):
         except Exception:
             pass
         return False
+
+def charts(chart_mode, chart_type, users, start_range, end_range):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    users_list = ", ".join(str(u) for u in users)
+    cursor.execute("SET time_zone='+00:00';")
+    
+    if chart_mode == "individual":
+        if chart_type == "track":
+            if not start_range or not end_range:
+                sql = "SELECT artists.name as artist, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.name as album, albums.url as album_url, albums.image_url as album_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.track ORDER BY scrobbles DESC LIMIT 50".format(users_list)
+            else:
+                sql = "SELECT artists.name as artist, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.name as album, albums.url as album_url, albums.image_url as album_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.track ORDER BY scrobbles DESC LIMIT 50".format(users_list, start_range, end_range)
+        elif chart_type == "album":
+            if not start_range or not end_range:
+                sql = "SELECT artists.name as artist, artists.url as artist_url, artists.image_url as artist_image, albums.name as album, albums.url as album_url, albums.image_url as album_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.album_id ORDER BY scrobbles DESC LIMIT 50".format(users_list)
+            else:
+                sql = "SELECT artists.name as artist, artists.url as artist_url, artists.image_url as artist_image, albums.name as album, albums.url as album_url, albums.image_url as album_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.album_id ORDER BY scrobbles DESC LIMIT 50".format(users_list, start_range, end_range)
+        else: # artist
+            if not start_range or not end_range:
+                sql = "SELECT artists.name as artist, artists.url as artist_url, artists.image_url as artist_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id WHERE track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.artist_id ORDER BY scrobbles DESC LIMIT 50".format(users_list)
+            else:
+                sql = "SELECT artists.name as artist, artists.url as artist_url, artists.image_url as artist_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id WHERE track_scrobbles.user_id IN ({}) AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.artist_id ORDER BY scrobbles DESC LIMIT 50".format(users_list, start_range, end_range)
+        cursor.execute(sql)
+        result = list(cursor)
+    
+    mdb.close()
+    return result

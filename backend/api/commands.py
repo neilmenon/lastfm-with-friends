@@ -225,3 +225,20 @@ def artist_redirects():
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
+
+@command_api.route('/api/commands/charts', methods=['POST'])
+def charts():
+    try:
+        params = request.get_json()
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            response = command_helper.charts(params['chart_mode'], params['chart_type'], params['users'], params['start_range'], params['end_range'])
+            return jsonify(response)
+        else:
+            abort(401)
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)
