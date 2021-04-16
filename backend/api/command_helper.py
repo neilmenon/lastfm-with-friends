@@ -165,7 +165,7 @@ def nowplaying(join_code=None, database=False, single_user=None):
     cursor = mdb.cursor(dictionary=True)
     if not single_user:
         if join_code:
-            sql = "SELECT users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC;".format(join_code)
+            sql = "SELECT users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' AND users.scrobbles > 0 ORDER BY user_groups.joined ASC;".format(join_code)
         else:
             logger.log("Checking now playing activity for all users...")
             sql = "SELECT username FROM users;"
