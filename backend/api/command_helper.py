@@ -165,10 +165,10 @@ def nowplaying(join_code=None, database=False, single_user=None):
     cursor = mdb.cursor(dictionary=True)
     if not single_user:
         if join_code:
-            sql = "SELECT users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' AND users.scrobbles > 0 ORDER BY user_groups.joined ASC;".format(join_code)
+            sql = "SELECT users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC;".format(join_code)
         else:
             logger.log("Checking now playing activity for all users...")
-            sql = "SELECT username FROM users WHERE users.scrobbles > 0;"
+            sql = "SELECT username FROM users;"
         cursor.execute(sql)
         users = list(cursor)
     else:
@@ -223,7 +223,7 @@ def nowplaying(join_code=None, database=False, single_user=None):
 def get_nowplaying(join_code):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
-    sql = "SELECT now_playing.* FROM user_groups LEFT JOIN now_playing ON now_playing.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY IF(now_playing.timestamp = 0, 9999999999, now_playing.timestamp) DESC, user_groups.joined ASC".format(join_code)
+    sql = "SELECT now_playing.* FROM user_groups LEFT JOIN now_playing ON now_playing.username = user_groups.username WHERE user_groups.group_jc = '{}' AND now_playing.username IS NOT NULL ORDER BY IF(now_playing.timestamp = 0, 9999999999, now_playing.timestamp) DESC, user_groups.joined ASC".format(join_code)
     cursor.execute(sql)
     result = list(cursor)
     mdb.close()
