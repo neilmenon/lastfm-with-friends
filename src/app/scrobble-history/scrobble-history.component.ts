@@ -56,10 +56,6 @@ export class ScrobbleHistoryComponent implements OnInit {
     } else {
       selectedUser = [selectedUser]
     }
-    console.log(pageData)
-    console.log(selectedUser)
-    console.log(this.sortBy)
-    console.log(this.sortOrder)
     this.paginationTriggered = true;
     if (reset) {
       this.paginator.pageIndex = 0;

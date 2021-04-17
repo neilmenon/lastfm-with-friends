@@ -85,6 +85,9 @@ export class GroupDashboardComponent implements OnInit {
   chartReleaseType: string = "track";
   chartDropdownDate: number = 30;
   chartLoading: boolean = false;
+  chartIsCustomDate: boolean = false;
+  chartCustomStartDate: moment.Moment;
+  chartCustomEndDate: moment.Moment;
   chartResults;
 
   constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog, private detectorService: DeviceDetectorService) {
@@ -342,16 +345,22 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistSuggestions = {'suggestions': [], 'partial_result': false}
     this.wkAlbumSuggestions = {'suggestions': [], 'partial_result': false}
     this.wkTrackSuggestions = {'suggestions': [], 'partial_result': false}
-    let albumQuery = entry.artist + " - " + entry.album
+    
     this.wkArtistForm.get('query').setValue(entry.artist)
-    this.wkAlbumForm.get('query').setValue(albumQuery)
     this.wkArtistSubmit({'query': entry.artist}, this.group.members)
-    this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
+    
+    if (entry.album !== undefined) {
+      let albumQuery = entry.artist + " - " + entry.album
+      this.wkAlbumForm.get('query').setValue(albumQuery)
+      this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
+    }
+    
     if (entry.track !== undefined) {
       let trackQuery = entry.artist + " - " + entry.track
       this.wkTrackForm.get('query').setValue(trackQuery)
       this.wkTrackSubmit({'query': trackQuery}, this.group.members)
     }
+    
     if (wkArtist)
       wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
@@ -437,15 +446,22 @@ export class GroupDashboardComponent implements OnInit {
     this.valueSubject.next(event.value);
   }
 
-  customDateRange() {
+  customDateRange(title) {
     let dialogRef = this.dialog.open(CustomDateRangeComponent, {
       data: {
-        'title': 'Scrobble Leaderboard'
+        'title': title
       }
     })
     let dateSub = dialogRef.componentInstance.submitDateRange.subscribe((data) => {
-      this.leaderboardLoading = true
-      this.scrobbleLeaderboard(null, this.group.members.map(u => u.id), data.startDate, data.endDate, true)
+      if (title == 'Scrobble Leaderboard') {
+        this.leaderboardLoading = true
+        this.scrobbleLeaderboard(null, this.group.members.map(u => u.id), data.startDate, data.endDate, true)
+      } else if (title == 'Individual & Group Charts') {
+        this.chartLoading = true
+        this.chartCustomStartDate = data.startDate
+        this.chartCustomEndDate = data.endDate
+        this.charts(data.startDate, data.endDate)
+      }
     })
     dialogRef.afterClosed().subscribe(() => {
       dateSub.unsubscribe()
@@ -456,7 +472,7 @@ export class GroupDashboardComponent implements OnInit {
     this.wkAutoSubject.next({'wkMode': wkMode, 'query': event})
   }
 
-  charts() {
+  charts(customStartDate: moment.Moment=null, customEndDate: moment.Moment=null) {
     this.chartLoading = true;
     this.chartsDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")'
     this.chartResults = null
@@ -468,9 +484,16 @@ export class GroupDashboardComponent implements OnInit {
       users = [this.chartSelectedUser]
       chartMode = "individual"
     }
-    if (this.chartDropdownDate != -1) {
+    if (customStartDate && customEndDate) {
+      startRange = customStartDate.format()
+      endRange = customEndDate.format()
+      this.chartIsCustomDate = true
+    } else if (this.chartDropdownDate != -1) {
       endRange = moment.utc().format()
       startRange = moment.utc().subtract(this.chartDropdownDate, 'd').format()
+      this.chartIsCustomDate = false
+    } else {
+      this.chartIsCustomDate = false
     }
     this.userService.charts(chartMode, this.chartReleaseType, users, startRange, endRange).toPromise().then(data => {
       this.chartResults = data
