@@ -415,9 +415,9 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
     for user in users:
         if chart_type == "track":
             if not start_range or not end_range:
-                sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} GROUP BY track_scrobbles.track ORDER BY scrobbles DESC LIMIT {}".format(user, entry_limit)
+                sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} GROUP BY artists.id, track_scrobbles.track ORDER BY scrobbles DESC LIMIT {}".format(user, entry_limit)
             else:
-                sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.track ORDER BY scrobbles DESC LIMIT {}".format(user, start_range, end_range, entry_limit)
+                sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY artists.id, track_scrobbles.track ORDER BY scrobbles DESC LIMIT {}".format(user, start_range, end_range, entry_limit)
         elif chart_type == "album":
             if not start_range or not end_range:
                 sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, albums.name as album, albums.id as album_id, albums.url as url, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} GROUP BY track_scrobbles.album_id ORDER BY scrobbles DESC LIMIT {}".format(user, entry_limit)
@@ -438,7 +438,7 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
         if chart_type == "track":
             for entry in result:
                 entry['url'] = entry['artist_url'] + "/_/" + entry['track'].replace(" ", "+").replace("/", "%2F")
-        return result
+        return result[:100]
     else: # group
         for chart in user_charts:
             for entry in chart:
@@ -456,4 +456,4 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
                     group_chart[entry_key] = entry
                     group_chart[entry_key]['score'] = math.log(entry['scrobbles'])
         group_chart_final = sorted([v for k,v in group_chart.items()], key=itemgetter('score'), reverse=True)
-        return group_chart_final[:50]
+        return group_chart_final[:100]
