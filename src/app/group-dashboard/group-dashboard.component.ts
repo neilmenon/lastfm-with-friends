@@ -78,6 +78,15 @@ export class GroupDashboardComponent implements OnInit {
   wkArtistSuggestions: any = {'suggestions': [], 'partial_result': false};
   wkAlbumSuggestions: any = {'suggestions': [], 'partial_result': false};
   wkTrackSuggestions: any = {'suggestions': [], 'partial_result': false};
+
+  // individualGroupCharts
+  @ViewChild('individualGroupCharts', { static: true }) chartsDom: ElementRef;
+  chartSelectedUser: any = "all";
+  chartReleaseType: string = "track";
+  chartDropdownDate: number = 30;
+  chartLoading: boolean = false;
+  chartResults;
+
   constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog, private detectorService: DeviceDetectorService) {
     moment.locale('en-short', {
       relativeTime: {
@@ -142,6 +151,8 @@ export class GroupDashboardComponent implements OnInit {
           })
         }
       })
+      // charts
+      this.charts();
   }
 
   nowPlayingStartInterval() {
@@ -443,6 +454,43 @@ export class GroupDashboardComponent implements OnInit {
 
   wkAutocomplete(wkMode, event) {
     this.wkAutoSubject.next({'wkMode': wkMode, 'query': event})
+  }
+
+  charts() {
+    this.chartLoading = true;
+    this.chartsDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")'
+    this.chartResults = null
+    let chartMode, users, startRange=null, endRange=null;
+    if (this.chartSelectedUser == "all") {
+      users = this.group.members.map(u => u.id)
+      chartMode = "group"
+    } else {
+      users = [this.chartSelectedUser]
+      chartMode = "individual"
+    }
+    if (this.chartDropdownDate != -1) {
+      endRange = moment.utc().format()
+      startRange = moment.utc().subtract(this.chartDropdownDate, 'd').format()
+    }
+    this.userService.charts(chartMode, this.chartReleaseType, users, startRange, endRange).toPromise().then(data => {
+      this.chartResults = data
+      this.chartLoading = false;
+      let imageUrl;
+      if (this.chartResults.length > 0) {
+        if (this.chartReleaseType == 'track' || this.chartReleaseType == 'album') {
+          imageUrl = this.chartResults[0].image
+        } else {
+          imageUrl = this.chartResults[0].artist_image
+        }
+        this.chartsDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+imageUrl+')'
+        this.chartsDom.nativeElement.style.backgroundPosition = 'center'
+        this.chartsDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+        this.chartsDom.nativeElement.style.backgroundSize = 'cover'
+      }
+    }).catch(error => {
+      this.chartLoading = false;
+      this.messageService.open("Error while trying to generate the chart! Please try again.")
+    })
   }
 
 }

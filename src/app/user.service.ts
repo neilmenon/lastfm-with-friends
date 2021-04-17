@@ -202,4 +202,16 @@ export class UserService {
       'artist_string': artistString,
     })
   }
+
+  charts(chartMode, chartType, users, startRange=null, endRange=null) {
+    return this.http.post(config.api_root + "/commands/charts", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'chart_mode': chartMode,
+      'chart_type': chartType,
+      'users': users,
+      'start_range': startRange,
+      'end_range': endRange,
+    })
+  }
 }
