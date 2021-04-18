@@ -327,18 +327,18 @@
         </div> 
         <div class="command-result" *ngIf="chartResults">
             <div class="command-result-summary" *ngIf="chartResults.length > 0">
-                <a *ngIf="chartReleaseType == 'track'" href="{{ chartResults[0].url }}" target="_blank">
-                    {{ chartResults[0].artist }} - {{ chartResults[0].track }}<br>
+                <a *ngIf="chartReleaseType == 'track'" href="{{ chartTopEntry.url }}" target="_blank">
+                    {{ chartTopEntry.artist }} - {{ chartTopEntry.track }}<br>
                 </a>
-                <a *ngIf="chartReleaseType == 'album'" href="{{ chartResults[0].url }}" target="_blank">
-                    {{ chartResults[0].artist }} - {{ chartResults[0].album }}<br>
+                <a *ngIf="chartReleaseType == 'album'" href="{{ chartTopEntry.url }}" target="_blank">
+                    {{ chartTopEntry.artist }} - {{ chartTopEntry.album }}<br>
                 </a>
-                <a *ngIf="chartReleaseType == 'artist'" href="{{ chartResults[0].artist_url }}" target="_blank">
-                    {{ chartResults[0].artist }}<br>
+                <a *ngIf="chartReleaseType == 'artist'" href="{{ chartTopEntry.artist_url }}" target="_blank">
+                    {{ chartTopEntry.artist }}<br>
                 </a>
-                <div *ngIf="chartReleaseType == 'track'">{{ chartResults[0].track }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
-                <div *ngIf="chartReleaseType == 'album'">{{ chartResults[0].album }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
-                <div *ngIf="chartReleaseType == 'artist'">{{ chartResults[0].artist }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
+                <div *ngIf="chartReleaseType == 'track'">{{ chartTopEntry.track }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
+                <div *ngIf="chartReleaseType == 'album'">{{ chartTopEntry.album }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
+                <div *ngIf="chartReleaseType == 'artist'">{{ chartTopEntry.artist }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
             </div>
             <table class="results-table" *ngIf="chartResults.length > 0; else noScrobbles">
                 <thead>
@@ -348,8 +348,8 @@
                         <th *ngIf="chartReleaseType == 'track'">Track</th>
                         <th *ngIf="chartReleaseType == 'album'">Album</th>
                         <th *ngIf="chartReleaseType == 'artist'">Artist</th>
-                        <th>Scrbl.</th>
-                        <th *ngIf="chartSelectedUser == 'all'">Score</th>
+                        <th class="clickable" matTooltip="Click to sort by scrobbles" matTooltipPosition="above" (click)="sort('scrobbles', 'charts')">Scrbl.</th>
+                        <th *ngIf="chartSelectedUser == 'all'" class="clickable" matTooltip="Click to sort | Score(N) = log(user1_scrobbles) + log(user2_scrobbles) + ... + log(userN_scrobbles)" matTooltipPosition="above" (click)="sort('score', 'charts')">Score</th>
                         <th>Actions</th>
                     </tr>
                 </thead>

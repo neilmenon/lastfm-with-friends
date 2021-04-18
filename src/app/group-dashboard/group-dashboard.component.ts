@@ -89,6 +89,7 @@ export class GroupDashboardComponent implements OnInit {
   chartCustomStartDate: moment.Moment;
   chartCustomEndDate: moment.Moment;
   chartResults;
+  chartTopEntry;
 
   constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog, private detectorService: DeviceDetectorService) {
     moment.locale('en-short', {
@@ -306,7 +307,7 @@ export class GroupDashboardComponent implements OnInit {
   sort(column, command) {
     if (command == "wkArtist") {
       if (this.wkArtistResults.users.length > 1) {
-        if (this.wkArtistResults.users[0][column] < this.wkArtistResults.users[1][column]) {
+        if (this.wkArtistResults.users[0][column] < this.wkArtistResults.users[this.wkArtistResults.users.length-1][column]) {
           this.wkArtistResults.users.sort(((a, b) => (a[column] < b[column]) ? 1 : -1))
         } else {
           this.wkArtistResults.users.sort(((a, b) => (a[column] > b[column]) ? 1 : -1))
@@ -314,7 +315,7 @@ export class GroupDashboardComponent implements OnInit {
       }
     } else if (command == "wkAlbum") {
       if (this.wkAlbumResults.users.length > 1) {
-        if (this.wkAlbumResults.users[0][column] < this.wkAlbumResults.users[1][column]) {
+        if (this.wkAlbumResults.users[0][column] < this.wkAlbumResults.users[this.wkAlbumResults.users.length-1][column]) {
           this.wkAlbumResults.users.sort(((a, b) => (a[column] < b[column]) ? 1 : -1))
         } else {
           this.wkAlbumResults.users.sort(((a, b) => (a[column] > b[column]) ? 1 : -1))
@@ -322,10 +323,18 @@ export class GroupDashboardComponent implements OnInit {
       }
     } else if (command == "wkTrack") {
       if (this.wkTrackResults.users.length > 1) {
-        if (this.wkTrackResults.users[0][column] < this.wkTrackResults.users[1][column]) {
+        if (this.wkTrackResults.users[0][column] < this.wkTrackResults.users[this.wkTrackResults.users.length-1][column]) {
           this.wkTrackResults.users.sort(((a, b) => (a[column] < b[column]) ? 1 : -1))
         } else {
           this.wkTrackResults.users.sort(((a, b) => (a[column] > b[column]) ? 1 : -1))
+        }
+      }
+    } else if (command == "charts") {
+      if (this.chartResults.length > 1) {
+        if (this.chartResults[0][column] < this.chartResults[this.chartResults.length-1][column]) {
+          this.chartResults.sort(((a, b) => (a[column] < b[column]) ? 1 : -1))
+        } else {
+          this.chartResults.sort(((a, b) => (a[column] > b[column]) ? 1 : -1))
         }
       }
     }
@@ -497,6 +506,7 @@ export class GroupDashboardComponent implements OnInit {
     }
     this.userService.charts(chartMode, this.chartReleaseType, users, startRange, endRange).toPromise().then(data => {
       this.chartResults = data
+      this.chartTopEntry = data[0]
       this.chartLoading = false;
       let imageUrl;
       if (this.chartResults.length > 0) {
