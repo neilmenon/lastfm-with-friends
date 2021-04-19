@@ -87,7 +87,7 @@
                         <td>{{ i+1 }}</td>
                         <td>{{ entry.username }}</td>
                         <td>{{ entry.scrobbles | number }}</td>
-                        <td>{{ entry.percent }}</td>
+                        <td>{{ entry.percent | number: '1.2-2' }}</td>
                         <td class="wk-actions">
                             <a (click)="whoKnowsTop('artist', wkArtistResults, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
                         </td> 
@@ -156,7 +156,7 @@
                         <td>{{ i+1 }}</td>
                         <td>{{ entry.username }}</td>
                         <td>{{ entry.scrobbles | number }}</td>
-                        <td>{{ entry.percent }}</td>
+                        <td>{{ entry.percent | number: '1.2-2'}}</td>
                         <td class="wk-actions">
                             <a (click)="whoKnowsTop('album', wkAlbumResults, entry)" matTooltip="Top Scrobbles — Album" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
                         </td>
@@ -221,7 +221,7 @@
                         <td>{{ i+1 }}</td>
                         <td>{{ entry.username }}</td>
                         <td>{{ entry.scrobbles | number }}</td>
-                        <td>{{ entry.percent }}</td>
+                        <td>{{ entry.percent | number: '1.2-2' }}</td>
                         <td class="wk-actions">
                             <a (click)="whoKnowsTop('artist', wkTrackResults, entry)" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
                         </td>                     
