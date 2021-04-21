@@ -77,7 +77,6 @@ def wk_artist(query, users, start_range, end_range):
         sql = 'SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN "{}" AND "{}" GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'], start_range, end_range)
     else:
         sql = 'SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'])
-    logger.log(sql)
     cursor.execute(sql)
     result = list(cursor)
     total_scrobbles = sum([u['scrobbles'] for u in result])
