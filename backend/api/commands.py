@@ -17,7 +17,7 @@ def wk_artist():
     try:
         params = request.get_json()
         if auth_helper.is_authenticated(params['username'], params['session_key']):
-            result = command_helper.wk_artist(params['query'], params['users'])
+            result = command_helper.wk_artist(params['query'], params['users'], params['start_range'], params['end_range'])
             if not result:
                 abort(404)
             return jsonify(result)
@@ -36,7 +36,7 @@ def wk_album():
     try:
         params = request.get_json()
         if auth_helper.is_authenticated(params['username'], params['session_key']):
-            result = command_helper.wk_album(params['query'], params['users'])
+            result = command_helper.wk_album(params['query'], params['users'], params['start_range'], params['end_range'], )
             if result == None:
                 abort(404)
             elif result == False:
@@ -57,7 +57,7 @@ def wk_track():
     try:
         params = request.get_json()
         if auth_helper.is_authenticated(params['username'], params['session_key']):
-            result = command_helper.wk_track(params['query'], params['users'])
+            result = command_helper.wk_track(params['query'], params['users'], params['start_range'], params['end_range'])
             if result == None:
                 abort(404)
             elif result == False:
@@ -121,13 +121,13 @@ def history():
         if auth_helper.is_authenticated(params['username'], params['session_key']):
             wk_mode = params['wk_mode']
             if wk_mode == "track":
-                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], params['track'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
+                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], params['start_range'], params['end_range'], params['track'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
             elif wk_mode == "album":
-                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], None, params['album_id'], params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
+                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], params['start_range'], params['end_range'], None, params['album_id'], params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
             elif wk_mode == "artist":
-                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
+                result = command_helper.play_history(wk_mode, params['artist_id'], params['users'], params['start_range'], params['end_range'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
             elif wk_mode == "overall":
-                result = command_helper.play_history(wk_mode, None, params['users'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
+                result = command_helper.play_history(wk_mode, None, params['users'], params['start_range'], params['end_range'], sort_by=params['sort_by'], sort_order=params['sort_order'], limit=params['limit'], offset=params['offset'])
             else:
                 abort(400)
             return jsonify(result)

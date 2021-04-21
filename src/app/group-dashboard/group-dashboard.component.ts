@@ -21,12 +21,32 @@ import { DeviceDetectorService } from 'ngx-device-detector';
 export class GroupDashboardComponent implements OnInit {
   moment: any = moment;
   deviceInfo: any = null;
+
+  // mappings for all date sliders/dropdowns
+  leaderboardSliderMappings: any = [
+    {'label': '24 hours', 'days': 1},
+    {'label': '7 days', 'days': 7},
+    {'label': '14 days', 'days': 14},
+    {'label': '30 days', 'days': 30},
+    {'label': '60 days', 'days': 60},
+    {'label': '90 days', 'days': 90},
+    {'label': '180 days', 'days': 180},
+    {'label': '365 days', 'days': 365},
+    {'label': 'All time', 'days': -1}
+  ];
+
   // wkArtist
   @ViewChild('wkArtist', { static: true }) wkArtistDom: ElementRef;
   wkArtistForm;
   wkArtistResults;
   wkArtistInit: boolean = false;
   wkArtistRedirectLoading: boolean = false;
+  wkArtistSelectedIndex: number = this.leaderboardSliderMappings.length - 1;
+  wkArtistIsCustomDateRange: boolean = false;
+  wkArtistValueSubject = new BehaviorSubject<number>(1);
+  wkArtistDateLoading: boolean = false;
+  wkArtistCustomStartDate: moment.Moment;
+  wkArtistCustomEndDate: moment.Moment;
 
   // wkAlbum
   @ViewChild('wkAlbum', { static: true }) wkAlbumDom: ElementRef;
@@ -47,22 +67,11 @@ export class GroupDashboardComponent implements OnInit {
 
   // scrobbleLeaderboard
   @ViewChild('scrobbleLeaderboard', { static: true }) leaderboardDom: ElementRef;
-  leaderboardSliderMappings: any = [
-    {'label': '24 hours', 'days': 1},
-    {'label': '7 days', 'days': 7},
-    {'label': '14 days', 'days': 14},
-    {'label': '30 days', 'days': 30},
-    {'label': '60 days', 'days': 60},
-    {'label': '90 days', 'days': 90},
-    {'label': '180 days', 'days': 180},
-    {'label': '365 days', 'days': 365},
-    {'label': 'All time', 'days': -1}
-  ];
   leaderboardSelectedIndex: number = 1; // real-time slider value
   leaderboardLoadedIndex: number = 1; // http request-dependent value
   leaderboardObject: any;
   leaderboardLoading: boolean = true;
-  valueSubject = new BehaviorSubject<number>(1);
+  leaderboardValueSubject = new BehaviorSubject<number>(1);
   customStartDate: moment.Moment;
   customEndDate: moment.Moment;
   isCustomDateRange: boolean = false;
@@ -132,13 +141,25 @@ export class GroupDashboardComponent implements OnInit {
         }
       })
       // leaderboard slider change
-      this.valueSubject.pipe(debounceTime(1000)).subscribe(value => {
+      this.leaderboardValueSubject.pipe(debounceTime(1000)).subscribe(value => {
         if (value == this.leaderboardSliderMappings.length-1) { // All time
           this.scrobbleLeaderboard(value, this.group.members.map(u => u.id))
         } else {
           let endRange = moment.utc()
           let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
           this.scrobbleLeaderboard(value, this.group.members.map(u => u.id), startRange, endRange)
+        }
+      })
+      // wkArtist slider change
+      this.wkArtistValueSubject.pipe(debounceTime(1000)).subscribe(value => {
+        if (this.wkArtistResults) {
+          if (value == this.leaderboardSliderMappings.length-1) { // All time
+            this.wkArtistSubmit({'query': this.wkArtistResults.artist.name}, this.group.members)
+          } else {
+            let endRange = moment.utc()
+            let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
+            this.wkArtistSubmit({'query': this.wkArtistResults.artist.name}, this.group.members, startRange, endRange, true)
+          }
         }
       })
       // wk autocomplete
@@ -178,11 +199,13 @@ export class GroupDashboardComponent implements OnInit {
     clearInterval(this.npInterval);
   }
 
-  wkArtistSubmit(formData, users) {
+  wkArtistSubmit(formData, users, startRange=null, endRange=null, fromSliderChange:boolean=false) {
     this.wkArtistInit = true
-    this.wkArtistResults = null
+    if (!fromSliderChange)
+      this.wkArtistResults = null
     this.wkArtistDom.nativeElement.style.background = ''
-    this.userService.wkArtist(formData['query'], users.map(u => u.id)).toPromise().then(data => {
+    this.userService.wkArtist(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then(data => {
+      this.wkArtistDateLoading = false;
       this.wkArtistResults = data
       this.wkArtistDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkArtistResults['artist']['image_url']+')'
       this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
@@ -202,6 +225,7 @@ export class GroupDashboardComponent implements OnInit {
         this.wkArtistInput.closePanel()
         this.wkArtistInputRaw.nativeElement.blur();  
       }
+      this.wkArtistDateLoading = false;
       this.wkArtistInit = false
       if (error['status'] == 404) {
         this.wkArtistInit = undefined;
@@ -350,13 +374,15 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  nowPlayingToWk(entry, wkArtist: HTMLElement=null) {
+  nowPlayingToWk(entry, wkArtist: HTMLElement=null, startRange=null, endRange=null) {
     this.wkArtistSuggestions = {'suggestions': [], 'partial_result': false}
     this.wkAlbumSuggestions = {'suggestions': [], 'partial_result': false}
     this.wkTrackSuggestions = {'suggestions': [], 'partial_result': false}
     
     this.wkArtistForm.get('query').setValue(entry.artist)
     this.wkArtistSubmit({'query': entry.artist}, this.group.members)
+    this.wkArtistIsCustomDateRange = false
+    this.wkArtistSelectedIndex = this.leaderboardSliderMappings.length - 1
     
     if (entry.album !== undefined) {
       let albumQuery = entry.artist + " - " + entry.album
@@ -452,7 +478,14 @@ export class GroupDashboardComponent implements OnInit {
     this.leaderboardLoading = true;
     this.leaderboardSelectedIndex = event.value
     this.isCustomDateRange = false;
-    this.valueSubject.next(event.value);
+    this.leaderboardValueSubject.next(event.value);
+  }
+
+  onwkArtistSliderChange(event: MatSliderChange) {
+    this.wkArtistDateLoading = true;
+    this.wkArtistSelectedIndex = event.value
+    this.wkArtistIsCustomDateRange = false;
+    this.wkArtistValueSubject.next(event.value);
   }
 
   customDateRange(title) {
@@ -470,6 +503,12 @@ export class GroupDashboardComponent implements OnInit {
         this.chartCustomStartDate = data.startDate
         this.chartCustomEndDate = data.endDate
         this.charts(data.startDate, data.endDate)
+      } else if (title == 'Who Knows This Artist') {
+        this.wkArtistDateLoading = true
+        this.wkArtistIsCustomDateRange = true
+        this.wkArtistCustomStartDate = data.startDate
+        this.wkArtistCustomEndDate = data.endDate
+        this.wkArtistSubmit({'query': this.wkArtistResults.artist.name}, this.group.members, data.startDate, data.endDate)
       }
     })
     dialogRef.afterClosed().subscribe(() => {

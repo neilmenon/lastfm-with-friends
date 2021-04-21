@@ -106,30 +106,36 @@ export class UserService {
     })
   }
 
-  wkArtist(query, users) {
+  wkArtist(query, users, startRange=null, endRange=null) {
     return this.http.post(config.api_root + "/commands/wkartist", {
       'username': this.username,
       'session_key': this.session_key,
       'query': query,
-      'users': users
+      'users': users,
+      'start_range': startRange,
+      'end_range': endRange
     })
   }
 
-  wkAlbum(query, users) {
+  wkAlbum(query, users, startRange=null, endRange=null) {
     return this.http.post(config.api_root + "/commands/wkalbum", {
       'username': this.username,
       'session_key': this.session_key,
       'query': query,
-      'users': users
+      'users': users,
+      'start_range': startRange,
+      'end_range': endRange
     })
   }
 
-  wkTrack(query, users) {
+  wkTrack(query, users, startRange=null, endRange=null) {
     return this.http.post(config.api_root + "/commands/wktrack", {
       'username': this.username,
       'session_key': this.session_key,
       'query': query,
-      'users': users
+      'users': users,
+      'start_range': startRange,
+      'end_range': endRange
     })
   }
 
@@ -141,12 +147,14 @@ export class UserService {
     })
   }
 
-  scrobbleHistory(wkMode, wkObject, users, sortBy, sortOrder, limit, offset) {
+  scrobbleHistory(wkMode, wkObject, users, sortBy, sortOrder, limit, offset, startRange=null, endRange=null,) {
     let payload = {
       'username': this.username,
       'session_key': this.session_key,
       'wk_mode': wkMode,
       'users': users,
+      'start_range': startRange,
+      'end_range': endRange,
       'sort_by': sortBy,
       'sort_order': sortOrder,
       'limit': limit,

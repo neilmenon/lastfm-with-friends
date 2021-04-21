@@ -45,3 +45,8 @@
 .chart-release > span:first-child {
     font-weight: bold;
 }
+.wk-slider {
+    height: 10px!important;
+    margin-top: -34px!important;
+    width: 100%;
+}
