@@ -201,16 +201,19 @@ export class GroupDashboardComponent implements OnInit {
 
   wkArtistSubmit(formData, users, startRange=null, endRange=null, fromSliderChange:boolean=false) {
     this.wkArtistInit = true
-    if (!fromSliderChange)
+    if (!fromSliderChange) {
       this.wkArtistResults = null
-    this.wkArtistDom.nativeElement.style.background = ''
+      this.wkArtistDom.nativeElement.style.background = ''
+    }
     this.userService.wkArtist(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then(data => {
       this.wkArtistDateLoading = false;
       this.wkArtistResults = data
-      this.wkArtistDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkArtistResults['artist']['image_url']+')'
-      this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
-      this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-      this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
+      if (!fromSliderChange) {
+        this.wkArtistDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkArtistResults['artist']['image_url']+')'
+        this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
+        this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+        this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
+      }
       if (this.detectorService.isMobile()) {
         this.wkArtistInput.closePanel()
         this.wkArtistInputRaw.nativeElement.blur();  

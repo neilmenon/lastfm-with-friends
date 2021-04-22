@@ -366,8 +366,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let entry of chartResults; let i = index">
-                        <td>{{ i+1 }}</td>
+                    <tr *ngFor="let entry of chartResults">
+                        <td>{{ entry.position }}</td>
                         <td *ngIf="chartReleaseType == 'track' || chartReleaseType == 'album'"><a href="{{ entry.url }}" target="_blank"><img src="{{ entry.image }}" class="chart-album-image"></a></td>
                         <td *ngIf="chartReleaseType == 'artist'"><a href="{{ entry.artist_url }}" target="_blank"><img src="{{ entry.artist_image }}" class="chart-artist-image"></a></td>
                         <td *ngIf="chartReleaseType == 'track'" class="chart-release">

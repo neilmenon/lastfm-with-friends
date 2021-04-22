@@ -469,5 +469,9 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
                 else:
                     group_chart[entry_key] = entry
                     group_chart[entry_key]['score'] = math.log(entry['scrobbles'])
-        group_chart_final = sorted([v for k,v in group_chart.items()], key=itemgetter('score'), reverse=True)
-        return group_chart_final[:100]
+        group_chart_condensed = sorted([v for k,v in group_chart.items()], key=itemgetter('score'), reverse=True)[:100]
+        group_chart_final = []
+        for i, entry in enumerate(group_chart_condensed):
+            entry['position'] = i + 1
+            group_chart_final.append(entry)
+        return group_chart_final
