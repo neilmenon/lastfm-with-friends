@@ -48,7 +48,7 @@
             <div class="refresh">
                 <mat-spinner *ngIf="wkArtistDateLoading" style="right: 46px;" diameter="19" color="accent"></mat-spinner>
             </div>
-            <a class="refresh clickable" style="right: 13px; font-size: 22px;" *ngIf="wkArtistResults && wkArtistResults.users.length > 0" (click)="scrobbleHistory('artist', wkArtistResults, group.members)" matTooltip="Group Scrobble History — Artist" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" style="right: 13px; font-size: 22px;" *ngIf="wkArtistResults && wkArtistResults.users.length > 0" (click)="scrobbleHistory('artist', wkArtistResults, group.members, wkArtistIsCustomDateRange ? wkArtistCustomStartDate : (wkArtistSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc().subtract(leaderboardSliderMappings[wkArtistSelectedIndex].days, 'd')), wkArtistIsCustomDateRange ? wkArtistCustomEndDate : (wkArtistSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc()))" matTooltip="Group Scrobble History — Artist" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
             <a class="refresh clickable" *ngIf="wkArtistResults" matTooltip="Custom Date Range" matTooltipPosition="above" (click)="customDateRange('Who Knows This Artist')"><mat-icon [inline]="true">date_range</mat-icon></a>
         </div>
         <div class="container">
@@ -120,14 +120,23 @@
     <!-- wkAlbum -->
     <div class="box center command-box" #wkAlbum >
         <div style="position: relative;">
-            <h2 class="box-title">Who Knows This Album</h2> 
-            <a class="refresh clickable" *ngIf="wkAlbumResults && wkAlbumResults.users.length > 0" (click)="scrobbleHistory('album', wkAlbumResults, group.members)" matTooltip="Group Scrobble History — Album" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <h2 class="box-title">Who Knows This Album</h2>
+            <div class="left-cmd-buttons" *ngIf="wkAlbumResults">
+                <mat-icon [inline]="true">access_time</mat-icon>
+                <span *ngIf="!wkAlbumIsCustomDateRange">{{ leaderboardSliderMappings[wkAlbumSelectedIndex].label }}</span>
+                <span *ngIf="wkAlbumIsCustomDateRange">{{ wkAlbumCustomStartDate.format('MM/DD/YY') }} - {{ wkAlbumCustomEndDate.format('MM/DD/YY') }}</span>
+            </div>
+            <div class="refresh">
+                <mat-spinner *ngIf="wkAlbumDateLoading" style="right: 46px;" diameter="19" color="accent"></mat-spinner>
+            </div>
+            <a class="refresh clickable" style="right: 13px; font-size: 22px;" *ngIf="wkAlbumResults && wkAlbumResults.users.length > 0" (click)="scrobbleHistory('album', wkAlbumResults, group.members, wkAlbumIsCustomDateRange ? wkAlbumCustomStartDate : (wkAlbumSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc().subtract(leaderboardSliderMappings[wkAlbumSelectedIndex].days, 'd')), wkAlbumIsCustomDateRange ? wkAlbumCustomEndDate : (wkAlbumSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc()))" matTooltip="Group Scrobble History — Album" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" *ngIf="wkAlbumResults" matTooltip="Custom Date Range" matTooltipPosition="above" (click)="customDateRange('Who Knows This Album')"><mat-icon [inline]="true">date_range</mat-icon></a>
         </div>
         <div class="container">
-            <form [formGroup]="wkAlbumForm" class="box-form" (ngSubmit)="wkAlbumSubmit(wkAlbumForm.value, group.members)">
+            <form [formGroup]="wkAlbumForm" class="box-form" (ngSubmit)="wkAlbumSubmit(wkAlbumForm.value, group.members);wkAlbumSelectedIndex = leaderboardSliderMappings.length - 1;wkAlbumIsCustomDateRange=false">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
                     <input #wkAlbumInput matInput name="name" placeholder="Coldplay - Mylo Xyloto, etc." type="text" formControlName="query" [matAutocomplete]="wkAlbumAuto" (ngModelChange)="wkAutocomplete('album', $event)">
-                    <mat-autocomplete #wkAlbumAuto="matAutocomplete" (optionSelected)="wkAlbumSubmit({'query': $event.option.value}, group.members, wkAlbumSuggestions.partial_result)">
+                    <mat-autocomplete #wkAlbumAuto="matAutocomplete" (optionSelected)="wkAlbumSubmit({'query': $event.option.value}, group.members, null, null, false, wkAlbumSuggestions.partial_result);wkAlbumSelectedIndex = leaderboardSliderMappings.length - 1;wkAlbumIsCustomDateRange=false">
                         <mat-option *ngFor="let s of wkAlbumSuggestions.suggestions" [value]="s" >{{ wkAlbumSuggestions.partial_result ? s.replace(' - ', '') : s }}</mat-option>
                     </mat-autocomplete>
                 </mat-form-field>
@@ -151,7 +160,10 @@
                 <span *ngIf="wkAlbumResults.users.length == 1">
                     Only {{ wkAlbumResults.users[0].username }} knows {{ wkAlbumResults.album.name }} in {{ group.name  }}!
                 </span>
-                <span *ngIf="wkAlbumResults.users.length == 0">No one knows {{ wkAlbumResults.artist.name }} - {{ wkAlbumResults.album.name }} in {{ group.name }}.</span>
+                <span *ngIf="wkAlbumResults.users.length == 0">No one knows {{ wkAlbumResults.album.name }} within this time period in {{ group.name }}.</span>
+                <div>
+                    <mat-slider invert [max]="leaderboardSliderMappings.length-1" (input)="onwkAlbumSliderChange($event)" [value]="wkAlbumSelectedIndex" class="wk-slider"></mat-slider>
+                </div>
             </div>
             <table class="results-table" *ngIf="wkAlbumResults.users.length > 0">
                 <thead>
@@ -185,14 +197,23 @@
     <!-- wkTrack -->
     <div class="box center command-box" #wkTrack >
         <div style="position: relative;">
-            <h2 class="box-title">Who Knows This Track</h2> 
-            <a class="refresh clickable" *ngIf="wkTrackResults && wkTrackResults.users.length > 0" (click)="scrobbleHistory('track', wkTrackResults, group.members)" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <h2 class="box-title">Who Knows This Track</h2>
+            <div class="left-cmd-buttons" *ngIf="wkTrackResults">
+                <mat-icon [inline]="true">access_time</mat-icon>
+                <span *ngIf="!wkTrackIsCustomDateRange">{{ leaderboardSliderMappings[wkTrackSelectedIndex].label }}</span>
+                <span *ngIf="wkTrackIsCustomDateRange">{{ wkTrackCustomStartDate.format('MM/DD/YY') }} - {{ wkTrackCustomEndDate.format('MM/DD/YY') }}</span>
+            </div>
+            <div class="refresh">
+                <mat-spinner *ngIf="wkTrackDateLoading" style="right: 46px;" diameter="19" color="accent"></mat-spinner>
+            </div>
+            <a class="refresh clickable" style="right: 13px; font-size: 22px;" *ngIf="wkTrackResults && wkTrackResults.users.length > 0" (click)="scrobbleHistory('track', wkTrackResults, group.members, wkTrackIsCustomDateRange ? wkTrackCustomStartDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc().subtract(leaderboardSliderMappings[wkTrackSelectedIndex].days, 'd')), wkTrackIsCustomDateRange ? wkTrackCustomEndDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc()))" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+            <a class="refresh clickable" *ngIf="wkAlbumResults" matTooltip="Custom Date Range" matTooltipPosition="above" (click)="customDateRange('Who Knows This Track')"><mat-icon [inline]="true">date_range</mat-icon></a>
         </div>
         <div class="container">
-            <form [formGroup]="wkTrackForm" class="box-form" (ngSubmit)="wkTrackSubmit(wkTrackForm.value, group.members)">
+            <form [formGroup]="wkTrackForm" class="box-form" (ngSubmit)="wkTrackSubmit(wkTrackForm.value, group.members);wkTrackSelectedIndex = leaderboardSliderMappings.length - 1;wkTrackIsCustomDateRange=false">
                 <mat-form-field appearance="legacy" class="full-width" color="accent">
                     <input #wkTrackInput matInput name="name" placeholder="Coldplay - Paradise, etc." type="text" formControlName="query" [matAutocomplete]="wkTrackAuto" (ngModelChange)="wkAutocomplete('track', $event)">
-                    <mat-autocomplete #wkTrackAuto="matAutocomplete" (optionSelected)="wkTrackSubmit({'query': $event.option.value}, group.members, wkTrackSuggestions.partial_result)">
+                    <mat-autocomplete #wkTrackAuto="matAutocomplete" (optionSelected)="wkTrackSubmit({'query': $event.option.value}, group.members, null, null, false, wkTrackSuggestions.partial_result);wkTrackSelectedIndex = leaderboardSliderMappings.length - 1;wkTrackIsCustomDateRange=false">
                         <mat-option *ngFor="let s of wkTrackSuggestions.suggestions" [value]="s">{{ wkTrackSuggestions.partial_result ? s.replace(' - ', '') : s }}</mat-option>
                     </mat-autocomplete>
                 </mat-form-field>
@@ -216,9 +237,12 @@
                 <span *ngIf="wkTrackResults.users.length == 1">
                     Only {{ wkTrackResults.users[0].username }} knows {{ wkTrackResults.track.name }} in {{ group.name  }}!
                 </span>
-                <span *ngIf="wkTrackResults.users.length == 0">No one knows {{ wkTrackResults.artist.name }} - {{ wkTrackResults.track.name }} in {{ group.name }}.</span>
+                <span *ngIf="wkTrackResults.users.length == 0">No one knows {{ wkTrackResults.track.name }} within this time period in {{ group.name }}.</span>
+                <div>
+                    <mat-slider invert [max]="leaderboardSliderMappings.length-1" (input)="onwkTrackSliderChange($event)" [value]="wkTrackSelectedIndex" class="wk-slider"></mat-slider>
+                </div>
             </div>
-            <table class="results-table" >
+            <table class="results-table" *ngIf="wkTrackResults.users.length > 0">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -382,7 +406,7 @@
                         <td>{{ entry.scrobbles | number }}</td>    
                         <td *ngIf="chartSelectedUser == 'all'">{{ entry.score | number: '1.2-2' }}</td>
                         <td class="wk-actions">
-                            <a (click)="nowPlayingToWk(entry, wkArtist)" matTooltip="Who Knows — Artist/Album/Track" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">help_center</mat-icon></a>
+                            <a (click)="nowPlayingToWk(entry, wkArtist, chartIsCustomDate ? chartCustomStartDate : (chartDropdownDate == -1 ? null : moment.utc().subtract(chartDropdownDate, 'd')), chartIsCustomDate ? chartCustomEndDate : (chartDropdownDate == -1 ? null : moment.utc()), true)" matTooltip="Who Knows — Artist/Album/Track" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">help_center</mat-icon></a>
                         </td>
                     </tr>
                 </tbody>

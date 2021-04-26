@@ -449,8 +449,9 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
    
     if chart_mode == "individual":
         result = user_charts[0]
-        if chart_type == "track":
-            for entry in result:
+        for i, entry in enumerate(result):
+            entry['position'] = i + 1
+            if chart_type == "track":
                 entry['url'] = entry['artist_url'] + "/_/" + entry['track'].replace(" ", "+").replace("/", "%2F")
         return result[:100]
     else: # group

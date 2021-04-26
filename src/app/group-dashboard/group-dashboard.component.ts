@@ -53,12 +53,24 @@ export class GroupDashboardComponent implements OnInit {
   wkAlbumForm;
   wkAlbumResults;
   wkAlbumInit: boolean = false;
+  wkAlbumSelectedIndex: number = this.leaderboardSliderMappings.length - 1;
+  wkAlbumIsCustomDateRange: boolean = false;
+  wkAlbumValueSubject = new BehaviorSubject<number>(1);
+  wkAlbumDateLoading: boolean = false;
+  wkAlbumCustomStartDate: moment.Moment;
+  wkAlbumCustomEndDate: moment.Moment;
 
   // wkTrack
   @ViewChild('wkTrack', { static: true }) wkTrackDom: ElementRef;
   wkTrackForm;
   wkTrackResults;
   wkTrackInit: boolean = false;
+  wkTrackSelectedIndex: number = this.leaderboardSliderMappings.length - 1;
+  wkTrackIsCustomDateRange: boolean = false;
+  wkTrackValueSubject = new BehaviorSubject<number>(1);
+  wkTrackDateLoading: boolean = false;
+  wkTrackCustomStartDate: moment.Moment;
+  wkTrackCustomEndDate: moment.Moment;
 
   // nowplaying
   nowPlayingResults = null;
@@ -162,6 +174,30 @@ export class GroupDashboardComponent implements OnInit {
           }
         }
       })
+      // wkAlbum slider change
+      this.wkAlbumValueSubject.pipe(debounceTime(1000)).subscribe(value => {
+        if (this.wkAlbumResults) {
+          if (value == this.leaderboardSliderMappings.length-1) { // All time
+            this.wkAlbumSubmit({'query': this.wkAlbumResults.artist.name + " - " + this.wkAlbumResults.album.name}, this.group.members)
+          } else {
+            let endRange = moment.utc()
+            let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
+            this.wkAlbumSubmit({'query': this.wkAlbumResults.artist.name + " - " + this.wkAlbumResults.album.name}, this.group.members, startRange, endRange, true)
+          }
+        }
+      })
+      // wkTrack slider change
+      this.wkTrackValueSubject.pipe(debounceTime(1000)).subscribe(value => {
+        if (this.wkTrackResults) {
+          if (value == this.leaderboardSliderMappings.length-1) { // All time
+            this.wkTrackSubmit({'query': this.wkTrackResults.artist.name + " - " + this.wkTrackResults.track.name}, this.group.members)
+          } else {
+            let endRange = moment.utc()
+            let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
+            this.wkTrackSubmit({'query': this.wkTrackResults.artist.name + " - " + this.wkTrackResults.track.name}, this.group.members, startRange, endRange, true)
+          }
+        }
+      })
       // wk autocomplete
       this.wkAutoSubject.pipe(debounceTime(500)).subscribe(value => {
         if (value) {
@@ -257,17 +293,22 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  wkAlbumSubmit(formData, users, partialResult=false) {
+  wkAlbumSubmit(formData, users, startRange=null, endRange=null, fromSliderChange:boolean=false, partialResult=false) {
     if (!partialResult) {
       this.wkAlbumInit = true
-      this.wkAlbumResults = null
-      this.wkAlbumDom.nativeElement.style.background = ''
-      this.userService.wkAlbum(formData['query'], users.map(u => u.id)).toPromise().then(data => {
+      if (!fromSliderChange) {
+        this.wkAlbumResults = null
+        this.wkAlbumDom.nativeElement.style.background = ''
+      }
+      this.userService.wkAlbum(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then(data => {
+        this.wkAlbumDateLoading = false;
         this.wkAlbumResults = data
-        this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
-        this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
-        this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-        this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
+        if (!fromSliderChange) {
+          this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
+          this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
+          this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+          this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
+        }
         if (this.detectorService.isMobile()) {
           this.wkAlbumInput.closePanel()
           this.wkAlbumInputRaw.nativeElement.blur();
@@ -277,6 +318,7 @@ export class GroupDashboardComponent implements OnInit {
           this.wkAlbumInput.closePanel()
           this.wkAlbumInputRaw.nativeElement.blur();
         }
+        this.wkAlbumDateLoading = false;
         this.wkAlbumInit = false
         if (error['status'] == 404) {
           this.wkAlbumInit = undefined;
@@ -294,17 +336,22 @@ export class GroupDashboardComponent implements OnInit {
     }
   }
 
-  wkTrackSubmit(formData, users, partialResult=false) {
+  wkTrackSubmit(formData, users, startRange=null, endRange=null, fromSliderChange:boolean=false, partialResult=false) {
     if (!partialResult) {
       this.wkTrackInit = true
-      this.wkTrackResults = null
-      this.wkTrackDom.nativeElement.style.background = ''
-      this.userService.wkTrack(formData['query'], users.map(u => u.id)).toPromise().then(data => {
+      if (!fromSliderChange) {
+        this.wkTrackResults = null
+        this.wkTrackDom.nativeElement.style.background = ''
+      }
+      this.userService.wkTrack(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then(data => {
+        this.wkTrackDateLoading = false;
         this.wkTrackResults = data
-        this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
-        this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
-        this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-        this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
+        if (!fromSliderChange) {
+          this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
+          this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
+          this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+          this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
+        }
         if (this.detectorService.isMobile()) {
           this.wkTrackInput.closePanel()
           this.wkTrackInputRaw.nativeElement.blur();
@@ -315,6 +362,7 @@ export class GroupDashboardComponent implements OnInit {
           this.wkTrackInputRaw.nativeElement.blur();
         }
         this.wkTrackInit = false
+        this.wkTrackDateLoading = false;
         if (error['status'] == 404) {
           this.wkTrackInit = undefined;
         } else if(error['status'] == 400) {
@@ -377,40 +425,73 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  nowPlayingToWk(entry, wkArtist: HTMLElement=null, startRange=null, endRange=null) {
+  nowPlayingToWk(entry, wkArtist: HTMLElement=null, startRange:moment.Moment=null, endRange:moment.Moment=null, fromChart:boolean=false) {
     this.wkArtistSuggestions = {'suggestions': [], 'partial_result': false}
     this.wkAlbumSuggestions = {'suggestions': [], 'partial_result': false}
     this.wkTrackSuggestions = {'suggestions': [], 'partial_result': false}
     
     this.wkArtistForm.get('query').setValue(entry.artist)
-    this.wkArtistSubmit({'query': entry.artist}, this.group.members)
-    this.wkArtistIsCustomDateRange = false
-    this.wkArtistSelectedIndex = this.leaderboardSliderMappings.length - 1
+    this.wkArtistSubmit({'query': entry.artist}, this.group.members, startRange, endRange)
+    if (fromChart) {
+      this.wkArtistIsCustomDateRange = this.chartIsCustomDate
+      if (!this.chartIsCustomDate) {
+        this.wkArtistSelectedIndex = this.leaderboardSliderMappings.findIndex(o => o.days == this.chartDropdownDate)
+      } else {
+        this.wkArtistCustomStartDate = startRange
+        this.wkArtistCustomEndDate = endRange
+      }
+    } else {
+      this.wkArtistSelectedIndex = this.leaderboardSliderMappings.length - 1
+    }
     
     if (entry.album !== undefined) {
       let albumQuery = entry.artist + " - " + entry.album
       this.wkAlbumForm.get('query').setValue(albumQuery)
-      this.wkAlbumSubmit({'query': albumQuery}, this.group.members)
+      if (fromChart) {
+        this.wkAlbumIsCustomDateRange = this.chartIsCustomDate
+        if (!this.chartIsCustomDate) {
+          this.wkAlbumSelectedIndex = this.leaderboardSliderMappings.findIndex(o => o.days == this.chartDropdownDate)
+        } else {
+          this.wkAlbumCustomStartDate = startRange
+          this.wkAlbumCustomEndDate = endRange
+        }
+      } else {
+        this.wkAlbumSelectedIndex = this.leaderboardSliderMappings.length - 1
+      }
+      this.wkAlbumSubmit({'query': albumQuery}, this.group.members, startRange, endRange)
     }
     
     if (entry.track !== undefined) {
       let trackQuery = entry.artist + " - " + entry.track
       this.wkTrackForm.get('query').setValue(trackQuery)
-      this.wkTrackSubmit({'query': trackQuery}, this.group.members)
+      if (fromChart) {
+        this.wkTrackIsCustomDateRange = this.chartIsCustomDate
+        if (!this.chartIsCustomDate) {
+          this.wkTrackSelectedIndex = this.leaderboardSliderMappings.findIndex(o => o.days == this.chartDropdownDate)
+        } else {
+          this.wkTrackCustomStartDate = startRange
+          this.wkTrackCustomEndDate = endRange
+        }
+      } else {
+        this.wkTrackSelectedIndex = this.leaderboardSliderMappings.length - 1
+      }
+      this.wkTrackSubmit({'query': trackQuery}, this.group.members, startRange, endRange)
     }
     
     if (wkArtist)
       wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
 
-  scrobbleHistory(wkMode, wkObject, users) {
+  scrobbleHistory(wkMode, wkObject, users, startRange:moment.Moment=null, endRange:moment.Moment=null) {
     let dialogRef = this.dialog.open(ScrobbleHistoryComponent, {
       data: {
         group: this.group,
         wkMode: wkMode,
         wkObject: wkObject,
         users: users,
-        user: this.user
+        user: this.user,
+        startRange: startRange,
+        endRange: endRange
       }
     })
     let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
@@ -491,6 +572,20 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistValueSubject.next(event.value);
   }
 
+  onwkAlbumSliderChange(event: MatSliderChange) {
+    this.wkAlbumDateLoading = true;
+    this.wkAlbumSelectedIndex = event.value
+    this.wkAlbumIsCustomDateRange = false;
+    this.wkAlbumValueSubject.next(event.value);
+  }
+
+  onwkTrackSliderChange(event: MatSliderChange) {
+    this.wkTrackDateLoading = true;
+    this.wkTrackSelectedIndex = event.value
+    this.wkTrackIsCustomDateRange = false;
+    this.wkTrackValueSubject.next(event.value);
+  }
+
   customDateRange(title) {
     let dialogRef = this.dialog.open(CustomDateRangeComponent, {
       data: {
@@ -512,6 +607,18 @@ export class GroupDashboardComponent implements OnInit {
         this.wkArtistCustomStartDate = data.startDate
         this.wkArtistCustomEndDate = data.endDate
         this.wkArtistSubmit({'query': this.wkArtistResults.artist.name}, this.group.members, data.startDate, data.endDate)
+      } else if (title == 'Who Knows This Album') {
+        this.wkAlbumDateLoading = true
+        this.wkAlbumIsCustomDateRange = true
+        this.wkAlbumCustomStartDate = data.startDate
+        this.wkAlbumCustomEndDate = data.endDate
+        this.wkAlbumSubmit({'query': this.wkAlbumResults.artist.name + " - " + this.wkAlbumResults.album.name}, this.group.members, data.startDate, data.endDate)
+      } else if (title == 'Who Knows This Track') {
+        this.wkTrackDateLoading = true
+        this.wkTrackIsCustomDateRange = true
+        this.wkTrackCustomStartDate = data.startDate
+        this.wkTrackCustomEndDate = data.endDate
+        this.wkTrackSubmit({'query': this.wkTrackResults.artist.name + " - " + this.wkTrackResults.track.name}, this.group.members, data.startDate, data.endDate)
       }
     })
     dialogRef.afterClosed().subscribe(() => {

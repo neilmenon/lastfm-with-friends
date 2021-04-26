@@ -28,6 +28,10 @@ export class ScrobbleHistoryComponent implements OnInit {
   sortOrder: any = "DESC";
   paginationTriggered: boolean = false;
 
+  // dates
+  historyStartDate:moment.Moment;
+  historyEndDate:moment.Moment;
+
   @Output() wkFromDialog: EventEmitter<any> = new EventEmitter(true)
   @Output() wkFromTopDialog: EventEmitter<any> = new EventEmitter(true)
   setPageSizeOptions(setPageSizeOptionsInput: string) {
@@ -39,7 +43,9 @@ export class ScrobbleHistoryComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService, public dialogRef: MatDialogRef<ScrobbleHistoryComponent>) { }
 
   ngOnInit(): void {
-    this.getHistoryPage(this.data.group.members.map(u => u.id), this.sortBy, this.sortOrder, this.pageSize, 0)
+    this.historyStartDate = this.data.startRange
+    this.historyEndDate = this.data.endRange
+    this.getHistoryPage(this.data.group.members.map(u => u.id), this.sortBy, this.sortOrder, this.pageSize, 0, this.historyStartDate ? this.historyStartDate.format() : null, this.historyEndDate ? this.historyEndDate.format() : null)
   }
 
   paginationChange(pageData, selectedUser, reset=false) {
@@ -61,10 +67,10 @@ export class ScrobbleHistoryComponent implements OnInit {
       this.paginator.pageIndex = 0;
     }
     let offset = reset ? 0 : (pageData['pageIndex'])*pageData['pageSize']
-    this.getHistoryPage(selectedUser, this.sortBy, this.sortOrder, pageData['pageSize'], offset)
+    this.getHistoryPage(selectedUser, this.sortBy, this.sortOrder, pageData['pageSize'], offset, this.historyStartDate ? this.historyStartDate.format() : null, this.historyEndDate ? this.historyEndDate.format() : null)
   }
 
-  getHistoryPage(users, sortBy, sortOrder, limit, offset) {
+  getHistoryPage(users, sortBy, sortOrder, limit, offset, startRange=null, endRange=null) {
     this.userService.scrobbleHistory(
       this.data.wkMode, 
       this.data.wkObject, 
@@ -72,7 +78,9 @@ export class ScrobbleHistoryComponent implements OnInit {
       sortBy,
       sortOrder,
       limit,
-      offset
+      offset,
+      startRange,
+      endRange
     ).toPromise().then(data => {
       this.resultsObject = data
       this.length = data['total']

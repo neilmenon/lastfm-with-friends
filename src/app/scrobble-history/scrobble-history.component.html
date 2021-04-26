@@ -1,7 +1,13 @@
-<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'overall'">Scrobble History for <u>{{ data.group.name }}</u></h3>
-<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'artist'">Scrobble History for <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h3>
-<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'album'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h3>
-<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'track'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }}</u> in {{ data.group.name }}</h3>
+<div class="center" style="margin-bottom: -16px;">
+    <h3 mat-dialog-title *ngIf="data.wkMode == 'overall'">Scrobble History for <u>{{ data.group.name }}</u></h3>
+    <h3 mat-dialog-title *ngIf="data.wkMode == 'artist'">Scrobble History for <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h3>
+    <h3 mat-dialog-title *ngIf="data.wkMode == 'album'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h3>
+    <h3 mat-dialog-title *ngIf="data.wkMode == 'track'">Scrobble History for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }}</u> in {{ data.group.name }}</h3>
+</div>
+<span class="center-all" *ngIf="!(historyStartDate && historyEndDate); else noDate" style="color: #bfbfbf;">Time Period: Overall</span>
+<ng-template #noDate>
+    <span class="center-all" style="color: #bfbfbf;">Time Period: {{ historyStartDate.format('MM/DD/YY') }} - {{ historyEndDate.format('MM/DD/YY') }}</span>
+</ng-template>
 <div class="history-options-container">
     <div class="history-options center">
         <mat-form-field color="accent">
