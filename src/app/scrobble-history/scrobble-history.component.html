@@ -12,7 +12,7 @@
     <div class="history-options center">
         <mat-form-field color="accent">
             <mat-label>User</mat-label>
-            <mat-select [(ngModel)]="selectedUser" [(value)]="selectedUser" (selectionChange)="paginationChange(pageEvent, selectedUser, true)" *ngIf="data.wkMode != 'overall'; else overallSelect">
+            <mat-select [(ngModel)]="selectedUser" [(value)]="selectedUser" (selectionChange)="paginationChange(pageEvent, selectedUser, true)" *ngIf="data.wkMode != 'overall' && !data.chartUser; else overallSelect">
                 <mat-option value="all">Everyone</mat-option>
                 <mat-option *ngFor="let u of data.wkObject.users" [value]="u.id">{{ u.username }}<span *ngIf="u.username == data.user.username"> (you)</span></mat-option>
             </mat-select>
@@ -46,7 +46,7 @@
     <mat-paginator #paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" (page)="pageEvent = $event; paginationChange($event, selectedUser)" color="accent"></mat-paginator>
 </div>
 <div mat-dialog-content class="history-result">
-    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="(!resultsObject) || paginationTriggered" style="padding-bottom: 10px;"></mat-spinner>
+    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="((resultsObject === null) || paginationTriggered)" style="padding-bottom: 10px;"></mat-spinner>
     <table *ngIf="resultsObject">
         <thead class="sticky-table-header">
             <tr>
@@ -78,4 +78,5 @@
             </tr>
         </tbody>
     </table>
+    <span *ngIf="resultsObject === undefined" class="center center-all" style="font-size: 13px;">No scrobble entries were found for this user in this time period.</span>
 </div>

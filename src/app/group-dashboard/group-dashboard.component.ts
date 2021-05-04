@@ -103,7 +103,8 @@ export class GroupDashboardComponent implements OnInit {
   // individualGroupCharts
   @ViewChild('individualGroupCharts', { static: true }) chartsDom: ElementRef;
   chartSelectedUser: any = "all";
-  chartReleaseType: string = "track";
+  chartReleaseTypeOptions = ['track', 'artist', 'album']
+  chartReleaseType: string = this.chartReleaseTypeOptions[Math.floor(Math.random() * this.chartReleaseTypeOptions.length)];
   chartDropdownDate: number = 30;
   chartLoading: boolean = false;
   chartIsCustomDate: boolean = false;
@@ -482,7 +483,21 @@ export class GroupDashboardComponent implements OnInit {
       wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
 
-  scrobbleHistory(wkMode, wkObject, users, startRange:moment.Moment=null, endRange:moment.Moment=null) {
+  scrobbleHistory(wkMode, wkObject, users, startRange:moment.Moment=null, endRange:moment.Moment=null, chartUser=null) {
+    if (chartUser) {
+      let tmp = wkObject
+      wkObject = {
+        'artist': {'id': tmp['artist_id'], 'name': tmp['artist']}, 
+        'track': {},
+        'album': {}
+      }
+      if (wkMode == "track") {
+        wkObject['track']['name'] = tmp['track']
+      } else if (wkMode == "album") {
+        wkObject['album']['id'] = tmp['album_id']
+        wkObject['album']['name'] = tmp['album']
+      }
+    }
     let dialogRef = this.dialog.open(ScrobbleHistoryComponent, {
       data: {
         group: this.group,
@@ -491,11 +506,12 @@ export class GroupDashboardComponent implements OnInit {
         users: users,
         user: this.user,
         startRange: startRange,
-        endRange: endRange
+        endRange: endRange,
+        chartUser: chartUser
       }
     })
     let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
-      this.nowPlayingToWk(entry)
+      this.nowPlayingToWk(entry, null, entry['startDate'], entry['endDate'], true)
     })
     let wkTopSub = dialogRef.componentInstance.wkFromTopDialog.subscribe(data => {
       this.whoKnowsTop(data.wkMode, data.wkObject, data.selectedUser)

@@ -11,13 +11,13 @@ import * as moment from 'moment';
   styleUrls: ['./scrobble-history.component.css']
 })
 export class ScrobbleHistoryComponent implements OnInit {
-  resultsObject: any;
+  resultsObject: any = null;
   moment: any = moment;
   @ViewChild('paginator') paginator: MatPaginator
 
   // MatPaginator Inputs
   length = 500;
-  pageSize = 100;
+  pageSize = 50;
   pageIndex = 0;
   pageSizeOptions: number[] = [50, 100, 250, 500];
 
@@ -43,9 +43,12 @@ export class ScrobbleHistoryComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService, public dialogRef: MatDialogRef<ScrobbleHistoryComponent>) { }
 
   ngOnInit(): void {
+    if (this.data.chartUser) {
+      this.selectedUser = this.data.chartUser
+    }
     this.historyStartDate = this.data.startRange
     this.historyEndDate = this.data.endRange
-    this.getHistoryPage(this.data.group.members.map(u => u.id), this.sortBy, this.sortOrder, this.pageSize, 0, this.historyStartDate ? this.historyStartDate.format() : null, this.historyEndDate ? this.historyEndDate.format() : null)
+    this.getHistoryPage(this.data.chartUser && this.data.chartUser != 'all' ? [this.data.chartUser] : this.data.group.members.map(u => u.id), this.sortBy, this.sortOrder, this.pageSize, 0, this.historyStartDate ? this.historyStartDate.format() : null, this.historyEndDate ? this.historyEndDate.format() : null)
   }
 
   paginationChange(pageData, selectedUser, reset=false) {
@@ -83,7 +86,12 @@ export class ScrobbleHistoryComponent implements OnInit {
       endRange
     ).toPromise().then(data => {
       this.resultsObject = data
-      this.length = data['total']
+      if (this.resultsObject === null) {
+        this.length = 0
+        this.resultsObject = undefined
+      } else {
+        this.length = data['total']
+      }
       this.paginationTriggered = false;
     }).catch(error => {
       this.messageService.open("Error getting play history. Please try again.")
@@ -93,11 +101,16 @@ export class ScrobbleHistoryComponent implements OnInit {
   }
 
   wkTrigger(data) {
+    data['startDate'] = this.historyStartDate
+    data['endDate'] = this.historyEndDate
     this.wkFromDialog.emit(data)
     this.dialogRef.close()
   }
 
   wkTopTrigger(wkMode, wkObject, users, selectedUser, entry) {
+    if (this.data.chartUser) {
+      wkObject = null
+    }
     let payload: Object = {};
     payload['wkMode'] = wkMode
     payload['users'] = users

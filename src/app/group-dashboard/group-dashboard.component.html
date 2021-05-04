@@ -407,6 +407,7 @@
                         <td *ngIf="chartSelectedUser == 'all'">{{ entry.score | number: '1.2-2' }}</td>
                         <td class="wk-actions">
                             <a (click)="nowPlayingToWk(entry, wkArtist, chartIsCustomDate ? chartCustomStartDate : (chartDropdownDate == -1 ? null : moment.utc().subtract(chartDropdownDate, 'd')), chartIsCustomDate ? chartCustomEndDate : (chartDropdownDate == -1 ? null : moment.utc()), true)" matTooltip="Who Knows — Artist/Album/Track" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">help_center</mat-icon></a>
+                            <a class="lastfm-icon clickable" (click)="scrobbleHistory(chartReleaseType, entry, group.members, chartIsCustomDate ? chartCustomStartDate : (chartDropdownDate == -1 ? null : moment.utc().subtract(chartDropdownDate, 'd')), chartIsCustomDate ? chartCustomEndDate : (chartDropdownDate == -1 ? null : moment.utc()), chartSelectedUser)" [matTooltip]="'Scrobble History — ' + chartReleaseType.charAt(0).toUpperCase() + chartReleaseType.slice(1)" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
                         </td>
                     </tr>
                 </tbody>
