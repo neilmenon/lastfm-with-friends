@@ -357,8 +357,10 @@ div.history-options-container > mat-paginator {
 .mat-paginator {
     background: transparent;
 }
-.mat-select-panel .mat-option:not(.mat-option-multiple), .mat-select-panel .mat-option.mat-selected:not(.mat-option-multiple) {
-    background: #333;
+
+.mat-select-panel {
+    background-image: url(/assets/img/background.svg);
+    background-color: #222;
 }
 
 .mat-datepicker-content {
