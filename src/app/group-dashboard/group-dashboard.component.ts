@@ -12,6 +12,7 @@ import { debounceTime } from 'rxjs/operators';
 import { CustomDateRangeComponent } from '../custom-date-range/custom-date-range.component';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { DeviceDetectorService } from 'ngx-device-detector';
+import { MatOption } from '@angular/material/core';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -102,7 +103,8 @@ export class GroupDashboardComponent implements OnInit {
 
   // individualGroupCharts
   @ViewChild('individualGroupCharts', { static: true }) chartsDom: ElementRef;
-  chartSelectedUser: any = "all";
+  @ViewChild('chartEveryone') private chartEveryoneSelected: MatOption;
+  chartSelectedUser: any;
   chartReleaseTypeOptions = ['track', 'artist', 'album']
   chartReleaseType: string = this.chartReleaseTypeOptions[Math.floor(Math.random() * this.chartReleaseTypeOptions.length)];
   chartDropdownDate: number = 30;
@@ -142,6 +144,8 @@ export class GroupDashboardComponent implements OnInit {
 
   ngOnInit(): void {
       this.deviceInfo = this.detectorService.getDeviceInfo()
+      let negOne = [-1]
+      this.chartSelectedUser = negOne.concat(this.group.members.map(u => u.id))
       this.nowPlayingStartInterval();
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState == "visible") {
@@ -646,18 +650,25 @@ export class GroupDashboardComponent implements OnInit {
     this.wkAutoSubject.next({'wkMode': wkMode, 'query': event})
   }
 
-  charts(customStartDate: moment.Moment=null, customEndDate: moment.Moment=null) {
+  charts(customStartDate: moment.Moment=null, customEndDate: moment.Moment=null, everyoneToggled=false) {
+    if (everyoneToggled) {
+      let negOne = [-1]
+      if (this.chartEveryoneSelected.selected) {
+        this.chartSelectedUser = negOne.concat(this.group.members.map(u => u.id))
+      } else {
+        this.chartSelectedUser = []
+      }
+    }
     this.chartLoading = true;
     this.chartsDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==")'
     this.chartResults = null
     let chartMode, users, startRange=null, endRange=null;
-    if (this.chartSelectedUser == "all") {
-      users = this.group.members.map(u => u.id)
+    if (this.chartSelectedUser.length > 1) {
       chartMode = "group"
     } else {
-      users = [this.chartSelectedUser]
       chartMode = "individual"
     }
+    users = this.chartSelectedUser
     if (customStartDate && customEndDate) {
       startRange = customStartDate.format()
       endRange = customEndDate.format()

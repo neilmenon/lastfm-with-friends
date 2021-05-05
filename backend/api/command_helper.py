@@ -314,9 +314,9 @@ def scrobble_leaderboard(users, start_range, end_range):
         sql = "SELECT users.username, users.profile_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN users on users.user_id = track_scrobbles.user_id WHERE from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC;".format(start_range, end_range, users_list)
     cursor.execute(sql)
     leaderboard = list(cursor)
-
+    total = sum([u['scrobbles'] for u in leaderboard])
     mdb.close()
-    return {'leaderboard': leaderboard, 'start_range': start_range, 'end_range': end_range}
+    return {'leaderboard': leaderboard, 'start_range': start_range, 'end_range': end_range, 'total': total}
 
 def wk_autocomplete(wk_mode, query):
     if len(query.strip()) < 2:
@@ -413,6 +413,8 @@ def check_artist_redirect(artist_string):
         return False
 
 def charts(chart_mode, chart_type, users, start_range, end_range):
+    if not users:
+        return []
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     entry_limit = 250

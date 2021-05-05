@@ -315,6 +315,11 @@
                         <td>{{ entry.username }}</td>
                         <td>{{ entry.scrobbles | number }}</td>                    
                     </tr>
+                    <tr style="border-top: 0.5px solid #737373;">
+                        <td></td>
+                        <td>Total</td>
+                        <td>{{ leaderboardObject.total | number }}</td>                    
+                    </tr>
                 </tbody>
             </table>
             <ng-template #noScrobbles>
@@ -348,10 +353,11 @@
                 </mat-select>
             </mat-form-field>
             <mat-form-field color="accent" style="width: 35%;">
-                <mat-label>User</mat-label>
-                <mat-select [(ngModel)]="chartSelectedUser" [(value)]="chartSelectedUser" (selectionChange)="charts()">
-                    <mat-option value="all">Everyone</mat-option>
-                    <mat-option *ngFor="let u of group.members" [value]="u.id">{{ u.username }}<span *ngIf="u.username == user.username"> (you)</span></mat-option>
+                <mat-label>Users</mat-label>
+                <mat-select multiple [(ngModel)]="chartSelectedUser" [(value)]="chartSelectedUser">
+                    <mat-select-trigger *ngIf="chartSelectedUser.includes(-1)">Everyone</mat-select-trigger>
+                    <mat-option [value]="-1" #chartEveryone (click)="charts(null, null, true)">Everyone</mat-option>
+                    <mat-option *ngFor="let u of group.members" [value]="u.id" (click)="chartSelectedUser.includes(-1) ? {} : charts()" [disabled]="chartSelectedUser.includes(-1)">{{ u.username }}<span *ngIf="u.username == user.username"> (you)</span></mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field color="accent" style="width: 70px;">
@@ -372,9 +378,9 @@
                 <a *ngIf="chartReleaseType == 'artist'" href="{{ chartTopEntry.artist_url }}" target="_blank">
                     {{ chartTopEntry.artist }}<br>
                 </a>
-                <div *ngIf="chartReleaseType == 'track'">{{ chartTopEntry.track }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
-                <div *ngIf="chartReleaseType == 'album'">{{ chartTopEntry.album }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
-                <div *ngIf="chartReleaseType == 'artist'">{{ chartTopEntry.artist }} {{ chartSelectedUser == 'all' ? "scores the highest in " + group.name + "." : "wins!" }}</div>
+                <div *ngIf="chartReleaseType == 'track'">{{ chartTopEntry.track }} {{ chartSelectedUser.includes(-1) ? "scores the highest in " + group.name + "." : "wins!" }}</div>
+                <div *ngIf="chartReleaseType == 'album'">{{ chartTopEntry.album }} {{ chartSelectedUser.includes(-1) ? "scores the highest in " + group.name + "." : "wins!" }}</div>
+                <div *ngIf="chartReleaseType == 'artist'">{{ chartTopEntry.artist }} {{ chartSelectedUser.includes(-1) ? "scores the highest in " + group.name + "." : "wins!" }}</div>
             </div>
             <table class="results-table" *ngIf="chartResults.length > 0; else noScrobbles">
                 <thead>
@@ -385,7 +391,7 @@
                         <th *ngIf="chartReleaseType == 'album'">Album</th>
                         <th *ngIf="chartReleaseType == 'artist'">Artist</th>
                         <th class="clickable" matTooltip="Click to sort by scrobbles" matTooltipPosition="above" (click)="sort('scrobbles', 'charts')">Scrbl.</th>
-                        <th *ngIf="chartSelectedUser == 'all'" class="clickable" matTooltip="Click to sort | Score(N) = log(user1_scrobbles) + log(user2_scrobbles) + ... + log(userN_scrobbles)" matTooltipPosition="above" (click)="sort('score', 'charts')">Score</th>
+                        <th *ngIf="chartSelectedUser.length > 1" class="clickable" matTooltip="Click to sort | Score(N) = log(user1_scrobbles) + log(user2_scrobbles) + ... + log(userN_scrobbles)" matTooltipPosition="above" (click)="sort('score', 'charts')">Score</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -404,16 +410,17 @@
                         </td>
                         <td *ngIf="chartReleaseType == 'artist'">{{ entry.artist }}</td>
                         <td>{{ entry.scrobbles | number }}</td>    
-                        <td *ngIf="chartSelectedUser == 'all'">{{ entry.score | number: '1.2-2' }}</td>
+                        <td *ngIf="chartSelectedUser.length > 1">{{ entry.score | number: '1.2-2' }}</td>
                         <td class="wk-actions">
                             <a (click)="nowPlayingToWk(entry, wkArtist, chartIsCustomDate ? chartCustomStartDate : (chartDropdownDate == -1 ? null : moment.utc().subtract(chartDropdownDate, 'd')), chartIsCustomDate ? chartCustomEndDate : (chartDropdownDate == -1 ? null : moment.utc()), true)" matTooltip="Who Knows — Artist/Album/Track" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">help_center</mat-icon></a>
-                            <a class="lastfm-icon clickable" (click)="scrobbleHistory(chartReleaseType, entry, group.members, chartIsCustomDate ? chartCustomStartDate : (chartDropdownDate == -1 ? null : moment.utc().subtract(chartDropdownDate, 'd')), chartIsCustomDate ? chartCustomEndDate : (chartDropdownDate == -1 ? null : moment.utc()), chartSelectedUser)" [matTooltip]="'Scrobble History — ' + chartReleaseType.charAt(0).toUpperCase() + chartReleaseType.slice(1)" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+                            <a class="lastfm-icon clickable" (click)="scrobbleHistory(chartReleaseType, entry, group.members, chartIsCustomDate ? chartCustomStartDate : (chartDropdownDate == -1 ? null : moment.utc().subtract(chartDropdownDate, 'd')), chartIsCustomDate ? chartCustomEndDate : (chartDropdownDate == -1 ? null : moment.utc()), chartSelectedUser[0] == -1 ? 'all' : chartSelectedUser[0])" [matTooltip]="'Scrobble History — ' + chartReleaseType.charAt(0).toUpperCase() + chartReleaseType.slice(1)" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
                         </td>
                     </tr>
                 </tbody>
             </table>
             <ng-template #noScrobbles>
-                No one scrobbled any tracks in this time period.
+                <span *ngIf="!chartSelectedUser.length; else reallyNoScrobbles">Select one or more users to generate a chart.</span>
+                <ng-template #reallyNoScrobbles>No one scrobbled any tracks in this time period.</ng-template>
             </ng-template>
         </div>
     </div>
