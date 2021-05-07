@@ -92,6 +92,14 @@ export class UserService {
     return this.http.post(config.api_root + '/groups/' + joinCode + '/leave', {'username': this.username, 'session_key': this.session_key})
   }
 
+  kickMember(userToKick:string, joinCode:string) {
+    return this.http.post(config.api_root + '/groups/' + joinCode + '/kick', {
+      'username': this.username, 
+      'session_key': this.session_key,
+      'user_to_kick': userToKick,
+    })
+  }
+
   deleteGroup(joinCode:string) {
     return this.http.post(config.api_root + '/groups/' + joinCode + '/delete', {'username': this.username, 'session_key': this.session_key})
   }

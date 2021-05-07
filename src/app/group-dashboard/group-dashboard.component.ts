@@ -204,7 +204,7 @@ export class GroupDashboardComponent implements OnInit {
         }
       })
       // wk autocomplete
-      this.wkAutoSubject.pipe(debounceTime(500)).subscribe(value => {
+      this.wkAutoSubject.pipe(debounceTime(250)).subscribe(value => {
         if (value) {
           this.userService.wkAutocomplete(value['wkMode'], value['query']).toPromise().then(data => {
             if (value['wkMode'] == "artist") {

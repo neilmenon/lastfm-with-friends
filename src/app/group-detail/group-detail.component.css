@@ -10,3 +10,15 @@
 .group-actions div:not(:last-child) {
     padding-right: 10px;
 }
+.member-card {
+    min-width: 150px;
+}
+.member-card i, .member-card mat-spinner {
+    margin-left: 3px;
+}
+.kick {
+    color: #ba0000;
+}
+.kick:hover {
+    color: unset;
+}

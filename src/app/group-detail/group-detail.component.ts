@@ -15,6 +15,8 @@ export class GroupDetailComponent implements OnInit {
   moment: any = moment;
   deleteConfirmed: boolean = false;
   leaveConfirmed: boolean = false;
+  kickingUser: string = null;
+  kickLoading: boolean = false;
   constructor(private route: ActivatedRoute, private userService: UserService, private messageService: MessageService, public router: Router) {
     this.route.paramMap.subscribe(params => {
       this.userService.getGroup(params.get('joinCode')).toPromise().then(data => {
@@ -62,6 +64,24 @@ export class GroupDetailComponent implements OnInit {
       })
     } else {
       this.deleteConfirmed = true
+    }
+  }
+
+  kickMember(username) {
+    if (this.kickingUser) {
+      this.kickLoading = true
+      this.userService.kickMember(this.kickingUser, this.group['join_code']).toPromise().then(data => {
+        this.kickLoading = false
+        this.group = data
+        this.messageService.open("Successfully kicked " + username + ".")
+        this.kickingUser = null
+      }).catch(error => {
+        this.kickLoading = false
+        this.kickingUser = null
+        this.messageService.open("Unable to kick " + username + ". Please try again.")
+      })
+    } else {
+      this.kickingUser = username;
     }
   }
 
