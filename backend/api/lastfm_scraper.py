@@ -210,6 +210,23 @@ def update_user(username, full=False, app=None):
                 logger.log("An unknown error occured while inserting a record: " + str(e), app)
                 continue
         page += 1
+    if tracks_fetched > 0:
+        updated_user = user_helper.get_user_account(username, update=True)
+        if not full_scrape or not user['progress']: # if it's a normal routine update
+            sql = "SELECT COUNT(*) as total FROM `track_scrobbles` WHERE user_id = {} ORDER BY `timestamp` DESC".format(user['user_id'])
+            cursor.execute(sql)
+            result = list(cursor)
+            if int(updated_user['scrobbles']) > result[0]['total']: # if Last.fm has more scrobbles than the database
+                # this could happen if user went back and submitted scrobbles before most recent updated timestamp in database
+                # delete scrobbles from past two weeks and fetch again in the same time period
+                logger.log("\tMismatch in scrobble counts, database is missing some! Deleting & re-fetching past two weeks...")
+                two_weeks_ago = most_recent_uts - 1209600
+                sql = "DELETE FROM `track_scrobbles` WHERE `user_id` = {} AND CAST(timestamp AS FLOAT) BETWEEN {} AND {}".format(user['user_id'], two_weeks_ago, str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())))
+                cursor.execute(sql)
+                mdb.commit()
+                user_helper.change_update_progress(username, None, clear_progress=True)
+                user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(two_weeks_ago))
+                update_user(username)
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
         cursor.execute(sql)
@@ -217,8 +234,6 @@ def update_user(username, full=False, app=None):
         user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
     else:
         user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(most_recent_uts))
-    if tracks_fetched > 0:
-        user_helper.get_user_account(username, update=True)
     user_helper.change_update_progress(username, None, clear_progress=True)
     logger.log("\tFetched {} track(s) for {}.".format(tracks_fetched, username), app)
     mdb.close()

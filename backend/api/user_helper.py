@@ -70,6 +70,8 @@ def get_user_account(username, update=False):
             sql = sql_helper.insert_into_where_not_exists("users", data, "username")
         cursor.execute(sql)
         mdb.commit()
+        if update:
+            return data
     except Exception as e:
         logger.log("Error while creating or updating {}: {}".format(username, e))
 
