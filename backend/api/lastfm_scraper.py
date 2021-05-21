@@ -18,7 +18,7 @@ def full_user_scrape(username):
     scrape_album_data(username)
     user_helper.change_updated_date(username=username, start_time=start_time)
 
-def update_user(username, full=False, app=None):
+def update_user(username, full=False, app=None, fix_count=False):
     logger.log("User update triggered for: " + username, app)
     user = user_helper.get_user(username, extended=False)
     last_update = user_helper.get_updated_date(username)
@@ -219,14 +219,17 @@ def update_user(username, full=False, app=None):
             if int(updated_user['scrobbles']) > result[0]['total']: # if Last.fm has more scrobbles than the database
                 # this could happen if user went back and submitted scrobbles before most recent updated timestamp in database
                 # delete scrobbles from past two weeks and fetch again in the same time period
-                logger.log("\tMismatch in scrobble counts, database is missing some! Deleting & re-fetching past two weeks...")
-                two_weeks_ago = most_recent_uts - 1209600
-                sql = "DELETE FROM `track_scrobbles` WHERE `user_id` = {} AND CAST(timestamp AS FLOAT) BETWEEN {} AND {}".format(user['user_id'], two_weeks_ago, str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())))
-                cursor.execute(sql)
-                mdb.commit()
-                user_helper.change_update_progress(username, None, clear_progress=True)
-                user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(two_weeks_ago))
-                update_user(username)
+                if not fix_count: # if we haven't already tried to fix the scrobble count (prevent infinite loop)
+                    logger.log("\tMismatch in scrobble counts for {} ({} lfm/{} db)! Deleting & re-fetching past two weeks...".format(username, updated_user['scrobbles'], result[0]['total']))
+                    two_weeks_ago = most_recent_uts - 1209600
+                    sql = "DELETE FROM `track_scrobbles` WHERE `user_id` = {} AND CAST(timestamp AS FLOAT) BETWEEN {} AND {}".format(user['user_id'], two_weeks_ago, str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())))
+                    cursor.execute(sql)
+                    mdb.commit()
+                    user_helper.change_update_progress(username, None, clear_progress=True)
+                    user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(two_weeks_ago))
+                    update_user(username, fix_count=True)
+                else:
+                    logger.log("\tFix attempt did not resolve mismatch for {}. Full scrape likely needed.".format(username))
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
         cursor.execute(sql)
