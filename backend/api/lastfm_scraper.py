@@ -220,7 +220,7 @@ def update_user(username, full=False, app=None, fix_count=False):
                 # this could happen if user went back and submitted scrobbles before most recent updated timestamp in database
                 # delete scrobbles from past two weeks and fetch again in the same time period
                 if not fix_count: # if we haven't already tried to fix the scrobble count (prevent infinite loop)
-                    logger.log("\tMismatch in scrobble counts for {} ({} lfm/{} db)! Deleting & re-fetching past two weeks...".format(username, updated_user['scrobbles'], result[0]['total']))
+                    logger.log("\tMissing scrobbles for {} ({} lfm/{} db)! Deleting & re-fetching past two weeks...".format(username, updated_user['scrobbles'], result[0]['total']))
                     two_weeks_ago = most_recent_uts - 1209600
                     sql = "DELETE FROM `track_scrobbles` WHERE `user_id` = {} AND CAST(timestamp AS FLOAT) BETWEEN {} AND {}".format(user['user_id'], two_weeks_ago, str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())))
                     cursor.execute(sql)
@@ -229,7 +229,8 @@ def update_user(username, full=False, app=None, fix_count=False):
                     user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(two_weeks_ago))
                     update_user(username, fix_count=True)
                 else:
-                    logger.log("\tFix attempt did not resolve mismatch for {}. Full scrape likely needed.".format(username))
+                    logger.log("\tFix attempt did not resolve missing scrobbles for {}. Triggering full scrape...".format(username))
+                    update_user(username, full=True)
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
         cursor.execute(sql)
