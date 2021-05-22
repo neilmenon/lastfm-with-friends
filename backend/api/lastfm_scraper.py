@@ -43,7 +43,7 @@ def update_user(username, full=False, app=None, fix_count=False):
     while page <= total_pages:
         if not full_scrape and not user['progress']:
             req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&from="+updated_unix+"&to="+current_unix+"&page="+str(page)+"&limit=1000&extended=1&format=json"
-        elif user['progress']:
+        elif user['progress'] and not full_scrape:
             req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&from="+registered_unix+"&to="+updated_unix+"&page="+str(page)+"&limit=1000&extended=1&format=json"
         else:
             req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&page="+str(page)+"&limit=1000&extended=1&format=json"
