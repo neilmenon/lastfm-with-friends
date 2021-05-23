@@ -515,7 +515,7 @@ export class GroupDashboardComponent implements OnInit {
       }
     })
     let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
-      this.nowPlayingToWk(entry, null, entry['startDate'], entry['endDate'], true)
+      this.nowPlayingToWk(entry, null, entry['startDate'], entry['endDate'], false)
     })
     let wkTopSub = dialogRef.componentInstance.wkFromTopDialog.subscribe(data => {
       this.whoKnowsTop(data.wkMode, data.wkObject, data.selectedUser)
