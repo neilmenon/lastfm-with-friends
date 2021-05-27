@@ -158,7 +158,7 @@ def wk_track(query, users, start_range, end_range):
             return None
         track = result[0]
     track = result[0]
-    track['url'] = artist['url'] + "/" + track['album_name'].replace(" ", "+").replace("/", "%2F") + "/" + track['name'].replace(" ", "+").replace("/", "%2F")
+    track['url'] = artist['url'] + "/_/" + sql_helper.format_lastfm_string(track['name'])
     # find users who have scrobbled this track
     users_list = ", ".join(str(u) for u in users)
     if start_range and end_range:
@@ -268,7 +268,7 @@ def play_history(wk_mode, artist_id, users, start_range, end_range, track=None, 
     total = records[0]['total']
     for r in records:
         r.pop("total")
-        r['track_url'] = r['artist_url'] + "/" + r['album'].replace(" ", "+").replace("/", "%2F") + "/" + r['track'].replace(" ", "+").replace("/", "%2F")
+        r['track_url'] = r['artist_url'] + "/" + sql_helper.format_lastfm_string(r['album']) + "/" + sql_helper.format_lastfm_string(r['track'])
     data = {
         'records': records,
         'total': total,
@@ -297,7 +297,7 @@ def wk_top(wk_mode, users, artist_id, album_id=None, track_mode=False):
         return None
     elif wk_mode == "album" or track_mode:
         for r in records:
-            r['track_url'] = r['album_url'] + "/" + r['track'].replace(" ", "+").replace("/", "%2F")
+            r['track_url'] = r['album_url'] + "/" + sql_helper.format_lastfm_string(r['track'])
     mdb.close()
     
     return records
@@ -454,14 +454,14 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
         for i, entry in enumerate(result):
             entry['position'] = i + 1
             if chart_type == "track":
-                entry['url'] = entry['artist_url'] + "/_/" + entry['track'].replace(" ", "+").replace("/", "%2F")
+                entry['url'] = entry['artist_url'] + "/_/" + sql_helper.format_lastfm_string(entry['track'])
         return result[:100]
     else: # group
         for chart in user_charts:
             for entry in chart:
                 if chart_type == "track":
                     entry_key = str(entry['artist_id']) + "." + entry['track']
-                    entry['url'] = entry['artist_url'] + "/_/" + entry['track'].replace(" ", "+").replace("/", "%2F")
+                    entry['url'] = entry['artist_url'] + "/_/" + sql_helper.format_lastfm_string(entry['track'])
                 elif chart_type == "album":
                     entry_key = str(entry['artist_id']) + "." + str(entry['album_id'])
                 else:

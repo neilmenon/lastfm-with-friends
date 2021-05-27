@@ -65,7 +65,7 @@ def get_user_account(username, update=False):
         data['scrobbles'] = user_info['user']['playcount']
         data['progress'] = 0
         if update:
-            sql = "UPDATE `users` SET `display_name` = '{}', `profile_image` = '{}', `scrobbles` = {} WHERE `username` = '{}'".format(data['display_name'], data['profile_image'], data['scrobbles'], username)
+            sql = "UPDATE `users` SET `display_name` = '{}', `profile_image` = '{}', `scrobbles` = {}, registered = '{}' WHERE `username` = '{}'".format(data['display_name'], data['profile_image'], data['scrobbles'], data['registered'], username)
         else:
             sql = sql_helper.insert_into_where_not_exists("users", data, "username")
         cursor.execute(sql)

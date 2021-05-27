@@ -1,3 +1,5 @@
+from requests.utils import quote
+
 def insert_into(table, data):
     columns = ', '.join("`" + str(x) + "`" for x in data.keys())
     values = ', '.join("'" + str(x) + "'" for x in data.values())
@@ -45,3 +47,10 @@ def sanitize_query(query):
     for s in special_chars_replace_with_space:
         query = query.replace(s, ' ')
     return query
+
+def format_lastfm_string(url_string):
+    safe = '():'
+    if "+" not in url_string:
+        url_string = url_string.replace(" ", "+")
+        safe += "+"
+    return quote(url_string, safe=safe)

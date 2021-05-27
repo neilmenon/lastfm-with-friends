@@ -8,6 +8,7 @@ import api.config as config
 from api.users import user_api
 from api.groups import group_api
 from api.commands import command_api
+from api.tasks import task_api
 
 cfg = config.config
 
@@ -16,6 +17,7 @@ app.config["DEBUG"] = True
 app.register_blueprint(user_api)
 app.register_blueprint(group_api)
 app.register_blueprint(command_api)
+app.register_blueprint(task_api)
 CORS(app)
 
 @app.route('/api', methods=['GET'])

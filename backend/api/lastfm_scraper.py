@@ -11,6 +11,7 @@ from . import user_helper
 from . import api_logger as logger
 cfg = config.config
 
+# no longer used
 def full_user_scrape(username):
     user_helper.change_updated_date(username, True)
     start_time = datetime.datetime.utcnow()
@@ -106,7 +107,7 @@ def update_user(username, full=False, app=None, fix_count=False):
             artist = sql_helper.esc_db(entry['artist']["name"])
             artist_url = entry['artist']['url']
             album = sql_helper.esc_db(entry['album']['#text'])
-            album_url = artist_url + "/" + entry['album']['#text'].replace(" ", "+").replace("/", "%2F")
+            album_url = artist_url + "/" + sql_helper.format_lastfm_string(entry['album']['#text'])
             track = sql_helper.esc_db(entry['name'])
             timestamp = entry['date']['uts']
             image_url = entry['image'][3]['#text']
@@ -243,6 +244,7 @@ def update_user(username, full=False, app=None, fix_count=False):
     mdb.close()
     return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}
 
+# no longer used
 def scrape_artist_data(username=None):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
@@ -313,6 +315,7 @@ def scrape_artist_data(username=None):
             page += 1
     mdb.close()
 
+# no longer used
 def scrape_album_data(username=None):
     failed_artists = []
     mdb = mariadb.connect(**(cfg['sql']))
@@ -449,10 +452,14 @@ def scrape_album_data(username=None):
     for f in failed_artists:
         logger.log(str(f))
 
-def scrape_artist_images():
+def scrape_artist_images(full=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM `artists` WHERE `image_url` IS null;")
+    if full: # check for new image for ALL artists, regardless of whether they have an image or not
+        sql = "SELECT * FROM `artists` WHERE `image_url`;"
+    else:
+        sql = "SELECT * FROM `artists` WHERE `image_url` IS null;"
+    cursor.execute(sql)
     result = list(cursor)
 
     for artist in result:
@@ -470,6 +477,36 @@ def scrape_artist_images():
         mdb.commit()
     mdb.close()
 
+def scrape_album_data(full=False):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    no_artwork_url = "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+    if full: # scrape data for ALL artists, regardless of whether they have an image or not
+        sql = "SELECT id,artist_name,name FROM `albums`;"
+    else:
+        sql = "SELECT id,artist_name,name FROM `albums` WHERE image_url = '{}'".format(no_artwork_url)
+    cursor.execute(sql)
+    result = list(cursor)
+    logger.log("=========== Initiating album data scrape {}for {} albums... ===========".format("FULL MODE " if full else "", len(result)))
+    newly_fetched_artwork = 0
+    for album in result:
+        logger.log("Fetching album data for {} - {}".format(album['artist_name'], album['name']))
+        req_url = "https://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key={}&artist={}&album={}&format=json".format(cfg['api']['key'], sql_helper.format_lastfm_string(album['artist_name']), sql_helper.format_lastfm_string(album['name']))
+        try:
+            req = requests.get(req_url).json()
+            album_info = req['album']
+        except Exception as e:
+            logger.log("\tAn error ocurred while trying get album data. Skipping... {}".format(e))
+            logger.log("\tRequest URL: {}".format(req_url))
+            continue
+        artwork_url = album_info['image'][3]['#text'].strip()
+        if artwork_url:
+            logger.log("\t Artwork found!")
+            newly_fetched_artwork += 1
+            sql = "UPDATE `albums` SET `image_url` = '{}' WHERE id = {}".format(artwork_url, album['id'])
+            cursor.execute(sql)
+            mdb.commit()
+    return {'data': "Fetched new album art for {} out of {} ({}%) checked albums in the database.".format(newly_fetched_artwork, len(result), round((newly_fetched_artwork/(len(result)+1))*100, 2))}
 
 def get_artists():
     mdb = mariadb.connect(**(cfg['sql']))
