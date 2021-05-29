@@ -49,7 +49,7 @@ def is_in_group(username, join_code):
     return False
 
 
-def get_group(join_code):
+def get_group(join_code, short=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     cursor.execute("SELECT * from groups WHERE join_code = '" + join_code + "';")
@@ -57,7 +57,11 @@ def get_group(join_code):
     if not result:
         mdb.close()
         return False
-    cursor.execute("SELECT user_groups.username, user_groups.joined, users.profile_image, users.scrobbles FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code))
+    if short:
+        sql = "SELECT users.user_id,users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
+    else:
+        sql = "SELECT user_groups.username, user_groups.joined, users.profile_image, users.scrobbles FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
+    cursor.execute(sql)
     users = list(cursor)
     result[0]['users'] = users
     mdb.close()

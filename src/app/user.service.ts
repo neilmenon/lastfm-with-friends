@@ -230,4 +230,29 @@ export class UserService {
       'end_range': endRange,
     })
   }
+
+  listeningTrends(joinCode, cmdMode, wkMode, wkObject, startRange=null, endRange=null) {
+    let payload = {
+      'username': this.username,
+      'session_key': this.session_key,
+      'join_code': joinCode,
+      'cmd_mode': cmdMode,
+      'wk_options': null,
+      'start_range': startRange,
+      'end_range': endRange
+    }
+    if (cmdMode == "wk") {
+      let wkOptions = {
+        'wk_mode': wkMode,
+        'artist_id': wkObject.artist.id
+      }
+      if (wkMode == "album") {
+        wkOptions['album_id'] = wkObject.album.id
+      } else if (wkMode == "track") {
+        wkOptions['track'] = wkObject.track.name
+      }
+      payload['wk_options'] = wkOptions
+    }
+    return this.http.post(config.api_root + "/commands/listeningtrends", payload)
+  }
 }

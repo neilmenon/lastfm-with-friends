@@ -1,0 +1,28 @@
+ngx-charts-line-chart > ngx-charts-chart > div > svg text {
+    fill: #e2e2e2;
+}
+.chart-legend .legend-label {
+    color: #e2e2e2!important;
+}
+.chart-legend .legend-label .active .legend-label-text {
+    color: darkseagreen!important;
+}
+/* .ngx-charts .line-highlight {
+    display: block !important;
+} */
+.chart-legend .legend-labels {
+    background: rgba(255,255,255,0.08)!important;
+    overflow-x: unset!important;
+    white-space: unset!important;
+    border-radius: 0px!important;
+    float: unset!important;
+}
+.chart-legend .legend-title {
+    margin-left: unset!important;
+    margin: auto!important;
+    text-align: center!important;
+    padding-bottom: 5px;
+}
+.ngx-charts .tooltip-anchor {
+    fill: #fff!important;
+}

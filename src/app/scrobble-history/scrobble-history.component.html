@@ -6,7 +6,10 @@
 </div>
 <span class="center-all" *ngIf="!(historyStartDate && historyEndDate); else noDate" style="color: #bfbfbf;">Time Period: Overall</span>
 <ng-template #noDate>
-    <span class="center-all" style="color: #bfbfbf;">Time Period: {{ historyStartDate.format('MM/DD/YY') }} - {{ historyEndDate.format('MM/DD/YY') }}</span>
+    <span class="center-all" style="color: #bfbfbf;">
+      Time Period: {{ historyStartDate.format('MM/DD/YY') }} - {{ historyEndDate.format('MM/DD/YY') }} 
+      ({{ historyEndDate.diff(historyStartDate, 'days') + (historyEndDate.diff(historyStartDate, 'days') <= 1 ? ' day' : ' days') }})
+    </span>
 </ng-template>
 <div class="history-options-container">
     <div class="history-options center">

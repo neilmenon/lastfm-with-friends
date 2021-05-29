@@ -13,6 +13,7 @@ import { CustomDateRangeComponent } from '../custom-date-range/custom-date-range
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { MatOption } from '@angular/material/core';
+import { ListeningTrendsComponent } from '../listening-trends/listening-trends.component';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -700,6 +701,25 @@ export class GroupDashboardComponent implements OnInit {
       this.chartLoading = false;
       this.messageService.open("Error while trying to generate the chart! Please try again.")
     })
+  }
+
+  listeningTrends(cmdMode, wkMode, wkObject, startRange:moment.Moment=null, endRange:moment.Moment=null) {
+    let dialogRef = this.dialog.open(ListeningTrendsComponent, {
+      data : {
+        cmdMode: cmdMode,
+        wkMode: wkMode,
+        wkObject: wkObject,
+        startRange: startRange,
+        endRange: endRange,
+        group: this.group
+      }
+    })
+    // let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
+    //   this.nowPlayingToWk(entry)
+    // })
+    // dialogRef.afterClosed().subscribe(() => {
+    //   wkSub.unsubscribe()
+    // })
   }
 
 }

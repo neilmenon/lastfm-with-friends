@@ -1,0 +1,37 @@
+<div class="center" style="margin-bottom: -16px;">
+  <h3 mat-dialog-title *ngIf="data.cmdMode == 'leaderboard'">Overall Listening Trends for <u>{{ data.group.name }}</u></h3>
+  <h3 mat-dialog-title *ngIf="data.wkMode == 'artist'">Listening Trends for <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h3>
+  <h3 mat-dialog-title *ngIf="data.wkMode == 'album'">Listening Trends for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h3>
+  <h3 mat-dialog-title *ngIf="data.wkMode == 'track'">Listening Trends for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }}</u> in {{ data.group.name }}</h3>
+</div>
+<span class="center-all" *ngIf="!(data.startRange && data.endRange); else noDate" style="color: #bfbfbf;">Time Period: Overall</span>
+<ng-template #noDate>
+    <span class="center-all" style="color: #bfbfbf;">
+      Time Period: {{ data.startRange.format('MM/DD/YY') }} - {{ data.endRange.format('MM/DD/YY') }} 
+      ({{ data.endRange.diff(data.startRange, 'days') + (data.endRange.diff(data.startRange, 'days') <= 1 ? ' day' : ' days') }})
+    </span>
+</ng-template>
+<div style="padding-top: 10px;"><mat-spinner diameter="25" color="accent" class="center-all" *ngIf="!chartData.length"></mat-spinner></div>
+<ngx-charts-line-chart
+  *ngIf="chartData.length"
+  [view]="view"
+  [scheme]="colorScheme"
+  [legend]="legend"
+  [legendPosition]="legendPosition"
+  [showXAxisLabel]="showXAxisLabel"
+  [showYAxisLabel]="showYAxisLabel"
+  [xAxis]="xAxis"
+  [yAxis]="yAxis"
+  [xAxisLabel]="xAxisLabel"
+  [yAxisLabel]="yAxisLabel"
+  [timeline]="timeline"
+  [results]="chartData"
+  [curve]="curve"
+  [showGridLines]="showGridLines"
+  [activeEntries]="activeEntries"
+  (select)="onSelect($event)"
+  (activate)="onActivate($event)"
+  (deactivate)="onDeactivate($event)"
+  (window:resize)="onResize($event)"
+  >
+</ngx-charts-line-chart>

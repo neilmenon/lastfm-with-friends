@@ -6,6 +6,7 @@ import math
 from operator import itemgetter
 from . import config
 from . import sql_helper
+from . import group_helper
 from . import api_logger as logger
 
 cfg = config.config
@@ -478,3 +479,28 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
             entry['position'] = i + 1
             group_chart_final.append(entry)
         return group_chart_final
+
+def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+
+    # get list of users in group
+    group = group_helper.get_group(join_code, short=True)
+    
+    scrobbles = []
+
+    if cmd_mode == "wk":
+        album_sql = " AND album_id = {} ".format(wk_options['album_id']) if wk_options['wk_mode'] == "album" else " "
+        track_sql = " AND track = '{}' ".format(sql_helper.esc_db(wk_options['track'])) if wk_options['wk_mode'] == "track" else " "
+        
+        for u in group['users']:
+            if start_range and end_range:
+                sql = "SELECT track,timestamp FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND artist_id = {}{}{}ORDER BY timestamp ASC".format(u['user_id'], start_range, end_range, wk_options['artist_id'], album_sql, track_sql)
+            else:
+                sql = "SELECT track,timestamp FROM `track_scrobbles` WHERE user_id = {} AND artist_id = {}{}{}ORDER BY timestamp ASC".format(u['user_id'], wk_options['artist_id'], album_sql, track_sql)
+            cursor.execute(sql)
+            result = [r['timestamp'] for r in list(cursor)]
+            if result:
+                scrobbles.append({u['username']: result})
+    mdb.close()
+    return scrobbles
