@@ -71,6 +71,7 @@ def wk_artist(query, users, start_range, end_range):
 
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SET time_zone='+00:00';")
 
     # find users who have scrobbled this artist
     users_list = ", ".join(str(u) for u in users)
@@ -145,6 +146,7 @@ def wk_track(query, users, start_range, end_range):
 
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SET time_zone='+00:00';")
 
     # find track in the database
     sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND UPPER({}) = UPPER('{}')".format(artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(track_query))
@@ -244,6 +246,7 @@ def get_nowplaying(join_code):
 def play_history(wk_mode, artist_id, users, start_range, end_range, track=None, album_id=None, sort_by="track_scrobbles.timestamp", sort_order="DESC", limit=50, offset=0):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SET time_zone='+00:00';")
     users_list = ", ".join(str(u) for u in users)
     
     if start_range and end_range:
@@ -483,6 +486,7 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
 def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SET time_zone='+00:00';")
 
     # get list of users in group
     group = group_helper.get_group(join_code, short=True)
@@ -490,7 +494,7 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
     scrobbles = []
 
     if cmd_mode == "wk":
-        album_sql = " AND album_id = {} ".format(wk_options['album_id']) if wk_options['wk_mode'] == "album" else " "
+        album_sql = " AND track IN ({}) ".format(find_album_tracks(wk_options['album_id'])) if wk_options['wk_mode'] == "album" else " "
         track_sql = " AND track = '{}' ".format(sql_helper.esc_db(wk_options['track'])) if wk_options['wk_mode'] == "track" else " "
         
         for u in group['users']:
@@ -502,5 +506,42 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
             result = [r['timestamp'] for r in list(cursor)]
             if result:
                 scrobbles.append({u['username']: result})
+    elif cmd_mode == "user-track": # timeline of different track's scrobbles
+        album_sql = " AND track IN ({}) ".format(find_album_tracks(wk_options['album_id'])) if wk_options['wk_mode'] == "album" else " "
+
+        # get tracks to find timestamps for (limit 20)
+        if start_range and end_range:
+            sql = "SELECT track FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND artist_id = {}{}GROUP BY track ORDER BY COUNT(*) DESC LIMIT 20".format(wk_options['user_id'], start_range, end_range, wk_options['artist_id'], album_sql)
+        else:
+            sql = "SELECT track FROM `track_scrobbles` WHERE user_id = {} AND artist_id = {}{}GROUP BY track ORDER BY COUNT(*) DESC LIMIT 20".format(wk_options['user_id'], wk_options['artist_id'], album_sql)    
+        cursor.execute(sql)
+        selected_tracks = [t['track'] for t in list(cursor)]
+        for track in selected_tracks:
+            if start_range and end_range:
+                sql = "SELECT track,timestamp FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.artist_id = {} AND track = '{}' ORDER BY timestamp ASC".format(wk_options['user_id'], start_range, end_range, wk_options['artist_id'], sql_helper.esc_db(track))
+            else:
+                sql = "SELECT track,timestamp FROM `track_scrobbles` WHERE user_id = {} AND track_scrobbles.artist_id = {} AND track = '{}' ORDER BY timestamp ASC".format(wk_options['user_id'], wk_options['artist_id'], sql_helper.esc_db(track))
+            cursor.execute(sql)
+            result = [r['timestamp'] for r in list(cursor)]
+            if result:
+                scrobbles.append({track: result})
+    elif cmd_mode == "user-album":
+        # get albums to find timestamps for (limit 10)
+        if start_range and end_range:
+            sql = "SELECT track_scrobbles.album_id,albums.name FROM track_scrobbles LEFT JOIN albums on track_scrobbles.album_id = albums.id WHERE track_scrobbles.user_id = {} AND track_scrobbles.artist_id = {} AND albums.name != '' AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.album_id ORDER BY COUNT(*) DESC LIMIT 10".format(wk_options['user_id'], wk_options['artist_id'], start_range, end_range)
+        else:
+            sql = "SELECT track_scrobbles.album_id,albums.name FROM track_scrobbles LEFT JOIN albums on track_scrobbles.album_id = albums.id WHERE track_scrobbles.user_id = {} AND track_scrobbles.artist_id = {} AND albums.name != '' GROUP BY track_scrobbles.album_id ORDER BY COUNT(*) DESC LIMIT 10".format(wk_options['user_id'], wk_options['artist_id'])
+        cursor.execute(sql)
+        selected_albums = list(cursor)
+        for record in selected_albums:
+            if start_range and end_range:
+                sql = "SELECT albums.name,track_scrobbles.timestamp FROM track_scrobbles LEFT JOIN albums on track_scrobbles.album_id = albums.id WHERE track_scrobbles.user_id = {} AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' ORDER BY track_scrobbles.timestamp ASC".format(wk_options['user_id'], wk_options['artist_id'], find_album_tracks(record['album_id']), start_range, end_range)
+            else:
+                sql = "SELECT albums.name,track_scrobbles.timestamp FROM track_scrobbles LEFT JOIN albums on track_scrobbles.album_id = albums.id WHERE track_scrobbles.user_id = {} AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) ORDER BY track_scrobbles.timestamp ASC".format(wk_options['user_id'], wk_options['artist_id'], find_album_tracks(record['album_id']))
+            cursor.execute(sql)
+            result = list(cursor)
+            album_scrobbles = [r['timestamp'] for r in result]
+            if album_scrobbles:
+                scrobbles.append({record['name']: album_scrobbles})
     mdb.close()
     return scrobbles

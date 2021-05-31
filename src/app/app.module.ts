@@ -28,7 +28,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-
+import { MatRadioModule } from '@angular/material/radio';
 
 // Miscellaneous
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -99,6 +99,7 @@ import { ListeningTrendsComponent } from './listening-trends/listening-trends.co
     MatMomentDateModule,
     MatAutocompleteModule,
     NgxChartsModule,
+    MatRadioModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},

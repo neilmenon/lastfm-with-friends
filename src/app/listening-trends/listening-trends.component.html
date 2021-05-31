@@ -1,16 +1,22 @@
 <div class="center" style="margin-bottom: -16px;">
   <h3 mat-dialog-title *ngIf="data.cmdMode == 'leaderboard'">Overall Listening Trends for <u>{{ data.group.name }}</u></h3>
-  <h3 mat-dialog-title *ngIf="data.wkMode == 'artist'">Listening Trends for <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h3>
-  <h3 mat-dialog-title *ngIf="data.wkMode == 'album'">Listening Trends for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h3>
+  <h3 mat-dialog-title *ngIf="data.wkMode == 'artist'">{{ data.cmdMode.includes('user') ? data.userObject.username + "'s " : "" }}Listening Trends for <u>{{ data.wkObject.artist.name }}</u> {{ data.cmdMode.includes('user') ? "" : "in " + data.group.name }}</h3>
+  <h3 mat-dialog-title *ngIf="data.wkMode == 'album'">{{ data.cmdMode.includes('user') ? data.userObject.username + "'s " : "" }}Listening Trends for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> {{ data.cmdMode.includes('user') ? "" : "in " + data.group.name }}</h3>
   <h3 mat-dialog-title *ngIf="data.wkMode == 'track'">Listening Trends for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }}</u> in {{ data.group.name }}</h3>
 </div>
-<span class="center-all" *ngIf="!(data.startRange && data.endRange); else noDate" style="color: #bfbfbf;">Time Period: Overall</span>
-<ng-template #noDate>
-    <span class="center-all" style="color: #bfbfbf;">
-      Time Period: {{ data.startRange.format('MM/DD/YY') }} - {{ data.endRange.format('MM/DD/YY') }} 
-      ({{ data.endRange.diff(data.startRange, 'days') + (data.endRange.diff(data.startRange, 'days') <= 1 ? ' day' : ' days') }})
-    </span>
-</ng-template>
+<div class="center-all" style="color: #bfbfbf;padding-bottom: 3px;" *ngIf="data.cmdMode.includes('user') && data.wkMode == 'artist'">
+  <mat-radio-button checked (change)="chartData = [];isTrackMode=true;listeningTrends('user-track')" style="padding-right: 15px;">Track Mode</mat-radio-button>
+  <mat-radio-button (change)="chartData = [];isTrackMode=false;listeningTrends('user-album')">Album Mode</mat-radio-button> 
+</div>
+<div class="center-all" style="color: #bfbfbf;">
+  <span *ngIf="!(data.startRange && data.endRange); else noDate">Time Period: Overall</span>
+  <ng-template #noDate>
+      <span>
+        Time Period: {{ data.startRange.format('MM/DD/YY') }} - {{ data.endRange.format('MM/DD/YY') }} 
+        ({{ data.endRange.diff(data.startRange, 'days') + (data.endRange.diff(data.startRange, 'days') <= 1 ? ' day' : ' days') }})
+      </span>
+    </ng-template>
+  </div>
 <div style="padding-top: 10px;"><mat-spinner diameter="25" color="accent" class="center-all" *ngIf="!chartData.length"></mat-spinner></div>
 <ngx-charts-line-chart
   *ngIf="chartData.length"
@@ -35,3 +41,7 @@
   (window:resize)="onResize($event)"
   >
 </ngx-charts-line-chart>
+<span class="center-all" style="font-size: 12px; color: #bfbfbf;" *ngIf="chartData.length">
+  *Hover or tap to isolate {{ data.cmdMode == 'wk' ? "user" : (data.cmdMode == 'user-track' ? "track" : "album") }}
+  <span *ngIf="data.cmdMode.includes('user')"> (Limit: top {{ data.cmdMode == 'user-track' ? "20 tracks" : "10 albums" }})</span>*
+</span>

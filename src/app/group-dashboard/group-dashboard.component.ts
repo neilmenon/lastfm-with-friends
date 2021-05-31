@@ -703,7 +703,7 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  listeningTrends(cmdMode, wkMode, wkObject, startRange:moment.Moment=null, endRange:moment.Moment=null) {
+  listeningTrends(cmdMode, wkMode, wkObject, startRange:moment.Moment=null, endRange:moment.Moment=null, userObject=null) {
     let dialogRef = this.dialog.open(ListeningTrendsComponent, {
       data : {
         cmdMode: cmdMode,
@@ -711,7 +711,8 @@ export class GroupDashboardComponent implements OnInit {
         wkObject: wkObject,
         startRange: startRange,
         endRange: endRange,
-        group: this.group
+        group: this.group,
+        userObject: userObject
       }
     })
     // let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {

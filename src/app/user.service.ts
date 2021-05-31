@@ -231,7 +231,7 @@ export class UserService {
     })
   }
 
-  listeningTrends(joinCode, cmdMode, wkMode, wkObject, startRange=null, endRange=null) {
+  listeningTrends(joinCode, cmdMode, wkMode, wkObject, startRange=null, endRange=null, user=null) {
     let payload = {
       'username': this.username,
       'session_key': this.session_key,
@@ -241,7 +241,7 @@ export class UserService {
       'start_range': startRange,
       'end_range': endRange
     }
-    if (cmdMode == "wk") {
+    if (cmdMode == "wk" || cmdMode == "user-track" || cmdMode == "user-album") {
       let wkOptions = {
         'wk_mode': wkMode,
         'artist_id': wkObject.artist.id
@@ -250,6 +250,9 @@ export class UserService {
         wkOptions['album_id'] = wkObject.album.id
       } else if (wkMode == "track") {
         wkOptions['track'] = wkObject.track.name
+      }
+      if (cmdMode == "user-track" || cmdMode == "user-album") {
+        wkOptions['user_id'] = user
       }
       payload['wk_options'] = wkOptions
     }

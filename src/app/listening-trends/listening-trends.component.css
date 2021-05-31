@@ -26,3 +26,9 @@ ngx-charts-line-chart > ngx-charts-chart > div > svg text {
 .ngx-charts .tooltip-anchor {
     fill: #fff!important;
 }
+.chart-legend .legend-labels {
+    max-height: 75px!important;
+}
+.mode-active {
+    color: darkseagreen!important;
+}

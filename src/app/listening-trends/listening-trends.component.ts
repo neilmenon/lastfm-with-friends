@@ -13,7 +13,7 @@ import { UserService } from '../user.service';
 })
 export class ListeningTrendsComponent implements OnInit {
   moment: any = moment;
-  view: any[] = [window.innerWidth / 1.35, 500];
+  view: any[] = [window.innerWidth / 1.35, window.innerHeight / 1.60];
   legend: boolean = true;
   legendPosition: string = "below";
   showLabels: boolean = true;
@@ -33,6 +33,7 @@ export class ListeningTrendsComponent implements OnInit {
   };
   activeEntries: any[] = [];
   chartData: any[] = [];
+  isTrackMode: boolean = true;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any, 
@@ -42,15 +43,22 @@ export class ListeningTrendsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.listeningTrends()
+  }
+
+  listeningTrends(cmdMode=this.data.cmdMode) {
+    this.data.cmdMode = cmdMode
     this.userService.listeningTrends(
       this.data.group.join_code, 
-      this.data.cmdMode, 
+      cmdMode, 
       this.data.wkMode, 
       this.data.wkObject, 
       !this.data.startRange ? null : this.data.startRange.format(),
       !this.data.endRange ? null : this.data.endRange.format(),
+      !this.data.userObject ? null : this.data.userObject.id
     ).toPromise().then(data => {
         let masterTimestamps: any[] = []
+        let chartDataTmp: any[] = []
         for (let index in data) {
           for (let [username, scrobbleList] of Object.entries(data[parseInt(index)])) {
             for (let timestamp of scrobbleList as any[]) {
@@ -64,10 +72,10 @@ export class ListeningTrendsComponent implements OnInit {
         for (let index in data) {
           let tmpEntry
           for (let [username, scrobbleList] of Object.entries(data[parseInt(index)])) {
-            tmpEntry = {"name": username, "series": []}
             let tmpSeries = []
             let scrobbles: number = 0
             let scrobbleListFinal: any[] = scrobbleList as any[]
+            tmpEntry = {"name": username, "series": [], numEntires: scrobbleListFinal.length}
             for (let timestamp of masterTimestamps) {
               if (scrobbleListFinal.includes(timestamp)) {
                 scrobbles++
@@ -76,8 +84,10 @@ export class ListeningTrendsComponent implements OnInit {
             }
             tmpEntry['series'] = tmpSeries
           }
-          this.chartData.push(tmpEntry)
+          chartDataTmp.push(tmpEntry)
         }
+        chartDataTmp.sort((a, b) => b.numEntires - a.numEntires)
+        this.chartData = chartDataTmp
     }).catch(error => {
       this.messageService.open("There was an error generating the trends chart. Please try again.")
       console.log(error)
@@ -101,7 +111,7 @@ export class ListeningTrendsComponent implements OnInit {
   }
 
   onResize(event) {
-    this.view = [event.target.innerWidth / 1.35, 500];
+    this.view = [event.target.innerWidth / 1.35, window.innerHeight / 1.60];
   }
 
 }
