@@ -30,7 +30,10 @@
             <div class="now-playing-details">
                 <span><a href="{{ entry.url }}" target="_blank" title="{{ entry.track }}" class="clear-color"><em>{{ entry.track }}</em></a></span>
                 <span title="{{ entry.artist }}">{{ entry.artist }}</span>
-                <span title="{{ entry.album }}">{{ entry.album }}</span>
+                <span *ngIf="entry.album == ''; else normalAlbum" style="color: #bfbfbf;" matTooltip="Album name was not specified when this track was scrobbled." matTooltipPosition="above">Unknown Album*</span>
+                <ng-template #normalAlbum>
+                    <span title="{{ entry.album }}">{{ entry.album }}</span>
+                </ng-template>
             </div>
         </div>
     </div>

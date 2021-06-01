@@ -451,7 +451,8 @@ export class GroupDashboardComponent implements OnInit {
     }
     
     if (entry.album !== undefined) {
-      let albumQuery = entry.artist + " - " + entry.album
+      let albumFinal = entry.album == '' ? 'Unknown Album' : entry.album
+      let albumQuery = entry.artist + " - " + albumFinal
       this.wkAlbumForm.get('query').setValue(albumQuery)
       if (fromChart) {
         this.wkAlbumIsCustomDateRange = this.chartIsCustomDate
