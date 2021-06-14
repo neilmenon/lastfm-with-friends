@@ -3,6 +3,7 @@ import json
 import requests
 import mariadb
 import datetime
+import time
 from bs4 import BeautifulSoup
 from . import config
 from . import sql_helper
@@ -28,13 +29,21 @@ def update_user(username, full=False, app=None, fix_count=False):
     if not full_scrape:
         updated_unix = str(int(last_update.replace(tzinfo=datetime.timezone.utc).timestamp()))
         current_unix = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
-        if user['progress']: # if there is a value here it means the the initial scrape did not finish
-            logger.log("\tDetected an unfinished ({}%) initial scrape. Finishing it...".format(user['progress']), app)
+        if user['progress']: # if there is a value here it means a scrape has not/did not finish
+            # logger.log("\tDetected an unfinished ({}%) scrape. Finishing it...".format(user['progress']), app)
             registered_unix = str(user['registered'])
             # we can clear the last updated date now to signify an update
             user_helper.change_updated_date(username, clear_date=True)
     else: # if full scrape, we always clear this date
         user_helper.change_updated_date(username, clear_date=True)
+        if user['progress']:
+            logger.log("\tDetected a potential in-progress scrape ({}%). Stalling a bit to see if it's progressing...".format(user['progress']), app)
+            time.sleep(60)
+            current_progress = user_helper.get_user(username)['progress']
+            if current_progress != user['progress']: # other task exists and is chugging along
+                logger.log("\t\tAnother process exists and is progressing. Exiting...", app)
+                return # kill this process as the other one already is doing something
+            logger.log("\t\tOther process does not exist or is stuck. Continuing...", app)
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     page = 1

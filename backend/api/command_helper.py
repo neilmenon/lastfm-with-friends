@@ -43,7 +43,8 @@ def find_artist(query, skip_sanitize=False):
             cursor.execute(sql)
             result = list(cursor)
         fallback = True
-    artist = result[0]
+    single_check = list(filter(lambda x: x['name'].upper() == query.upper(), result))
+    artist = result[0] if len(single_check) != 1 else single_check[0]
     artist['fallback'] = fallback
     artist['redirect'] = redirect
     mdb.close()
