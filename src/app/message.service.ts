@@ -18,11 +18,18 @@ export class MessageService {
     this.message = message;
   }
 
-  open(message: string, position = "center") {
-    this.snackBar.open(message, "Dismiss", {
-      horizontalPosition: this.positions[position],
-      duration: 5000
-    })
+  open(message: string, position = "center", persistent: boolean = false) {
+    if (persistent) {
+      this.snackBar.open(message, undefined, {
+        horizontalPosition: this.positions[position],
+        duration: 0
+      })
+    } else {
+      this.snackBar.open(message, "Dismiss", {
+        horizontalPosition: this.positions[position],
+        duration: 5000
+      })
+    }
   }
 
 }

@@ -3,6 +3,9 @@
 # lastfm-with-friends configuration file
 /src/app/config.ts
 
+# lastfm-with-friends build info
+/src/assets/build.json
+
 # virtualenv env
 /backend/env
 /backend/api/__pycache__/

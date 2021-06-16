@@ -1,0 +1,5 @@
+# backend lastfm-with-friends
+alias lfmwf-b="cd /root/projects/lastfm-with-friends && git pull && service lastfm-with-friends restart"
+
+# full lastfm-with-friends
+alias lfmwf="swapon /swapfile && cd /root/projects/lastfm-with-friends && git pull && npm i && ng build --prod && \cp -a /root/projects/lastfm-with-friends/dist/lastfm-with-friends/. /usr/share/nginx/lastfm-with-friends/ && . /root/.scripts/buildjson.sh > /usr/share/nginx/lastfm-with-friends/assets/build.json ; service lastfm-with-friends restart ; echo 'Disabling swap...' ; swapoff -a"
