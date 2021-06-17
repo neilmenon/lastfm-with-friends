@@ -716,12 +716,6 @@ export class GroupDashboardComponent implements OnInit {
         userObject: userObject
       }
     })
-    // let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
-    //   this.nowPlayingToWk(entry)
-    // })
-    // dialogRef.afterClosed().subscribe(() => {
-    //   wkSub.unsubscribe()
-    // })
   }
 
 }

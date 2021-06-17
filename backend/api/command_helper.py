@@ -548,14 +548,14 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
             album_scrobbles = [r['timestamp'] for r in result]
             if album_scrobbles:
                 scrobbles.append({record['name']: album_scrobbles})
-    elif cmd_mode == "leaderboard":
+    elif "leaderboard" in cmd_mode:
         if days_range == -1 or days_range > 365:
             days_increment = 30
         elif days_range < 3:
             days_increment = 1/24
         elif days_range <= 7:
-            days_increment = 1/3
-        elif days_range <= 180:
+            days_increment = 1
+        elif days_range < 180:
             days_increment = 1
         elif days_range <= 365:
             days_increment = 7
@@ -569,8 +569,8 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
             end = datetime.datetime.utcnow()
             days_range = (end - start).days
         else:
-            start = dateutil.parser.parse(start_range)
-            end = dateutil.parser.parse(end_range)
+            start = dateutil.parser.parse(start_range).replace(tzinfo=None)
+            end = dateutil.parser.parse(end_range).replace(tzinfo=None)
 
         for u in group['users']:
             days_tmp = 0
@@ -581,14 +581,21 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
                 start_tmp = (start + datetime.timedelta(days=days_tmp*days_increment))
                 end_tmp = (start + datetime.timedelta(days=(days_tmp*days_increment)+days_increment))
                 if end_tmp < registered_datetime: # don't query db if time range is before registered date
-                    scrbl_tmp.append({ int(start_tmp.timestamp()): scrbl_count })
+                    scrbl_tmp.append({ int(start_tmp.timestamp()): 0 })
                 else:
                     sql = "SELECT COUNT(*) as total FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}'".format(u['user_id'], start_tmp.strftime("%Y-%m-%dT%H:%M:%SZ"), end_tmp.strftime("%Y-%m-%dT%H:%M:%SZ"))
                     cursor.execute(sql)
-                    scrbl_count += int(list(cursor)[0]['total'])
+                    if cmd_mode == "leaderboard-cu": # cumulative mode
+                        scrbl_count += int(list(cursor)[0]['total'])
+                    else: # non-cumulative mode
+                        scrbl_count = int(list(cursor)[0]['total'])
                     scrbl_tmp.append({ int(start_tmp.timestamp()): scrbl_count })
                 days_tmp += 1
-            scrobbles.append({ u['username']: scrbl_tmp})
+            if cmd_mode == "leaderboard-cu":
+                if scrbl_count > 0:
+                    scrobbles.append({ u['username']: scrbl_tmp})
+            else:
+                scrobbles.append({ u['username']: scrbl_tmp})
 
     mdb.close()
     return scrobbles

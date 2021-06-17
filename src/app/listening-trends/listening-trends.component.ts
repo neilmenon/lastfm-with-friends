@@ -47,6 +47,11 @@ export class ListeningTrendsComponent implements OnInit {
   }
 
   listeningTrends(cmdMode=this.data.cmdMode) {
+    if (cmdMode == "leaderboard-noncu") {
+      this.curve = shape.curveBumpX
+    } else {
+      this.curve = shape.curveBasis
+    }
     this.data.cmdMode = cmdMode
     this.userService.listeningTrends(
       this.data.group.join_code, 
@@ -59,34 +64,52 @@ export class ListeningTrendsComponent implements OnInit {
     ).toPromise().then(data => {
         let masterTimestamps: any[] = []
         let chartDataTmp: any[] = []
-        for (let index in data) {
-          for (let [username, scrobbleList] of Object.entries(data[parseInt(index)])) {
-            for (let timestamp of scrobbleList as any[]) {
-              if (!masterTimestamps.includes(timestamp)) {
-                masterTimestamps.push(timestamp)
+        if (!cmdMode.includes("leaderboard")) {
+          for (let index in data) {
+            for (let [username, scrobbleList] of Object.entries(data[parseInt(index)])) {
+              for (let timestamp of scrobbleList as any[]) {
+                if (!masterTimestamps.includes(timestamp)) {
+                  masterTimestamps.push(timestamp)
+                }
               }
             }
           }
-        }
-        masterTimestamps.sort((a, b) => a - b)
-        for (let index in data) {
-          let tmpEntry
-          for (let [username, scrobbleList] of Object.entries(data[parseInt(index)])) {
-            let tmpSeries = []
-            let scrobbles: number = 0
-            let scrobbleListFinal: any[] = scrobbleList as any[]
-            tmpEntry = {"name": username, "series": [], numEntires: scrobbleListFinal.length}
-            for (let timestamp of masterTimestamps) {
-              if (scrobbleListFinal.includes(timestamp)) {
-                scrobbles++
+          masterTimestamps.sort((a, b) => a - b)
+          for (let index in data) {
+            let tmpEntry
+            for (let [username, scrobbleList] of Object.entries(data[parseInt(index)])) {
+              let tmpSeries = []
+              let scrobbles: number = 0
+              let scrobbleListFinal: any[] = scrobbleList as any[]
+              tmpEntry = {"name": username, "series": [], numEntires: scrobbleListFinal.length}
+              for (let timestamp of masterTimestamps) {
+                if (scrobbleListFinal.includes(timestamp)) {
+                  scrobbles++
+                }
+                tmpSeries.push({"name": moment.unix(timestamp).toDate(), "value": scrobbles})
               }
-              tmpSeries.push({"name": moment.unix(timestamp).toDate(), "value": scrobbles})
+              tmpEntry['series'] = tmpSeries
             }
-            tmpEntry['series'] = tmpSeries
+            chartDataTmp.push(tmpEntry)
           }
-          chartDataTmp.push(tmpEntry)
+          chartDataTmp.sort((a, b) => b.numEntires - a.numEntires)
+        } else {
+          for (let index in data) {
+            let tmpEntry
+            for (let [username, scrobbleList] of Object.entries(data[parseInt(index)])) {
+              let tmpSeries = []
+              let scrobbles: number = 0
+              let scrobbleListFinal: any[] = scrobbleList as any[]
+              tmpEntry = {"name": username, "series": [], numEntires: scrobbleListFinal.length}
+              for (let [index, record] of Object.entries(scrobbleList)) {
+                let [timestamp, scrobbles] = Object.entries(record)[0]
+                tmpSeries.push({"name": moment.unix(parseInt(timestamp)).toDate(), "value": scrobbles})
+              }
+              tmpEntry['series'] = tmpSeries
+            }
+            chartDataTmp.push(tmpEntry)
+          }
         }
-        chartDataTmp.sort((a, b) => b.numEntires - a.numEntires)
         this.chartData = chartDataTmp
     }).catch(error => {
       this.messageService.open("There was an error generating the trends chart. Please try again.")

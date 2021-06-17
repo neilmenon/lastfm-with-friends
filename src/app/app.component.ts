@@ -33,6 +33,6 @@ export class AppComponent {
           console.log(error)
         })
       }
-    }, 10000)
+    }, 60000)
   }
 }

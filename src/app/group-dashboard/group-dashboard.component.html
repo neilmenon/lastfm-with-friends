@@ -289,8 +289,9 @@
                 <span *ngIf="isCustomDateRange">{{ customStartDate.format('MM/DD/YY') }} - {{ customEndDate.format('MM/DD/YY') }}</span>
             </div>
             <div class="refresh">
-                <mat-spinner *ngIf="leaderboardLoading" style="right: 26px;" diameter="19" color="accent"></mat-spinner>
+                <mat-spinner *ngIf="leaderboardLoading" style="right: 52px;" diameter="19" color="accent"></mat-spinner>
             </div>
+            <a class="refresh clickable" style="right: 13px; font-size: 23px;" *ngIf="leaderboardObject && leaderboardObject.leaderboard.length > 0" (click)="listeningTrends('leaderboard-cu', null, null, isCustomDateRange ? customStartDate : (leaderboardSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc().subtract(leaderboardSliderMappings[leaderboardSelectedIndex].days, 'd')), isCustomDateRange ? customEndDate : (leaderboardSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc()))" matTooltip="Listening Trends" matTooltipPosition="above"><mat-icon [inline]="true">timeline</mat-icon></a>
             <a class="refresh clickable" matTooltip="Custom Date Range" matTooltipPosition="above" (click)="customDateRange('Scrobble Leaderboard')"><mat-icon [inline]="true">date_range</mat-icon></a>
         </div>
         <div>

@@ -1,5 +1,5 @@
 <div class="center" style="margin-bottom: -16px;">
-  <h3 mat-dialog-title *ngIf="data.cmdMode == 'leaderboard'">Overall Listening Trends for <u>{{ data.group.name }}</u></h3>
+  <h3 mat-dialog-title *ngIf="data.cmdMode.includes('leaderboard')">Overall Listening Trends for <u>{{ data.group.name }}</u></h3>
   <h3 mat-dialog-title *ngIf="data.wkMode == 'artist'">{{ data.cmdMode.includes('user') ? data.userObject.username + "'s " : "" }}Listening Trends for <u>{{ data.wkObject.artist.name }}</u> {{ data.cmdMode.includes('user') ? "" : "in " + data.group.name }}</h3>
   <h3 mat-dialog-title *ngIf="data.wkMode == 'album'">{{ data.cmdMode.includes('user') ? data.userObject.username + "'s " : "" }}Listening Trends for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> {{ data.cmdMode.includes('user') ? "" : "in " + data.group.name }}</h3>
   <h3 mat-dialog-title *ngIf="data.wkMode == 'track'">Listening Trends for <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.track.name }}</u> in {{ data.group.name }}</h3>
@@ -7,6 +7,10 @@
 <div class="center-all" style="color: #bfbfbf;padding-bottom: 3px;" *ngIf="data.cmdMode.includes('user') && data.wkMode == 'artist'">
   <mat-radio-button checked (change)="chartData = [];isTrackMode=true;listeningTrends('user-track')" style="padding-right: 15px;">Track Mode</mat-radio-button>
   <mat-radio-button (change)="chartData = [];isTrackMode=false;listeningTrends('user-album')">Album Mode</mat-radio-button> 
+</div>
+<div class="center-all" style="color: #bfbfbf;padding-bottom: 3px;" *ngIf="data.cmdMode.includes('leaderboard')">
+  <mat-radio-button checked (change)="chartData = [];listeningTrends('leaderboard-cu')" style="padding-right: 15px;">Cumulative</mat-radio-button>
+  <mat-radio-button (change)="chartData = [];listeningTrends('leaderboard-noncu')">Non-Cumulative</mat-radio-button> 
 </div>
 <div class="center-all" style="color: #bfbfbf;">
   <span *ngIf="!(data.startRange && data.endRange); else noDate">Time Period: Overall</span>
@@ -42,6 +46,6 @@
   >
 </ngx-charts-line-chart>
 <span class="center-all" style="font-size: 12px; color: #bfbfbf;" *ngIf="chartData.length">
-  *Hover or tap to isolate {{ data.cmdMode == 'wk' ? "user" : (data.cmdMode == 'user-track' ? "track" : "album") }}
+  *Hover or tap to isolate {{ data.cmdMode == 'wk' || data.cmdMode.includes('leaderboard') ? "user" : (data.cmdMode == 'user-track' ? "track" : "album") }}
   <span *ngIf="data.cmdMode.includes('user')"> (Limit: top {{ data.cmdMode == 'user-track' ? "20 tracks" : "10 albums" }})</span>*
 </span>
