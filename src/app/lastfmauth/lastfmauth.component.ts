@@ -19,7 +19,7 @@ export class LastfmauthComponent implements OnInit {
     if (session == null) {
       this.route.queryParams.subscribe(params => {
         if (params['token']) {
-          this.messageService.open('Signing in...')
+          this.messageService.open('Signing in...', "center", true)
           this.authenticate(params['token']).then(response => {
             localStorage.setItem("lastfm_session", response['session_key'])
             localStorage.setItem("lastfm_username", response['username'])
@@ -34,7 +34,7 @@ export class LastfmauthComponent implements OnInit {
             this.router.navigate([''])
           })
         } else {
-          this.messageService.open("Sending you to authentication page...")
+          this.messageService.open("Sending you to authentication page...", "center", true)
           window.location.href = 'https://www.last.fm/api/auth/?api_key='+ config.api_key +'&cb='+ config.project_root +'/lastfmauth';
         }
       });

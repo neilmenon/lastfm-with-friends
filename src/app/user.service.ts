@@ -45,8 +45,12 @@ export class UserService {
     if (this.user && !force) {
       return this.user;
     } else {
-      this.user = this.http.get(config.api_root + '/users/' + localStorage.getItem("lastfm_username")).pipe(share());
-      return this.user;
+      let u = localStorage.getItem("lastfm_username")
+      if (u) {
+        this.user = this.http.get(config.api_root + '/users/' + u).pipe(share());
+        return this.user;
+      }
+      return null
     }
   }
 
@@ -257,5 +261,12 @@ export class UserService {
       payload['wk_options'] = wkOptions
     }
     return this.http.post(config.api_root + "/commands/listeningtrends", payload)
+  }
+
+  appStats() {
+    return this.http.post(config.api_root + "/tasks/app-stats", {
+      'username': this.username,
+      'session_key': this.session_key,
+    })
   }
 }

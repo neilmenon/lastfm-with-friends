@@ -110,6 +110,9 @@ export class ListeningTrendsComponent implements OnInit {
             chartDataTmp.push(tmpEntry)
           }
         }
+        if (cmdMode == "leaderboard-cu") {
+          chartDataTmp.sort((a, b) => b.series[b.series.length - 1].value - a.series[b.series.length - 1].value)
+        }
         this.chartData = chartDataTmp
     }).catch(error => {
       this.messageService.open("There was an error generating the trends chart. Please try again.")
@@ -122,15 +125,15 @@ export class ListeningTrendsComponent implements OnInit {
   }
 
   onSelect(data): void {
-    console.log('Item clicked', JSON.parse(JSON.stringify(data)));
+    // console.log('Item clicked', JSON.parse(JSON.stringify(data)));
   }
 
   onActivate(data): void {
-    console.log('Activate', JSON.parse(JSON.stringify(data)));
+    // console.log('Activate', JSON.parse(JSON.stringify(data)));
   }
 
   onDeactivate(data): void {
-    console.log('Deactivate', JSON.parse(JSON.stringify(data)));
+    // console.log('Deactivate', JSON.parse(JSON.stringify(data)));
   }
 
   onResize(event) {

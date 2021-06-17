@@ -22,7 +22,7 @@ def is_authenticated(username, session_key):
     try:
         mdb = mariadb.connect(**(cfg['sql']))
         cursor = mdb.cursor(dictionary=True)
-        sql = 'SELECT * FROM sessions WHERE session_key = "'+session_key+'";'
+        sql = 'SELECT * FROM sessions WHERE session_key = "{}";'.format(session_key)
         cursor.execute(sql)
         result = list(cursor)
         if len(result) > 0:
@@ -43,7 +43,7 @@ def is_authenticated(username, session_key):
         logger.log("Database error while checking if " + username + " is authenticated: " + str(e))
         return False
     except Exception as e:
-        logger.log("Error while checking if " + username + " is authenticated: " + str(e))
+        logger.log("Error while checking if {} is authenticated: ".format(username) + str(e))
         return False
 
 def remove_session(username, session_key):

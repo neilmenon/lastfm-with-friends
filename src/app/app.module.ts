@@ -51,6 +51,8 @@ import { UserSettingsComponent } from './user-settings/user-settings.component';
 import { WhoKnowsTopComponent } from './who-knows-top/who-knows-top.component';
 import { CustomDateRangeComponent } from './custom-date-range/custom-date-range.component';
 import { ListeningTrendsComponent } from './listening-trends/listening-trends.component';
+import { FooterComponent } from './footer/footer.component';
+import { PluralizePipe } from './pluralize.pipe';
 
 @NgModule({
   declarations: [
@@ -70,6 +72,8 @@ import { ListeningTrendsComponent } from './listening-trends/listening-trends.co
     WhoKnowsTopComponent,
     CustomDateRangeComponent,
     ListeningTrendsComponent,
+    FooterComponent,
+    PluralizePipe,
   ],
   imports: [
     BrowserModule,
