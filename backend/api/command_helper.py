@@ -553,6 +553,8 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
             days_increment = 30
         elif days_range < 3:
             days_increment = 1/24
+        elif days_range <= 7:
+            days_increment = 1/3
         elif days_range <= 180:
             days_increment = 1
         elif days_range <= 365:

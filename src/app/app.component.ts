@@ -22,7 +22,7 @@ export class AppComponent {
             } else {
               if (currentBuildUnix != data.unixTimestamp) {
                 // let buildDate: moment.Moment = moment.unix(data.unixTimestamp).locale('en')
-                this.messageService.open("New app changes published! Reload to view latest version.", "center", true)
+                this.messageService.open("New app changes published! Reload to view the latest version.", "center", true)
                 clearInterval(interval)
               }
             }
