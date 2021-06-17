@@ -490,9 +490,13 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
     cursor.execute("SET time_zone='+00:00';")
 
     # get list of users in group
-    group = group_helper.get_group(join_code, short=True)
+    group = group_helper.get_group(join_code, short=False)
     
     scrobbles = []
+    days_range = -1
+
+    if start_range and end_range:
+        days_range = (dateutil.parser.parse(end_range) - dateutil.parser.parse(start_range)).days
 
     if cmd_mode == "wk":
         album_sql = " AND track IN ({}) ".format(find_album_tracks(wk_options['album_id'])) if wk_options['wk_mode'] == "album" else " "
@@ -544,5 +548,45 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
             album_scrobbles = [r['timestamp'] for r in result]
             if album_scrobbles:
                 scrobbles.append({record['name']: album_scrobbles})
+    elif cmd_mode == "leaderboard":
+        if days_range == -1 or days_range > 365:
+            days_increment = 30
+        elif days_range < 3:
+            days_increment = 1/24
+        elif days_range <= 180:
+            days_increment = 1
+        elif days_range <= 365:
+            days_increment = 7
+        
+        if days_range == -1:
+            users_list = ", ".join(str(u['user_id']) for u in group['users'])
+            sql = "SELECT timestamp from track_scrobbles WHERE user_id IN ({}) ORDER BY timestamp ASC LIMIT 1".format(users_list)
+            cursor.execute(sql)
+            result = list(cursor)
+            start = datetime.datetime.utcfromtimestamp(int(result[0]['timestamp']))
+            end = datetime.datetime.utcnow()
+            days_range = (end - start).days
+        else:
+            start = dateutil.parser.parse(start_range)
+            end = dateutil.parser.parse(end_range)
+
+        for u in group['users']:
+            days_tmp = 0
+            registered_datetime = datetime.datetime.utcfromtimestamp(int(u['registered']))
+            scrbl_tmp = []
+            scrbl_count = 0
+            while days_tmp < days_range/days_increment: # make discrete data points for each day
+                start_tmp = (start + datetime.timedelta(days=days_tmp*days_increment))
+                end_tmp = (start + datetime.timedelta(days=(days_tmp*days_increment)+days_increment))
+                if end_tmp < registered_datetime: # don't query db if time range is before registered date
+                    scrbl_tmp.append({ int(start_tmp.timestamp()): scrbl_count })
+                else:
+                    sql = "SELECT COUNT(*) as total FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}'".format(u['user_id'], start_tmp.strftime("%Y-%m-%dT%H:%M:%SZ"), end_tmp.strftime("%Y-%m-%dT%H:%M:%SZ"))
+                    cursor.execute(sql)
+                    scrbl_count += int(list(cursor)[0]['total'])
+                    scrbl_tmp.append({ int(start_tmp.timestamp()): scrbl_count })
+                days_tmp += 1
+            scrobbles.append({ u['username']: scrbl_tmp})
+
     mdb.close()
     return scrobbles

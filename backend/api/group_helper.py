@@ -60,7 +60,7 @@ def get_group(join_code, short=False):
     if short:
         sql = "SELECT users.user_id,users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
     else:
-        sql = "SELECT user_groups.username, user_groups.joined, users.profile_image, users.scrobbles FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
+        sql = "SELECT user_groups.username, user_groups.joined, users.profile_image, users.scrobbles, users.registered, users.user_id FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC".format(join_code)
     cursor.execute(sql)
     users = list(cursor)
     result[0]['users'] = users
