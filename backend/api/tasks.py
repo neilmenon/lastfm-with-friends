@@ -72,15 +72,17 @@ def app_stats():
     params = request.get_json()
     if params:
         try:
-            username = params['username']
-            session_key = params['session_key']
+            db_store = params['db_store']
+            if db_store:
+                secret_key = params['secret_key']
         except KeyError as e:
             response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
             abort(response)
     else:
         response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
         abort(response)
-    if not auth_helper.is_authenticated(username, session_key):
+    if db_store and secret_key != cfg['api']['secret']:
         abort(401)
-    response = task_helper.app_stats()
+    
+    response = task_helper.app_stats(db_store)
     return jsonify(response)

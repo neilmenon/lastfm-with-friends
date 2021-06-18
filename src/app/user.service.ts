@@ -265,8 +265,7 @@ export class UserService {
 
   appStats() {
     return this.http.post(config.api_root + "/tasks/app-stats", {
-      'username': this.username,
-      'session_key': this.session_key,
+      'db_store': false
     })
   }
 }

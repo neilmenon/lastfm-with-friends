@@ -48,7 +48,7 @@ export class FooterComponent implements OnInit, AfterViewInit {
       } else {
         this.showFooter = true
       }
-    }, 500)
+    }, 250)
   }
 
 }

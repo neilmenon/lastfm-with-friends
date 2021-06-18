@@ -163,6 +163,25 @@ CREATE TABLE `sessions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `stats`
+--
+
+DROP TABLE IF EXISTS `stats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `stats` (
+  `date` datetime NOT NULL,
+  `artists` bigint(20) NOT NULL,
+  `albums` bigint(20) NOT NULL,
+  `tracks` bigint(20) NOT NULL,
+  `scrobbles` bigint(20) NOT NULL,
+  `users` int(11) NOT NULL,
+  `groups` int(11) NOT NULL,
+  UNIQUE KEY `date` (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `track_scrobbles`
 --
 
@@ -232,4 +251,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-02-06 12:25:25
+-- Dump completed on 2021-06-18 16:41:31

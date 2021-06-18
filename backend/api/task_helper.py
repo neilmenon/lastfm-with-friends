@@ -1,5 +1,7 @@
 import mariadb
+import datetime
 from . import config
+from . import sql_helper
 from . import api_logger as logger
 cfg = config.config
 
@@ -38,23 +40,33 @@ def remove_unused_artists_albums():
     else:
         logger.log("========== Deleted {} artist(s) and {} album(s). ==========".format(len(deleted_artists), len(deleted_albums)))
 
-def app_stats():
+def app_stats(db_store):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
 
     stats = {}
-    cursor.execute("SELECT COUNT(*) as artists FROM artists")
-    stats['artists'] = list(cursor)[0]['artists']
-    cursor.execute("SELECT COUNT(*) as albums FROM albums")
-    stats['albums'] = list(cursor)[0]['albums']
-    cursor.execute("SELECT COUNT(*) as tracks FROM (SELECT DISTINCT track FROM track_scrobbles GROUP BY track) as dt")
-    stats['tracks'] = list(cursor)[0]['tracks']
-    cursor.execute("SELECT COUNT(*) as scrobbles FROM track_scrobbles")
-    stats['scrobbles'] = list(cursor)[0]['scrobbles']
-    cursor.execute("SELECT COUNT(*) as users FROM users")
-    stats['users'] = list(cursor)[0]['users']
-    cursor.execute("SELECT COUNT(*) as groups FROM groups")
-    stats['groups'] = list(cursor)[0]['groups']
+    if db_store:
+        cursor.execute("SELECT COUNT(*) as artists FROM artists")
+        stats['artists'] = list(cursor)[0]['artists']
+        cursor.execute("SELECT COUNT(*) as albums FROM albums")
+        stats['albums'] = list(cursor)[0]['albums']
+        cursor.execute("SELECT COUNT(*) as tracks FROM (SELECT DISTINCT track FROM track_scrobbles GROUP BY track) as dt")
+        stats['tracks'] = list(cursor)[0]['tracks']
+        cursor.execute("SELECT COUNT(*) as scrobbles FROM track_scrobbles")
+        stats['scrobbles'] = list(cursor)[0]['scrobbles']
+        cursor.execute("SELECT COUNT(*) as users FROM users")
+        stats['users'] = list(cursor)[0]['users']
+        cursor.execute("SELECT COUNT(*) as groups FROM groups")
+        stats['groups'] = list(cursor)[0]['groups']
+        stats['date'] = str(datetime.datetime.utcnow())
+
+        sql = sql_helper.insert_into("stats", stats)
+        cursor.execute(sql)
+        mdb.commit()
+    else:
+        sql = "SELECT * FROM stats ORDER BY date DESC LIMIT 1"
+        cursor.execute(sql)
+        stats = list(cursor)[0]
 
     mdb.close()
     return stats
