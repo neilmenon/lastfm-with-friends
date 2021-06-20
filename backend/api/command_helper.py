@@ -206,16 +206,15 @@ def nowplaying(single_user=None):
                         new_count = 0
 
                         # these calculations are based on the assumption this task will be run every minute!
-                        if hours <= 12:
-                            pass # if within 12 hours, check nowplaying
-                        elif hours <= 72:
-                            new_count = round(math.log(hours))
+                        if hours <= 2:
+                            pass # check nowplaying
+                        elif hours <= 36:
+                            new_count = round(math.log(hours) * math.log(hours))
                         else:
                             new_count = round(math.log(hours) * math.log(hours) * math.log(hours))
                         
                         if new_count:
-                            logger.log("Calculating now playing interval for {}.".format(user['username']))
-                            print("hours: {} | new_count: {}".format(hours, new_count))
+                            logger.log("Setting now playing interval for {} to: {}.".format(user['username'], new_count))
                             sql = "UPDATE now_playing SET check_count = {} WHERE username = '{}'".format(new_count, user['username'])
                             cursor.execute(sql)
                             mdb.commit()
