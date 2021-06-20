@@ -105,7 +105,7 @@ def nowplayingdb():
             abort(response)
         if secret_key != cfg['api']['secret']:
             abort(401)
-        result = command_helper.nowplaying(database=True)
+        result = command_helper.nowplaying()
         if not result:
             abort(500)
         return jsonify({'data': 'success'})

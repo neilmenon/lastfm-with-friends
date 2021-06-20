@@ -175,28 +175,71 @@ def wk_track(query, users, start_range, end_range):
     mdb.close()
     return {'artist': artist, 'track': track, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
-def nowplaying(join_code=None, database=False, single_user=None):
+def nowplaying(single_user=None):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     if not single_user:
-        if join_code:
-            sql = "SELECT users.username FROM user_groups LEFT JOIN users ON users.username = user_groups.username WHERE user_groups.group_jc = '{}' ORDER BY user_groups.joined ASC;".format(join_code)
-        else:
-            logger.log("Checking now playing activity for all users...")
-            sql = "SELECT username FROM users;"
+        logger.log("=== Running now playing task... ===")
+        sql = "SELECT username FROM users;"
         cursor.execute(sql)
         users = list(cursor)
     else:
-        logger.log("Checking now playing for individual user {}".format(single_user))
+        logger.log("[User-triggered now playing update] {}".format(single_user))
         users = [{'username': single_user}]
     now_playing_users = []
     played_users = []
     for user in users:
+        if single_user:
+            pass # don't check if needs update
+        else:
+            sql = "SELECT check_count,timestamp FROM now_playing WHERE username = '{}'".format(user['username'])
+            cursor.execute(sql)
+            result = list(cursor)
+            if result:
+                check_count = result[0]['check_count']
+                timestamp = int(result[0]['timestamp'])
+                if check_count == None: # calculate next nowplaying status
+                    if timestamp != 0:
+                        last_scrobbled_date = datetime.datetime.utcfromtimestamp(int(timestamp))
+                        diff = datetime.datetime.utcnow() - last_scrobbled_date
+                        hours = float(diff.days * 24 + diff.seconds / 3600)
+                        new_count = 0
+
+                        # these calculations are based on the assumption this task will be run every minute!
+                        if hours <= 12:
+                            pass # if within 12 hours, check nowplaying
+                        elif hours <= 72:
+                            new_count = round(math.log(hours))
+                        else:
+                            new_count = round(math.log(hours) * math.log(hours) * math.log(hours))
+                        
+                        if new_count:
+                            logger.log("Calculating now playing interval for {}.".format(user['username']))
+                            print("hours: {} | new_count: {}".format(hours, new_count))
+                            sql = "UPDATE now_playing SET check_count = {} WHERE username = '{}'".format(new_count, user['username'])
+                            cursor.execute(sql)
+                            mdb.commit()
+                            continue
+                elif check_count == 0: # check nowplaying status
+                    sql = "UPDATE now_playing SET check_count = NULL WHERE username = '{}'".format(user['username'])
+                    cursor.execute(sql)
+                    mdb.commit()
+                elif check_count > 0: # decrement interval and skip check
+                    new_count = check_count - 1
+                    sql = "UPDATE now_playing SET check_count = {} WHERE username = '{}'".format(new_count, user['username'])
+                    cursor.execute(sql)
+                    mdb.commit()
+                    continue
+            else: # user does not have a nowplaying row in table, so check nowplaying status
+                pass
+        logger.log("Checking now playing status for {}.".format(user['username']))
         req_url = 'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={}&api_key={}&limit=1&format=json'.format(user['username'], cfg['api']['key'])
         try:
             req = requests.get(req_url).json()
             track = req['recenttracks']['track'][0]
-        except (IndexError, KeyError, requests.exceptions.RequestException) as e:
+        except IndexError:
+            continue
+        except (KeyError, requests.exceptions.RequestException) as e:
             logger.log("Error getting most recently played track for {}: {}. Continuing...".format(user['username'], e))
             continue
         except Exception as e:
@@ -222,18 +265,11 @@ def nowplaying(join_code=None, database=False, single_user=None):
         else:
             now_playing_users.append(tmp_user)
 
-        if database:
-            sql = sql_helper.replace_into("now_playing", tmp_user)
-            cursor.execute(sql)
-            mdb.commit()
+        sql = sql_helper.replace_into("now_playing", tmp_user)
+        cursor.execute(sql)
+        mdb.commit()
     
-    played_users = sorted(played_users, key=itemgetter('timestamp'), reverse=True)
-    now_playing_users.extend(played_users)
-    mdb.close()
-    if database:
-        return True
-    else:
-        return now_playing_users
+    return True
 
 def get_nowplaying(join_code):
     mdb = mariadb.connect(**(cfg['sql']))

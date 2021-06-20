@@ -133,6 +133,7 @@ DROP TABLE IF EXISTS `now_playing`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `now_playing` (
   `username` varchar(191) NOT NULL,
+  `check_count` int(11) DEFAULT NULL,
   `artist` varchar(400) NOT NULL,
   `track` varchar(400) NOT NULL,
   `album` varchar(400) NOT NULL,
@@ -251,4 +252,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-06-18 16:41:31
+-- Dump completed on 2021-06-20 17:30:26

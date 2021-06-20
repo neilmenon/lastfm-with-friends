@@ -49,7 +49,6 @@ def create():
         mdb.close()
         if cursor.rowcount > 0:
             group_helper.join_group(params['username'], join_code)
-            command_helper.nowplaying(join_code, database=True)
             return jsonify(data)
         else:
             response = make_response(jsonify(error="Group with join code "+join_code+" already exists. Randomness has failed."), 409)
@@ -120,7 +119,6 @@ def join():
             abort(409)
         group_helper.join_group(params['username'], params['join_code'])
         group_data = group_helper.get_group(params['join_code'])
-        command_helper.nowplaying(params['join_code'], database=True)
         return jsonify(group_data)
     except mariadb.Error as e:
         logger.log("Database error while joining group " + params['join_code'] + ": " + str(e))
