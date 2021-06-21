@@ -189,8 +189,10 @@ def nowplaying(single_user=None):
     now_playing_users = []
     played_users = []
     for user in users:
-        if single_user:
-            pass # don't check if needs update
+        if single_user: # if update is user-triggered, no need to calculate next update (yet)
+            sql = "UPDATE now_playing SET check_count = NULL WHERE username = '{}'".format(user['username'])
+            cursor.execute(sql)
+            mdb.commit()
         else:
             sql = "SELECT check_count,timestamp FROM now_playing WHERE username = '{}'".format(user['username'])
             cursor.execute(sql)
@@ -214,7 +216,7 @@ def nowplaying(single_user=None):
                             new_count = round(math.log(hours) * math.log(hours) * math.log(hours))
                         
                         if new_count:
-                            logger.log("Setting now playing interval for {} to: {}.".format(user['username'], new_count))
+                            logger.log("New now playing interval for {}: {}.".format(user['username'], new_count))
                             sql = "UPDATE now_playing SET check_count = {} WHERE username = '{}'".format(new_count, user['username'])
                             cursor.execute(sql)
                             mdb.commit()
@@ -267,7 +269,7 @@ def nowplaying(single_user=None):
         sql = sql_helper.replace_into("now_playing", tmp_user)
         cursor.execute(sql)
         mdb.commit()
-    
+    mdb.close()
     return True
 
 def get_nowplaying(join_code):
