@@ -384,6 +384,12 @@ div.history-options-container > mat-paginator {
     background: transparent;
     color: darkseagreen!important;
 }
+.mat-menu-panel {
+    background-image: url(/assets/img/background.svg)!important;
+}
+.mat-menu-content {
+    background: #8585852b!important;
+}
 
 /* SCROLLBARS */
 .wk-actions-dialog {

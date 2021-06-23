@@ -10,8 +10,7 @@
 <div class="box center now-playing-container">
     <div style="position: relative;">
         <h2 class="box-title">Listening Activity</h2> 
-        <a class="refresh clickable" (click)="messageService.open('Click on an album artwork to see who else knows the release.')"><mat-icon [inline]="true">info</mat-icon></a>
-        <a class="np-scrobble-history clickable" (click)="scrobbleHistory('overall', null, group.members)" matTooltip="Group Scrobble History — Overall" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+        <a class="refresh clickable" (click)="scrobbleHistory('overall', null, group.members)" matTooltip="Group Scrobble History — Overall" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
     </div>
     <div class="now-playing-errors" *ngIf="!nowPlayingResults || nowPlayingTimeoutReached">
         <span *ngIf="nowPlayingTimeoutReached; else errorBlock">Listening activity interval expired. Please refresh.</span>
@@ -24,9 +23,16 @@
     </div>
     <div class="container" style="flex-wrap: wrap;">
         <div *ngFor="let entry of nowPlayingResults" class="now-playing-box">
-            <strong><a href="https://last.fm/user/{{ entry.username }}" target="_blank" [class.now-playing-track]="!entry.timestamp">{{ entry.username }}</a></strong>
-            <span *ngIf="entry.timestamp" class="recently-played-track" title="{{ moment.unix(entry.timestamp) }}">{{ moment.unix(entry.timestamp).fromNow() }}</span><br>
-            <div class="clickable now-playing-artwork-container" (click)="nowPlayingToWk(entry, wkArtist)"><img src="{{ entry.image_url }}" width="110px"></div>
+            <strong><a href="https://last.fm/user/{{ entry.username }}" target="_blank" [class.now-playing-track]="!entry.timestamp" [matTooltip]="!entry.timestamp ? 'Listening now' : null" matTooltipPosition="above">{{ entry.username }}</a></strong>
+            <span *ngIf="entry.timestamp" class="recently-played-track">
+                <span title="{{ moment.unix(entry.timestamp) }}">{{ moment.unix(entry.timestamp).fromNow() }}</span>
+                <span *ngIf="entry?.check_count > 1" matTooltip="Next now playing update: {{ moment().add(entry.check_count, 'minutes').locale('en-US').fromNow() }}" matTooltipPosition="above" style="margin-left: 2px;">
+                    <i class="fas fa-clock" style="font-size: 12px;"></i>
+                </span>
+            </span><br>
+            <div class="clickable now-playing-artwork-container" (click)="nowPlayingToWk(entry, wkArtist)" matTooltip="Who knows {{ entry.artist }} in {{ group.name }}?" matTooltipPosition="right">
+                <img src="{{ entry.image_url }}" width="110px">
+            </div>
             <div class="now-playing-details">
                 <span><a href="{{ entry.url }}" target="_blank" title="{{ entry.track }}" class="clear-color"><em>{{ entry.track }}</em></a></span>
                 <span title="{{ entry.artist }}">{{ entry.artist }}</span>

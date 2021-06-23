@@ -446,7 +446,7 @@ export class GroupDashboardComponent implements OnInit {
         this.wkArtistCustomStartDate = startRange
         this.wkArtistCustomEndDate = endRange
       }
-    } else {
+    } else if (!(startRange && endRange)) {
       this.wkArtistSelectedIndex = this.leaderboardSliderMappings.length - 1
     }
     
@@ -462,7 +462,7 @@ export class GroupDashboardComponent implements OnInit {
           this.wkAlbumCustomStartDate = startRange
           this.wkAlbumCustomEndDate = endRange
         }
-      } else {
+      } else if (!(startRange && endRange)) {
         this.wkAlbumSelectedIndex = this.leaderboardSliderMappings.length - 1
       }
       this.wkAlbumSubmit({'query': albumQuery}, this.group.members, startRange, endRange)
@@ -479,7 +479,7 @@ export class GroupDashboardComponent implements OnInit {
           this.wkTrackCustomStartDate = startRange
           this.wkTrackCustomEndDate = endRange
         }
-      } else {
+      } else if (!(startRange && endRange)) {
         this.wkTrackSelectedIndex = this.leaderboardSliderMappings.length - 1
       }
       this.wkTrackSubmit({'query': trackQuery}, this.group.members, startRange, endRange)
@@ -517,6 +517,23 @@ export class GroupDashboardComponent implements OnInit {
       }
     })
     let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
+      let targetIndex: number, isCustomDate: boolean
+      if (wkMode == "track") {
+        targetIndex = this.wkTrackSelectedIndex
+        isCustomDate = this.wkTrackIsCustomDateRange
+      } else if (wkMode == "album") {
+        targetIndex = this.wkAlbumSelectedIndex
+        isCustomDate = this.wkAlbumIsCustomDateRange
+      } else if (wkMode == "artist") {
+        targetIndex = this.wkArtistSelectedIndex
+        isCustomDate = this.wkArtistIsCustomDateRange
+      }
+      this.wkTrackSelectedIndex = targetIndex
+      this.wkTrackIsCustomDateRange = isCustomDate
+      this.wkAlbumSelectedIndex = targetIndex
+      this.wkAlbumIsCustomDateRange = isCustomDate
+      this.wkArtistSelectedIndex = targetIndex
+      this.wkArtistIsCustomDateRange = isCustomDate
       this.nowPlayingToWk(entry, null, entry['startDate'], entry['endDate'], false)
     })
     let wkTopSub = dialogRef.componentInstance.wkFromTopDialog.subscribe(data => {
