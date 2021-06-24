@@ -75,7 +75,7 @@ export class GroupDashboardComponent implements OnInit {
   wkTrackCustomEndDate: moment.Moment;
 
   // nowplaying
-  nowPlayingResults = null;
+  nowPlayingResults: Array<any> = null;
   npInterval: any;
   nowPlayingTimeoutReached: boolean = false;
 
@@ -424,8 +424,13 @@ export class GroupDashboardComponent implements OnInit {
   nowPlaying(loading=false) {
     if (loading)
       this.nowPlayingResults = null
-    this.userService.nowPlaying(this.group.join_code).toPromise().then(data => {
-      this.nowPlayingResults = data;
+    this.userService.nowPlaying(this.group.join_code).toPromise().then((data: any) => {
+      this.nowPlayingResults = []
+      for (let entry of data) {
+        let checkCount = entry.check_count == null ? 0 : (entry.check_count == 0 ? 0.25 : entry.check_count)
+        entry['checkDisp'] = checkCount
+        this.nowPlayingResults.push(entry)
+      }
     }).catch(error => {
       this.nowPlayingResults = undefined
     })

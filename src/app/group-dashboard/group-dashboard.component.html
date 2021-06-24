@@ -26,7 +26,7 @@
             <strong><a href="https://last.fm/user/{{ entry.username }}" target="_blank" [class.now-playing-track]="!entry.timestamp" [matTooltip]="!entry.timestamp ? 'Listening now' : null" matTooltipPosition="above">{{ entry.username }}</a></strong>
             <span *ngIf="entry.timestamp" class="recently-played-track">
                 <span title="{{ moment.unix(entry.timestamp) }}">{{ moment.unix(entry.timestamp).fromNow() }}</span>
-                <span *ngIf="entry?.check_count > 1" matTooltip="Next now playing update: {{ moment().add(entry.check_count, 'minutes').locale('en-US').fromNow() }}" matTooltipPosition="above" style="margin-left: 2px;">
+                <span matTooltip="Now playing update: {{ moment().add(entry.checkDisp, 'minutes').locale('en-US').fromNow() }}" matTooltipPosition="above" style="margin-left: 2px;">
                     <i class="fas fa-clock" style="font-size: 12px;"></i>
                 </span>
             </span><br>
