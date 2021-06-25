@@ -11,7 +11,7 @@
       ({{ historyEndDate.diff(historyStartDate, 'days') + (historyEndDate.diff(historyStartDate, 'days') <= 1 ? ' day' : ' days') }})
     </span>
 </ng-template>
-<div class="history-options-container">
+<div class="history-options-container" [class.disable-click]="(resultsObject === null) || paginationTriggered">
     <div class="history-options center">
         <mat-form-field color="accent">
             <mat-label>User</mat-label>
@@ -49,7 +49,7 @@
     <mat-paginator #paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" (page)="pageEvent = $event; paginationChange($event, selectedUser)" color="accent"></mat-paginator>
 </div>
 <div mat-dialog-content class="history-result">
-    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="((resultsObject === null) || paginationTriggered)" style="padding-bottom: 10px;"></mat-spinner>
+    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="(resultsObject === null) || paginationTriggered" style="padding-bottom: 10px;"></mat-spinner>
     <table *ngIf="resultsObject">
         <thead class="sticky-table-header">
             <tr>

@@ -390,6 +390,10 @@ div.history-options-container > mat-paginator {
 .mat-menu-content {
     background: #8585852b!important;
 }
+.disable-click {
+    pointer-events: none;
+    opacity: 0.5;
+}
 
 /* SCROLLBARS */
 .wk-actions-dialog {

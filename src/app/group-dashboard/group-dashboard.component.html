@@ -358,7 +358,7 @@
             </div>
             <a class="refresh clickable" (click)="customDateRange('Individual & Group Charts')" matTooltip="Custom Date Range" matTooltipPosition="above"><mat-icon [inline]="true">date_range</mat-icon></a>
         </div>
-        <div class="chart-options">
+        <div class="chart-options" [class.disable-click]="chartLoading">
             <mat-form-field color="accent" style="width: 70px;">
                 <mat-label>Release Type</mat-label>
                 <mat-select [(ngModel)]="chartReleaseType" [(value)]="chartReleaseType" (selectionChange)="charts()">
@@ -443,7 +443,7 @@
     <!-- placeholder -->
     <div class="box center command-box">
         <div style="position: relative;">
-            <h2 class="box-title">Discovery Leaderboard</h2> 
+            <h2 class="box-title">Group Mainstream Factor</h2> 
         </div>
         <span>Coming soon.</span>
     </div>

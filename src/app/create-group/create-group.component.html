@@ -1,6 +1,6 @@
 <div class="box center">
     <h1>Create Group</h1>
-    <form [formGroup]="groupForm" class="create-group-form" (ngSubmit)="onSubmit(groupForm.value)">
+    <form [formGroup]="groupForm" class="create-group-form" (ngSubmit)="onSubmit(groupForm.value)" [class.disable-click]="createLoading">
         <mat-form-field appearance="legacy" class="full-width" color="accent">
             <mat-label>Group Name</mat-label>
             <input matInput name="name" placeholder="The Audiophiles, The Lastfmers, etc." type="text" formControlName="name" required>
@@ -11,7 +11,7 @@
             <mat-hint align="end">{{description.value?.length || 0}}/100</mat-hint>
         </mat-form-field>
         <button color="accent" mat-raised-button type="submit" *ngIf="!createLoading">Create</button>
-        <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="createLoading"></mat-spinner>
     </form>
+    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="createLoading"></mat-spinner>
     <br>
 </div>

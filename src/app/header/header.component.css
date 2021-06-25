@@ -91,3 +91,13 @@
   padding-top: 13px;
   margin-left: -15px;
 }
+.mobile-update-loading {
+  display: inline;
+  margin-left: -10px;
+  top: -13.5px;
+  width: 14px;
+  height: 14px;
+}
+.mat-mobile-loading-shift {
+  margin-right: 10px;
+}
