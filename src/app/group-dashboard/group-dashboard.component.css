@@ -50,3 +50,8 @@
     margin-top: -34px!important;
     width: 100%;
 }
+.toggle-update-clock {
+    position: absolute;
+    left: -10px;
+    top: -12px;
+}

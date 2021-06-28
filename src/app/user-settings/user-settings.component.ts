@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { discreteTimePeriods, releaseTypes } from '../constants';
 import { MessageService } from '../message.service';
+import { getSettingsModel, SettingsModel } from '../models/settingsModel';
+import { TimePeriodModel } from '../models/timePeriodModel';
 import { UserService } from '../user.service';
 
 @Component({
@@ -15,7 +21,17 @@ export class UserSettingsComponent implements OnInit {
   fullScrapeInProgress: boolean = false;
   signed_in: boolean;
   updateInterval;
-  constructor(private userService: UserService, public messageService: MessageService, public router: Router) {
+  settingsForm: FormGroup
+  formSub: Subscription
+  releaseTypes: Array<string> = releaseTypes
+  discreteTimePeriods: Array<TimePeriodModel> = discreteTimePeriods
+  randomTimePeriod: TimePeriodModel = {days: 0, label: 'Random'}
+  constructor(
+    private userService: UserService, 
+    public messageService: MessageService, 
+    public router: Router,
+    private fb: FormBuilder
+  ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
       this.userService.getUser().toPromise().then(data => {
@@ -32,11 +48,24 @@ export class UserSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.userService.setRapidRefresh(true)
+    this.settingsForm = this.fb.group({
+      chartReleaseType: [null],
+      leaderboardTimePeriodDays: [null]
+    })
+    console.log(this.userService.getSettings())
+    this.settingsForm.patchValue(this.userService.getSettings())
+
+    this.formSub = this.settingsForm.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(() => {
+      this.userService.setSettings(getSettingsModel(this.settingsForm.getRawValue()))
+      console.log(this.userService.getSettings())
+      this.messageService.open("Successfully updated user settings.")
+    })
   }
 
   ngOnDestroy() {
     clearInterval(this.updateInterval)
     this.userService.setRapidRefresh(false)
+    this.formSub.unsubscribe()
   }
 
   userInterval() {

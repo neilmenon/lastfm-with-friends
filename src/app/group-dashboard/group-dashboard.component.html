@@ -10,6 +10,7 @@
 <div class="box center now-playing-container">
     <div style="position: relative;">
         <h2 class="box-title">Listening Activity</h2> 
+        <mat-slide-toggle [(ngModel)]="userSettings.showUpdateInterval" (change)="updateIntervalToggle($event)"  class="toggle-update-clock" matTooltip="Toggle listening activity update clock" matTooltipPosition="right"></mat-slide-toggle>
         <a class="refresh clickable" (click)="scrobbleHistory('overall', null, group.members)" matTooltip="Group Scrobble History — Overall" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
     </div>
     <div class="now-playing-errors" *ngIf="!nowPlayingResults || nowPlayingTimeoutReached">
@@ -26,7 +27,7 @@
             <strong><a href="https://last.fm/user/{{ entry.username }}" target="_blank" [class.now-playing-track]="!entry.timestamp" [matTooltip]="!entry.timestamp ? 'Listening now' : null" matTooltipPosition="above">{{ entry.username }}</a></strong>
             <span *ngIf="entry.timestamp" class="recently-played-track">
                 <span title="{{ moment.unix(entry.timestamp) }}">{{ moment.unix(entry.timestamp).fromNow() }}</span>
-                <span matTooltip="Now playing update: {{ moment().add(entry.checkDisp, 'minutes').locale('en-US').fromNow() }}" matTooltipPosition="above" style="margin-left: 2px;">
+                <span *ngIf="userSettings.showUpdateInterval" matTooltip="Now playing update: {{ moment().add(entry.checkDisp, 'minutes').locale('en-US').fromNow() }}" matTooltipPosition="above" style="margin-left: 2px;">
                     <i class="fas fa-clock" style="font-size: 12px;"></i>
                 </span>
             </span><br>

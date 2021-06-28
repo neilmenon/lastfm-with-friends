@@ -29,6 +29,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 // Miscellaneous
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -102,6 +103,7 @@ import { PluralizePipe } from './pluralize.pipe';
     MatDatepickerModule,
     MatMomentDateModule,
     MatAutocompleteModule,
+    MatSlideToggleModule,
     NgxChartsModule,
     MatRadioModule,
     RouterModule.forRoot([

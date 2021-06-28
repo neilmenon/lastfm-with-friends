@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
@@ -14,6 +14,10 @@ import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { MatOption } from '@angular/material/core';
 import { ListeningTrendsComponent } from '../listening-trends/listening-trends.component';
+import { SettingsModel } from '../models/settingsModel';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { discreteTimePeriods, releaseTypes } from '../constants';
+import { TimePeriodModel } from '../models/timePeriodModel';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -23,23 +27,14 @@ import { ListeningTrendsComponent } from '../listening-trends/listening-trends.c
 export class GroupDashboardComponent implements OnInit {
   moment: any = moment;
   deviceInfo: any = null;
+  userSettings: SettingsModel;
 
   // mappings for all date sliders/dropdowns
-  leaderboardSliderMappings: any = [
-    {'label': '24 hours', 'days': 1},
-    {'label': '7 days', 'days': 7},
-    {'label': '14 days', 'days': 14},
-    {'label': '30 days', 'days': 30},
-    {'label': '60 days', 'days': 60},
-    {'label': '90 days', 'days': 90},
-    {'label': '180 days', 'days': 180},
-    {'label': '365 days', 'days': 365},
-    {'label': 'All time', 'days': -1}
-  ];
+  leaderboardSliderMappings: Array<TimePeriodModel> = discreteTimePeriods;
 
   // wkArtist
   @ViewChild('wkArtist', { static: true }) wkArtistDom: ElementRef;
-  wkArtistForm;
+  wkArtistForm: FormGroup;
   wkArtistResults;
   wkArtistInit: boolean = false;
   wkArtistRedirectLoading: boolean = false;
@@ -52,7 +47,7 @@ export class GroupDashboardComponent implements OnInit {
 
   // wkAlbum
   @ViewChild('wkAlbum', { static: true }) wkAlbumDom: ElementRef;
-  wkAlbumForm;
+  wkAlbumForm: FormGroup;
   wkAlbumResults;
   wkAlbumInit: boolean = false;
   wkAlbumSelectedIndex: number = this.leaderboardSliderMappings.length - 1;
@@ -64,7 +59,7 @@ export class GroupDashboardComponent implements OnInit {
 
   // wkTrack
   @ViewChild('wkTrack', { static: true }) wkTrackDom: ElementRef;
-  wkTrackForm;
+  wkTrackForm: FormGroup;
   wkTrackResults;
   wkTrackInit: boolean = false;
   wkTrackSelectedIndex: number = this.leaderboardSliderMappings.length - 1;
@@ -81,11 +76,11 @@ export class GroupDashboardComponent implements OnInit {
 
   // scrobbleLeaderboard
   @ViewChild('scrobbleLeaderboard', { static: true }) leaderboardDom: ElementRef;
-  leaderboardSelectedIndex: number = 1; // real-time slider value
-  leaderboardLoadedIndex: number = 1; // http request-dependent value
+  leaderboardSelectedIndex: number = null; // real-time slider value
+  leaderboardLoadedIndex: number = null; // http request-dependent value
   leaderboardObject: any;
   leaderboardLoading: boolean = true;
-  leaderboardValueSubject = new BehaviorSubject<number>(1);
+  leaderboardValueSubject: BehaviorSubject<number>
   customStartDate: moment.Moment;
   customEndDate: moment.Moment;
   isCustomDateRange: boolean = false;
@@ -106,8 +101,8 @@ export class GroupDashboardComponent implements OnInit {
   @ViewChild('individualGroupCharts', { static: true }) chartsDom: ElementRef;
   @ViewChild('chartEveryone') private chartEveryoneSelected: MatOption;
   chartSelectedUser: any;
-  chartReleaseTypeOptions = ['track', 'artist', 'album']
-  chartReleaseType: string = this.chartReleaseTypeOptions[Math.floor(Math.random() * this.chartReleaseTypeOptions.length)];
+  chartReleaseTypeOptions: Array<string> = releaseTypes;
+  chartReleaseType: string;
   chartDropdownDate: number = 30;
   chartLoading: boolean = false;
   chartIsCustomDate: boolean = false;
@@ -138,6 +133,17 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistForm = this.formBuilder.group({query: ['']})
     this.wkAlbumForm = this.formBuilder.group({query: ['']})
     this.wkTrackForm = this.formBuilder.group({query: ['']})
+
+    this.userSettings = this.userService.getSettings()
+    
+    // initialize setting-dependent configs
+    this.chartReleaseType = this.userSettings.chartReleaseType != "random" ? this.userSettings.chartReleaseType : 
+      this.chartReleaseTypeOptions[Math.floor(Math.random() * this.chartReleaseTypeOptions.length)]
+    let tmpIndex: number = this.leaderboardSliderMappings.findIndex(x => x.days == this.userSettings.leaderboardTimePeriodDays)
+    let randomTimePeriodIndex: number = Math.floor(Math.random() * this.leaderboardSliderMappings.length)
+    this.leaderboardSelectedIndex = tmpIndex == -1 ? randomTimePeriodIndex : tmpIndex
+    this.leaderboardLoadedIndex = this.leaderboardSelectedIndex
+    this.leaderboardValueSubject = new BehaviorSubject<number>(this.leaderboardSelectedIndex);
   }
 
   @Input() group: any;
@@ -419,6 +425,11 @@ export class GroupDashboardComponent implements OnInit {
         }
       }
     }
+  }
+
+  updateIntervalToggle(event: MatSlideToggleChange) {
+    this.userSettings.showUpdateInterval = event.checked
+    this.userService.setSettings(this.userSettings)
   }
 
   nowPlaying(loading=false) {

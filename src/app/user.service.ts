@@ -4,6 +4,7 @@ import { share } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { config } from './config'
 import { MessageService } from './message.service';
+import { getSettingsModel, SettingsModel } from './models/settingsModel';
 
 @Injectable()
 export class UserService {
@@ -11,6 +12,7 @@ export class UserService {
   session_key: string = localStorage.getItem("lastfm_session");
   user: Observable<any>;
   rapidRefresh: boolean = false;
+  userSettings: SettingsModel = getSettingsModel(localStorage.getItem("lfmwf_settings"));
   constructor(private http: HttpClient, public messageService: MessageService) { }
 
   isSignedIn() {
@@ -52,6 +54,15 @@ export class UserService {
       }
       return null
     }
+  }
+
+  getSettings(): SettingsModel {
+    return this.userSettings
+  }
+
+  setSettings(settings: SettingsModel) {
+    localStorage.setItem("lfmwf_settings", JSON.stringify(settings))
+    this.userSettings = settings
   }
 
   updateUser(userObject: any, fullScrape: boolean) {

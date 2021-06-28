@@ -1,7 +1,28 @@
 <div class="box center">
     <div class="settings center-all">
+        <h1 class="clear-color-full">Settings</h1>
+        <form [formGroup]="settingsForm" class="settings-form">
+            <h3 class="box-title">Chart Release Type</h3>
+            <p>Default release type selection for Individual/Group Charts box on the Group Dashboard.</p>
+            <mat-form-field appearance="legacy" color="accent">
+                <mat-label>Default Chart Release Type</mat-label>
+                <mat-select formControlName="chartReleaseType" name="chartReleaseType">
+                    <mat-option *ngFor="let r of releaseTypes" [value]="r">{{ r | titlecase }}</mat-option>
+                    <mat-option value="random">Random</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <h3 class="box-title">Scrobble Leaderboard Time Period</h3>
+            <p>Default time period selection for Scrobble Leaderboard.</p>
+            <mat-form-field appearance="legacy" color="accent">
+                <mat-label>Scrobble Leaderboard Time Period</mat-label>
+                <mat-select formControlName="leaderboardTimePeriodDays" name="leaderboardTimePeriodDays">
+                    <mat-option *ngFor="let d of discreteTimePeriods" [value]="d.days">{{ d.label }}</mat-option>
+                    <mat-option [value]="randomTimePeriod.days">{{ randomTimePeriod.label }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </form>
+        <h1 class="clear-color-full">Actions</h1>
         <div class="settings-option">
-            <h1 class="clear-color-full">Settings</h1>
             <h3 class="box-title">Full Scrape</h3>
             <p>
                 Flushes all of your scrobbles from our database and fetches them anew from Last.fm. 

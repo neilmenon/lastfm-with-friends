@@ -1,5 +1,5 @@
 .settings {
-    max-width: 50%;
+    max-width: 75%;
 }
 .settings-option {
     padding-bottom: 10px;
@@ -13,4 +13,14 @@
     .settings {
         max-width: 100%;
     }
+}
+.settings-form {
+    margin: auto;
+}
+.settings-form > mat-form-field {
+    font-size: 13px;
+}
+.settings-form p {
+    font-size: 13px;
+    color: #bfbfbf;
 }
