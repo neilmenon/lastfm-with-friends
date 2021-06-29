@@ -115,6 +115,8 @@ export class ScrobbleHistoryComponent implements OnInit {
     payload['wkMode'] = wkMode
     payload['users'] = users
     payload['selectedUser'] = selectedUser
+    payload['startDate'] = this.historyStartDate
+    payload['endDate'] = this.historyEndDate
     if (wkObject == null) {
       this.userService.wkArtist(entry.artist, users.map(u => u.id)).toPromise().then(data => {
         payload['wkObject'] = data

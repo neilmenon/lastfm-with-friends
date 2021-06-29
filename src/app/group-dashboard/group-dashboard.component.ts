@@ -543,17 +543,26 @@ export class GroupDashboardComponent implements OnInit {
       } else if (wkMode == "artist") {
         targetIndex = this.wkArtistSelectedIndex
         isCustomDate = this.wkArtistIsCustomDateRange
+      } else if (wkMode == "overall") {
+        targetIndex = this.leaderboardSelectedIndex
+        isCustomDate = this.isCustomDateRange
       }
       this.wkTrackSelectedIndex = targetIndex
       this.wkTrackIsCustomDateRange = isCustomDate
+      this.wkTrackCustomStartDate = entry['startDate']
+      this.wkTrackCustomEndDate = entry['endDate']
       this.wkAlbumSelectedIndex = targetIndex
       this.wkAlbumIsCustomDateRange = isCustomDate
+      this.wkAlbumCustomStartDate = entry['startDate']
+      this.wkAlbumCustomEndDate = entry['endDate']
       this.wkArtistSelectedIndex = targetIndex
       this.wkArtistIsCustomDateRange = isCustomDate
+      this.wkArtistCustomStartDate = entry['startDate']
+      this.wkArtistCustomEndDate = entry['endDate']
       this.nowPlayingToWk(entry, null, entry['startDate'], entry['endDate'], false)
     })
     let wkTopSub = dialogRef.componentInstance.wkFromTopDialog.subscribe(data => {
-      this.whoKnowsTop(data.wkMode, data.wkObject, data.selectedUser)
+      this.whoKnowsTop(data.wkMode, data.wkObject, data.selectedUser, data['startDate'], data['endDate'])
     })
     dialogRef.afterClosed().subscribe(() => {
       wkSub.unsubscribe()
@@ -561,18 +570,46 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  whoKnowsTop(wkMode, wkObject, selectedUser) {
+  whoKnowsTop(wkMode, wkObject, selectedUser, startRange: moment.Moment, endRange:moment.Moment) {
     let dialogRef = this.dialog.open(WhoKnowsTopComponent, {
       data : {
         group: this.group,
         wkMode: wkMode,
         wkObject: wkObject,
         user: this.user,
-        selectedUser: selectedUser
+        selectedUser: selectedUser,
+        startRange: startRange,
+        endRange: endRange
       }
     })
     let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
-      this.nowPlayingToWk(entry)
+      let targetIndex: number, isCustomDate: boolean
+      if (wkMode == "track") {
+        targetIndex = this.wkTrackSelectedIndex
+        isCustomDate = this.wkTrackIsCustomDateRange
+      } else if (wkMode == "album") {
+        targetIndex = this.wkAlbumSelectedIndex
+        isCustomDate = this.wkAlbumIsCustomDateRange
+      } else if (wkMode == "artist") {
+        targetIndex = this.wkArtistSelectedIndex
+        isCustomDate = this.wkArtistIsCustomDateRange
+      } else if (wkMode == "overall") {
+        targetIndex = this.leaderboardSelectedIndex
+        isCustomDate = this.isCustomDateRange
+      }
+      this.wkTrackSelectedIndex = targetIndex
+      this.wkTrackIsCustomDateRange = isCustomDate
+      this.wkTrackCustomStartDate = entry['startDate']
+      this.wkTrackCustomEndDate = entry['endDate']
+      this.wkAlbumSelectedIndex = targetIndex
+      this.wkAlbumIsCustomDateRange = isCustomDate
+      this.wkAlbumCustomStartDate = entry['startDate']
+      this.wkAlbumCustomEndDate = entry['endDate']
+      this.wkArtistSelectedIndex = targetIndex
+      this.wkArtistIsCustomDateRange = isCustomDate
+      this.wkArtistCustomStartDate = entry['startDate']
+      this.wkArtistCustomEndDate = entry['endDate']
+      this.nowPlayingToWk(entry, null, entry['startDate'], entry['endDate'], false)
     })
     dialogRef.afterClosed().subscribe(() => {
       wkSub.unsubscribe()

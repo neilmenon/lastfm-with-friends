@@ -12,6 +12,10 @@ import * as moment from 'moment';
 export class WhoKnowsTopComponent implements OnInit {
   resultsObject: any;
   moment: any = moment;
+  topStartDate: moment.Moment;
+  topEndDate: moment.Moment;
+  topStartDateString: string
+  topEndDateString: string
 
   trackMode: boolean = true;
   selectedUser: any;
@@ -20,13 +24,24 @@ export class WhoKnowsTopComponent implements OnInit {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService, public dialogRef: MatDialogRef<WhoKnowsTopComponent>) { }
 
   ngOnInit(): void {
-    this.whoKnowsTop(this.data.wkMode, [this.data.selectedUser.id], this.data.wkObject.artist.id, this.data.wkMode == "album" ? this.data.wkObject.album.id : null, true)
+    this.topStartDate = this.data.startRange
+    this.topEndDate = this.data.endRange
+    this.topStartDateString = this.data.startRange ? this.data.startRange.format() : null
+    this.topEndDateString = this.data.endRange ? this.data.endRange.format() : null,
+    this.whoKnowsTop(this.data.wkMode, 
+      [this.data.selectedUser.id], 
+      this.data.wkObject.artist.id, 
+      this.topStartDateString, 
+      this.topEndDateString, 
+      this.data.wkMode == "album" ? this.data.wkObject.album.id : null, 
+      true
+    )
     this.selectedUser = this.data.selectedUser.id
   }
 
-  whoKnowsTop(wkMode, users, artistId, albumId=null, trackMode=false) {
+  whoKnowsTop(wkMode, users, artistId, startRange, endRange, albumId=null, trackMode=false) {
     this.resultsObject = null
-    this.userService.whoKnowsTop(wkMode, users, artistId, albumId, trackMode).toPromise().then(data => {
+    this.userService.whoKnowsTop(wkMode, users, artistId, startRange, endRange, albumId, trackMode).toPromise().then(data => {
       this.resultsObject = data
     }).catch(error => {
       this.messageService.open("Error getting top scrobbles. Please try again.")
@@ -36,7 +51,9 @@ export class WhoKnowsTopComponent implements OnInit {
 
   wkTrigger(data) {
     data['artist'] = this.data.wkObject.artist.name
-    console.log(data)
+    data['wkMode'] = this.data.wkMode
+    data['startDate'] = this.topStartDate
+    data['endDate'] = this.topEndDate
     this.wkFromDialog.emit(data)
     this.dialogRef.close()
   }

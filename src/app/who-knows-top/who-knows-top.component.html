@@ -1,18 +1,27 @@
-<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'artist'">Top Scrobbles of <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h3>
-<h3 mat-dialog-title class="center" *ngIf="data.wkMode == 'album'">Top Scrobbles of <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h3>
-<div class="wk-top-options center" [class.disable-click]="!resultsObject">
+<div class="center" style="margin-bottom: -16px;">
+    <h3 mat-dialog-title *ngIf="data.wkMode != 'album'">Top Scrobbles of <u>{{ data.wkObject.artist.name }}</u> in {{ data.group.name }}</h3>
+    <h3 mat-dialog-title *ngIf="data.wkMode == 'album'">Top Scrobbles of <u>{{ data.wkObject.artist.name }} - {{ data.wkObject.album.name }}</u> in {{ data.group.name }}</h3>
+</div>
+<span class="center-all" *ngIf="!(topStartDate && topEndDate); else noDate" style="color: #bfbfbf;">Time Period: Overall</span>
+<ng-template #noDate>
+    <span class="center-all" style="color: #bfbfbf;">
+      Time Period: {{ topStartDate.format('MM/DD/YY') }} - {{ topEndDate.format('MM/DD/YY') }} 
+      ({{ topEndDate.diff(topStartDate, 'days') + (topEndDate.diff(topStartDate, 'days') <= 1 ? ' day' : ' days') }})
+    </span>
+</ng-template>
+<div class="wk-top-options center" [class.disable-click]="!resultsObject" style="padding-top: 5px;">
     <mat-form-field color="accent">
         <mat-label>User</mat-label>
-        <mat-select [(ngModel)]="selectedUser" [(value)]="selectedUser" (selectionChange)="whoKnowsTop(data.wkMode, [selectedUser], data.wkObject.artist.id, data.wkMode == 'album' ? data.wkObject.album.id : null, trackMode)">
+        <mat-select [(ngModel)]="selectedUser" [(value)]="selectedUser" (selectionChange)="whoKnowsTop(data.wkMode, [selectedUser], data.wkObject.artist.id, topStartDateString, topEndDateString, data.wkMode == 'album' ? data.wkObject.album.id : null, trackMode)">
             <mat-option *ngFor="let u of data.wkObject.users" [value]="u.id">{{ u.username }}<span *ngIf="u.username == data.user.username"> (you)</span></mat-option>
         </mat-select>
     </mat-form-field>
     
     <mat-form-field color="accent" style="width: 65px;">
         <mat-label>Release Type</mat-label>
-        <mat-select [(ngModel)]="trackMode" [(value)]="trackMode" (selectionChange)="whoKnowsTop(data.wkMode, [selectedUser], data.wkObject.artist.id, data.wkMode == 'album' ? data.wkObject.album.id : null, trackMode)">
+        <mat-select [(ngModel)]="trackMode" [(value)]="trackMode" (selectionChange)="whoKnowsTop(data.wkMode, [selectedUser], data.wkObject.artist.id, topStartDateString, topEndDateString, data.wkMode == 'album' ? data.wkObject.album.id : null, trackMode)">
             <mat-option [value]="true">Track</mat-option>
-            <mat-option [value]="false" *ngIf="data.wkMode == 'artist'">Album</mat-option>
+            <mat-option [value]="false" *ngIf="data.wkMode != 'album'">Album</mat-option>
         </mat-select>
     </mat-form-field>
 </div> 
