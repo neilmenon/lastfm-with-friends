@@ -103,7 +103,7 @@ export class GroupDashboardComponent implements OnInit {
   chartSelectedUser: any;
   chartReleaseTypeOptions: Array<string> = releaseTypes;
   chartReleaseType: string;
-  chartDropdownDate: number = 30;
+  chartDropdownDate: number;
   chartLoading: boolean = false;
   chartIsCustomDate: boolean = false;
   chartCustomStartDate: moment.Moment;
@@ -139,6 +139,11 @@ export class GroupDashboardComponent implements OnInit {
     // initialize setting-dependent configs
     this.chartReleaseType = this.userSettings.chartReleaseType != "random" ? this.userSettings.chartReleaseType : 
       this.chartReleaseTypeOptions[Math.floor(Math.random() * this.chartReleaseTypeOptions.length)]
+    
+    this.chartDropdownDate = this.userSettings.chartTimePeriodDays == 0 ? 
+      this.leaderboardSliderMappings[Math.floor(Math.random() * this.leaderboardSliderMappings.length)].days :
+      this.userSettings.chartTimePeriodDays
+
     let tmpIndex: number = this.leaderboardSliderMappings.findIndex(x => x.days == this.userSettings.leaderboardTimePeriodDays)
     let randomTimePeriodIndex: number = Math.floor(Math.random() * this.leaderboardSliderMappings.length)
     this.leaderboardSelectedIndex = tmpIndex == -1 ? randomTimePeriodIndex : tmpIndex

@@ -50,12 +50,13 @@ export class UserSettingsComponent implements OnInit {
     this.userService.setRapidRefresh(true)
     this.settingsForm = this.fb.group({
       chartReleaseType: [null],
+      chartTimePeriodDays: [null],
       leaderboardTimePeriodDays: [null]
     })
     console.log(this.userService.getSettings())
     this.settingsForm.patchValue(this.userService.getSettings())
 
-    this.formSub = this.settingsForm.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe(() => {
+    this.formSub = this.settingsForm.valueChanges.pipe(debounceTime(200), distinctUntilChanged()).subscribe(() => {
       this.userService.setSettings(getSettingsModel(this.settingsForm.getRawValue()))
       console.log(this.userService.getSettings())
       this.messageService.open("Successfully updated user settings.")

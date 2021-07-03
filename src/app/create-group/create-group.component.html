@@ -3,7 +3,8 @@
     <form [formGroup]="groupForm" class="create-group-form" (ngSubmit)="onSubmit(groupForm.value)" [class.disable-click]="createLoading">
         <mat-form-field appearance="legacy" class="full-width" color="accent">
             <mat-label>Group Name</mat-label>
-            <input matInput name="name" placeholder="The Audiophiles, The Lastfmers, etc." type="text" formControlName="name" required>
+            <input matInput #name name="name" placeholder="The Audiophiles, The Lastfmers, etc." type="text" formControlName="name" required maxlength="50">
+            <mat-hint align="end">{{name.value?.length || 0}}/50</mat-hint>
         </mat-form-field>
         <mat-form-field class="full-width" color="accent" appearance="legacy">
             <mat-label>Group Description</mat-label>

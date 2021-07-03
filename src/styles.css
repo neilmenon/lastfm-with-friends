@@ -210,9 +210,28 @@ hr {
 }
 .group-dashboard-header {
     padding-bottom: 10px;
+    position: relative;
+}
+.group-collapsed {
+    background: #6986a240;;
+    padding: 0.75rem!important;
+    border-radius: 1rem;
+    margin-bottom: 15px;
+}
+.group-dashboard-expand {
+    position: absolute!important;
+    right: 0.2rem;
+    top: -0.2rem;
+}
+.group-dashboard-collapse {
+    position: absolute!important;
+    right: 0.1rem;
+    top: -0.4rem;
 }
 .group-dashboard-header > h1 {
     color: #bfbfbf;
+    max-width: 85%;
+    margin: auto;
 }
 .group-dashboard-subtext {
     display: flex; 

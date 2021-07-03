@@ -1,11 +1,3 @@
-<div class="center-all group-dashboard-header">
-    <h1 class="box-title clickable" [routerLink]="['groups/' + group.join_code]">{{ group.name }}</h1>
-    <div class="group-dashboard-subtext">
-        <span><i class="fa fa-user"></i> {{ group.members.length }} | <strong>Join Code</strong>: {{ group.join_code }}</span>
-        <span class="spacer"></span>
-        <span><em>{{ group.description }}</em></span>
-    </div>
-</div>
 <!-- Now Playing -->
 <div class="box center now-playing-container">
     <div style="position: relative;">
@@ -352,7 +344,9 @@
             <h2 class="box-title">Individual & Group Charts</h2> 
             <div class="left-cmd-buttons">
                 <mat-icon [inline]="true">access_time</mat-icon>
-                <span *ngIf="!chartIsCustomDate">{{ chartDropdownDate == -1 ? 'All time' : chartDropdownDate + ' days'}}</span>
+                <span *ngIf="!chartIsCustomDate">
+                    {{ chartDropdownDate == -1 ? 'All time' : (chartDropdownDate == 1 ? '24 hours': chartDropdownDate + ' days')}}
+                </span>
                 <span *ngIf="chartIsCustomDate">{{ chartCustomStartDate.format('MM/DD/YY') }} - {{ chartCustomEndDate.format('MM/DD/YY') }}</span>
             </div>
             <div class="refresh">

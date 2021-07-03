@@ -9,8 +9,8 @@
     <div *ngIf="user && user.groups.length > 0">
         <div class="box">
             <p>Welcome to Last.fm with Friends. </p>
-            <p *ngIf="commit; else noCommit">
-                Last updated <span style="text-decoration: underline;" [matTooltip]="moment(commit.committer.date)" matTooltipPosition="above">{{ moment(commit.committer.date).locale('en-us').fromNow() }}</span> by {{ commit.committer.name }}: <a href="{{ commit.html_url }}" target="_blank">{{ commit.message }}</a>
+            <p *ngIf="commit && buildInfo?.unixTimestamp; else noCommit">
+                Last updated <span style="text-decoration: underline;" [matTooltip]="moment.unix(buildInfo.unixTimestamp)" matTooltipPosition="above">{{ moment.unix(buildInfo.unixTimestamp).locale("en-US").fromNow() }}</span> by {{ commit.committer.name }}: <a href="{{ commit.html_url }}" target="_blank">{{ commit.message }}</a>
             </p>
             <ng-template #noCommit>
                 <p>Getting latest commit...</p>
@@ -28,8 +28,30 @@
         </div>
 
         <div *ngFor="let group of user.groups; last as lastChild">
-            <app-group-dashboard [group]="group" [user]="user"></app-group-dashboard>
-            <hr *ngIf="!lastChild">
+            <div class="center-all group-dashboard-header" [class.group-collapsed]="userSettings.groupExpandedList[group.join_code] == false">
+                <h1 class="box-title clickable">
+                    <span matTooltip="Visit {{ group.name }}'s page" matTooltipPosition="above" [routerLink]="['groups/' + group.join_code]">
+                        {{ group.name }}
+                    </span>
+                </h1>
+                <div class="group-dashboard-subtext">
+                    <span><i class="fa fa-user"></i> {{ group.members.length }} | <strong>Join Code</strong>: {{ group.join_code }}</span>
+                    <span class="spacer"></span>
+                    <span><em>{{ group.description }}</em></span>
+                </div>
+                <button mat-icon-button color="accent"(click)="toggleGroup(group.join_code)"
+                [ngClass]="userSettings.groupExpandedList[group.join_code] !== false ? 'group-dashboard-collapse' : 'group-dashboard-expand'">
+                    <mat-icon matTooltip="Collapse" matTooltipPosition="above" 
+                        *ngIf="userSettings.groupExpandedList[group.join_code] !== false">
+                        expand_less
+                    </mat-icon>
+                    <mat-icon matTooltip="Expand" matTooltipPosition="above" 
+                        *ngIf="userSettings.groupExpandedList[group.join_code] == false">
+                        expand_more
+                    </mat-icon>
+                </button>
+            </div>
+            <app-group-dashboard [group]="group" [user]="user" *ngIf="userSettings.groupExpandedList[group.join_code] !== false"></app-group-dashboard>
         </div>
     </div>
 </div>

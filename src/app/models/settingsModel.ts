@@ -3,12 +3,16 @@ import { discreteTimePeriods } from "../constants"
 export class SettingsModel {
     showUpdateInterval: boolean
     chartReleaseType: string
+    chartTimePeriodDays: number
     leaderboardTimePeriodDays: number
+    groupExpandedList: any
 
     constructor() {
         this.showUpdateInterval = false
         this.chartReleaseType = "random"
+        this.chartTimePeriodDays = 30
         this.leaderboardTimePeriodDays = 7
+        this.groupExpandedList = {}
     }
 }
 

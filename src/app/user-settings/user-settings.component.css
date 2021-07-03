@@ -20,7 +20,6 @@
 .settings-form > mat-form-field {
     font-size: 13px;
 }
-.settings-form p {
-    font-size: 13px;
+p {
     color: #bfbfbf;
 }

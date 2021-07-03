@@ -14,6 +14,7 @@ export class FooterComponent implements OnInit, AfterViewInit {
   stats: StatsModel = null
   build: BuildModel = null
   showFooter: boolean = false
+  commit: any
   constructor(private userService: UserService, private buildService: BuildService, private router: Router) { }
 
   ngAfterViewInit(): void {
@@ -41,6 +42,9 @@ export class FooterComponent implements OnInit, AfterViewInit {
               })
               this.buildService.getBuildInfo().toPromise().then((data: BuildModel) => {
                 this.build = data
+                this.buildService.getCommitInfo(this.build.commit).toPromise().then(data => {
+                  this.commit = data
+                })
               })
             }
           })

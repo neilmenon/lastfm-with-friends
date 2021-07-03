@@ -20,7 +20,7 @@ def get_user(username, extended=True):
     if not extended:
         mdb.close()
         return user_data
-    cursor.execute("SELECT group_jc FROM user_groups WHERE username = '" + str(username) + "';")
+    cursor.execute("SELECT group_jc FROM user_groups WHERE username = '" + str(username) + "' ORDER BY joined ASC;")
     group_jcs = [k['group_jc'] for k in list(cursor)]
     user_data['groups'] = []
     for join_code in group_jcs:
