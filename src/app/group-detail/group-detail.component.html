@@ -7,7 +7,12 @@
                 <button *ngIf="leaveConfirmed" color="primary" mat-raised-button (click)="leaveGroup()">Confirm Leave</button>
             </div>
             <p><strong>Description: </strong>{{ group.description }}</p>
-            <p><strong>Join Code: </strong>{{ group.join_code }}</p>
+            <p>
+                <strong>Join Code: </strong>{{ group.join_code }}
+                <span class="clickable" (click)="messageService.copyJoinCode(group.join_code, group.name)" matTooltip="Copy to Clipboard" matTooltipPosition="above">
+                    <i class="fas fa-copy"></i>
+                </span>
+            </p>
             <strong>Members ({{ group.users.length }}): </strong><br><br>
             <div class="container" style="flex-wrap: wrap;">
                 <div *ngFor="let u of group.users" class="member-card">

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { FormBuilder } from '@angular/forms';
@@ -13,11 +13,12 @@ import { UserService } from '../user.service';
 export class JoinGroupComponent implements OnInit {
   joinForm;
   joinLoading: boolean = false;
+  @Output() joinSuccess: EventEmitter<any> = new EventEmitter(true)
   constructor( 
     private formBuilder: FormBuilder, 
     private messageService: MessageService, 
     private userService: UserService,
-    public router: Router
+    public router: Router,
   ) { 
     this.joinForm = this.formBuilder.group({
       joinCode: ['', Validators.required],
@@ -33,6 +34,7 @@ export class JoinGroupComponent implements OnInit {
       this.userService.joinGroup(formData['joinCode']).toPromise().then(data => {
         this.joinLoading = false
         this.messageService.save("You have joined " + data['name'] + ".")
+        this.joinSuccess.emit()
         this.router.navigate(['groups/' + data['join_code']])
       }).catch(error => {
         this.joinLoading = false

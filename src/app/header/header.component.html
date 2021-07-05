@@ -32,6 +32,20 @@
           <div [matTooltip]="!user.last_update ? 'An update is currently in progress...' : null" matTooltipPosition="left">
             <button [class.disable-click]="!user.last_update" mat-menu-item (click)="updateUser()">Update</button>
           </div>
+          <button mat-menu-item [matMenuTriggerFor]="groupsMenu">Groups</button>
+          <mat-menu #groupsMenu="matMenu">
+            <button mat-menu-item [routerLink]="['groups/create']">
+              <mat-icon>add</mat-icon>
+              <span>Create</span>
+            </button>
+            <button mat-menu-item (click)="openJoinDialog()">
+              <mat-icon>person_add</mat-icon>
+              <span>Join</span>
+            </button>
+            <button mat-menu-item *ngFor="let group of user?.groups" [routerLink]="['groups/' + group.join_code]" matTooltip="Visit {{ group.name }}'s page" matTooltipPosition="above">
+              {{ group.name }}
+            </button>
+          </mat-menu>
           <button mat-menu-item [routerLink]="['/settings']">Settings</button>
           <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
         </mat-menu>
@@ -67,6 +81,20 @@
             <div [matTooltip]="!user.last_update ? 'An update is currently in progress...' : null" matTooltipPosition="left">
               <button [class.disable-click]="!user.last_update" mat-menu-item (click)="updateUser()">Update</button>
             </div>
+            <button mat-menu-item [matMenuTriggerFor]="groupsMenu">Groups</button>
+            <mat-menu #groupsMenu="matMenu">
+              <button mat-menu-item [routerLink]="['groups/create']">
+                <mat-icon>add</mat-icon>
+                <span>Create</span>
+              </button>
+              <button mat-menu-item (click)="openJoinDialog()">
+                <mat-icon>person_add</mat-icon>
+                <span>Join</span>
+              </button>
+              <button mat-menu-item *ngFor="let group of user?.groups" [routerLink]="['groups/' + group.join_code]" matTooltip="Visit {{ group.name }}'s page" matTooltipPosition="above">
+                {{ group.name }}
+              </button>
+            </mat-menu>
             <button mat-menu-item [routerLink]="['/settings']">Settings</button>
             <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
           </mat-menu>

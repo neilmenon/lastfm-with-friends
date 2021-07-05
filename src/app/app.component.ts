@@ -2,6 +2,7 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import * as moment from 'moment';
 import { BuildModel, BuildService } from './build.service';
 import { MessageService } from './message.service';
+import { UserService } from './user.service';
 
 @Component({
   selector: 'app-root',
@@ -11,10 +12,17 @@ import { MessageService } from './message.service';
 })
 export class AppComponent {
   title = 'lastfm-with-friends';
-
-  constructor(private buildService: BuildService, private messageService: MessageService) {
+  user;
+  constructor(
+    private buildService: BuildService, 
+    private messageService: MessageService,
+    private userService: UserService
+    ) {
     let currentBuildUnix: number = null
     let currentCommitHash: string = null
+    this.userService.getUser()?.toPromise().then(data => {
+      this.user = data
+    })
     let interval = setInterval(() => {
       if (document.visibilityState == "visible") {
         this.buildService.getBuildInfo().toPromise().then((data: BuildModel) => {

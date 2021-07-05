@@ -6,6 +6,7 @@ import { UserService } from '../user.service';
 import * as moment from 'moment';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message.service';
+import { JoinGroupComponent } from '../join-group/join-group.component';
 
 @Component({
   selector: 'app-header',
@@ -18,20 +19,16 @@ export class HeaderComponent {
   moment: any = moment;
   userUpdateInterval: any = 30000;
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(map(result => result.matches), shareReplay());
-
-  constructor(private breakpointObserver: BreakpointObserver, private userService: UserService, public dialog: MatDialog, private messageService: MessageService) {
+  initUpdate: boolean = true
+  constructor(
+    private breakpointObserver: BreakpointObserver, 
+    private userService: UserService, 
+    public dialog: MatDialog, 
+    private messageService: MessageService,
+  ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
-      this.userService.getUser().toPromise().then(data => {
-        this.user = data
-        this.checkUserUpdate()
-      }).catch(error => {
-        if (error['status'] == 404) {
-          this.userService.clearLocalData()
-        }
-        this.user = null;
-        this.messageService.open("Error getting data from the backend. Please refresh.");
-      })
+      this.checkUserUpdate()
     } else {
       this.user = null;
     }
@@ -47,12 +44,19 @@ export class HeaderComponent {
           this.userUpdateInterval = 30000
         }
         window.setTimeout(() => { this.checkUserUpdate() }, this.userUpdateInterval)
-        console.log("Checking for user update @ interval of " + this.userUpdateInterval + " ms.")
+        // console.log("Checking for user update @ interval of " + this.userUpdateInterval + " ms.")
+      }).catch(error => {
+        if (error['status'] == 404 && this.initUpdate) {
+          this.userService.clearLocalData()
+        }
+        this.user = null;
+        this.messageService.open("Error getting data from the backend. Please refresh.");
       })
     } else {
       window.setTimeout(() => { this.checkUserUpdate() }, 5000)
-      console.log("[tab unfocused] Checking if tab in focus @ interval of 5000 ms.")
+      // console.log("[tab unfocused] Checking if tab in focus @ interval of 5000 ms.")
     }
+    this.initUpdate = false
   }
 
   ngOnInit() {
@@ -77,6 +81,13 @@ export class HeaderComponent {
     }).catch(error => {
         this.user.last_update = tmp
         this.messageService.open("Error while updating your user scrobbles!")
+    })
+  }
+
+  openJoinDialog() {
+    let dialogRef = this.dialog.open(JoinGroupComponent)
+    dialogRef.componentInstance.joinSuccess.subscribe(() => {
+      this.dialog.closeAll()
     })
   }
 }

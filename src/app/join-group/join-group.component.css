@@ -4,3 +4,7 @@
     min-width: 20px;
     margin: auto;
 }
+p {
+    color: #bfbfbf;
+    /* margin-bottom: 0; */
+}

@@ -3,18 +3,25 @@
         <h2>Welcome to Last.fm with Friends.</h2>
         <span *ngIf="!user.last_update">Your scrobbles are currently being fetched in the background.<br>While you wait, you may...<br><br></span>
         <app-join-group></app-join-group>
-        or<br><br>
-        <button [routerLink]="['groups/create']" color="accent" mat-raised-button type="submit">Create Group</button>
+        — OR —
+        <br><br>
+        <p style="color: #bfbfbf;">Create a new group and start adding friends!</p>
+        <button [routerLink]="['groups/create']" color="accent" mat-raised-button type="submit" style="margin-top: .4375em;">Create Group</button>
     </div>
     <div *ngIf="user && user.groups.length > 0">
         <div class="box">
-            <p>Welcome to Last.fm with Friends. </p>
-            <p *ngIf="commit && buildInfo?.unixTimestamp; else noCommit">
+            <p>
+                Welcome to Last.fm with Friends, {{ user.display_name ? user.display_name : user.username }}! You've scrobbled {{ user.scrobbles | pluralize:'track' }} over 
+                <span>{{ moment.unix(user.registered).locale("en-US").toNow(true) }}</span> — 
+                <span *ngIf="user.last_update" [matTooltip]="nextUpdate.format()" matTooltipPosition="above">{{ "next update " + nextUpdate.fromNow() }}.</span>
+                <span *ngIf="!user.last_update">updating now...</span>
+            </p>
+            <!-- <p *ngIf="commit && buildInfo?.unixTimestamp; else noCommit">
                 Last updated <span style="text-decoration: underline;" [matTooltip]="moment.unix(buildInfo.unixTimestamp)" matTooltipPosition="above">{{ moment.unix(buildInfo.unixTimestamp).locale("en-US").fromNow() }}</span> by {{ commit.committer.name }}: <a href="{{ commit.html_url }}" target="_blank">{{ commit.message }}</a>
             </p>
             <ng-template #noCommit>
                 <p>Getting latest commit...</p>
-            </ng-template>
+            </ng-template> -->
             <p>
                 <strong>My groups:</strong>
                 <li *ngFor="let group of user.groups"><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> - {{ group.description }}</li>
@@ -22,20 +29,46 @@
             <p>
                 <a [routerLink]="['groups/join']">Join Group</a> | <a [routerLink]="['groups/create']">Create Group</a> 
             </p>
-            <p>
-                New to Last.fm? Connect to your preferred music service <a href="https://www.last.fm/about/trackmymusic" target="_blank">here</a>.
+        </div>
+        <div class="box" *ngIf="user.scrobbles == 0">
+            <h2 class="box-title center">We Don't Have Any Scrobbles From You!</h2>
+            <p class="center">
+                It looks like you haven't scrobbled anything yet! New to Last.fm? Connect to your preferred music service <a href="https://www.last.fm/about/trackmymusic" target="_blank">here</a>.
+                If you're a Spotify user, you can quickly do this in your Last.fm settings <a href="https://www.last.fm/settings/applications" target="_blank">here</a> (Spotify Scrobbling).
+            </p>
+            <p class="center">
+                After you connect your music service, allow some time for Last.fm to sync some of your most recent tracks to your <a href="https://www.last.fm/user/{{ user.username }}">Last.fm profile</a>.
+                Once you start to see your recent tracks in your Last.fm profile, we'll automatically start fetching them for you
+                (alternatively, you can manually trigger a user update in the Last.fm with Friends menu at any time).
             </p>
         </div>
-
-        <div *ngFor="let group of user.groups; last as lastChild">
+        <div class="box" *ngIf="user.last_update && user.scrobbles > 0 && moment.utc().diff(moment.utc(user.last_update), 'weeks') >= 1">
+            <h2 class="box-title center">Get Listening!</h2>
+            <p class="center">
+                It looks like you haven't scrobbled anything recently — according to our data, you last scrobbled on 
+                {{ moment.utc(user.last_update).locale('en-US').format('MMMM Do, YYYY') }}, {{ moment.utc(user.last_update).locale('en-US').fromNow() }}. Get listening!
+            </p>
+            <p class="center">
+                If you <em>have</em> been listening, check your <a href="https://www.last.fm/user/{{ user.username }}">Last.fm profile</a> to ensure Last.fm is picking up scrobbles from your music service.
+            </p>
+        </div>
+        <div *ngFor="let group of user.groups; last as lastChild; let i = index" #groupDoms id="group-{{ group.join_code }}">
             <div class="center-all group-dashboard-header" [class.group-collapsed]="userSettings.groupExpandedList[group.join_code] == false">
-                <h1 class="box-title clickable">
-                    <span matTooltip="Visit {{ group.name }}'s page" matTooltipPosition="above" [routerLink]="['groups/' + group.join_code]">
+                <h1 class="box-title">
+                    <span matTooltip="Visit {{ group.name }}'s page" matTooltipPosition="above" [routerLink]="['groups/' + group.join_code]" class="clickable">
                         {{ group.name }}
                     </span>
                 </h1>
                 <div class="group-dashboard-subtext">
-                    <span><i class="fa fa-user"></i> {{ group.members.length }} | <strong>Join Code</strong>: {{ group.join_code }}</span>
+                    <span>
+                        <i class="fa fa-user"></i> {{ group.members.length }}
+                        <span>
+                            | <strong class="hide-join-code-mobile">Join Code: </strong>{{ group.join_code }}
+                            <span class="clickable" (click)="messageService.copyJoinCode(group.join_code, group.name)" matTooltip="Copy to Clipboard" matTooltipPosition="above">
+                                <i class="fas fa-copy"></i>
+                            </span>
+                        </span>
+                    </span>
                     <span class="spacer"></span>
                     <span><em>{{ group.description }}</em></span>
                 </div>

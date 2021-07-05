@@ -20,13 +20,13 @@ export class FooterComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.getFooter()
+          this.getFooter()
       }
     })
   }
 
   ngOnInit(): void {
-    
+    this.getFooter()
   }
 
   getFooter() {

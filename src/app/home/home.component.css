@@ -1,0 +1,5 @@
+@media screen and (max-width: 379px) {
+    .hide-join-code-mobile {
+        display: none;
+    }
+}

@@ -111,7 +111,13 @@ export class GroupDashboardComponent implements OnInit {
   chartResults;
   chartTopEntry;
 
-  constructor(private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService, public dialog: MatDialog, private detectorService: DeviceDetectorService) {
+  constructor(
+    private formBuilder: FormBuilder, 
+    private userService: UserService, 
+    public messageService: MessageService, 
+    public dialog: MatDialog, 
+    private detectorService: DeviceDetectorService
+  ) {
     moment.locale('en-short', {
       relativeTime: {
         future: 'in %s',
