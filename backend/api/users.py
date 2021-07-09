@@ -152,3 +152,21 @@ def delete():
     if not result:
         abort(409)
     return jsonify({"data": "success"})
+
+@user_api.route('/api/users/<string:username>/settings', methods=['POST'])
+def set_settings(username):
+    params = request.get_json()
+    if params:
+        try:
+            session_key = params['session_key']
+            settings = params['settings']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if not auth_helper.is_authenticated(username, session_key):
+        abort(401)
+    user_helper.set_settings(username, settings)
+    return jsonify({"data": "success"})

@@ -19,10 +19,8 @@ export class HomeComponent implements OnInit {
   commit;
   buildInfo: BuildModel;
   userSettings: SettingsModel
-  nextUpdate: moment.Moment
   @ViewChildren('groupDoms') groupDoms: QueryList<ElementRef>
   constructor(public router: Router, public messageService: MessageService, public http: HttpClient, private userService: UserService, private buildService: BuildService) {
-    this.nextUpdate =  moment().add(30 - (moment().minute() % 30), "minutes").startOf('minute').locale("en-US")
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
       this.userService.getUser().toPromise().then(data => {

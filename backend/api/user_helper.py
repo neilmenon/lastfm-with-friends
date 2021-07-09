@@ -134,3 +134,20 @@ def delete_user(user_id, username):
     mdb.commit()
     mdb.close()
     return True
+
+def get_settings(username):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SELECT settings FROM users WHERE username = '{}'".format(username))
+    result = list(cursor)
+    mdb.close()
+    if result:
+        return result[0]['settings']
+    return False
+
+def set_settings(username, settings):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("UPDATE users SET settings = '{}' WHERE username = '{}'".format(settings, username))
+    mdb.commit()
+    mdb.close()

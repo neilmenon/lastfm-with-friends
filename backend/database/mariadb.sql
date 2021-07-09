@@ -238,6 +238,7 @@ CREATE TABLE `users` (
   `scrobbles` bigint(20) NOT NULL,
   `last_update` datetime DEFAULT NULL,
   `progress` float NOT NULL,
+  `settings` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`user_id`,`username`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -252,4 +253,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-06-20 17:30:26
+-- Dump completed on 2021-07-08 23:11:35
