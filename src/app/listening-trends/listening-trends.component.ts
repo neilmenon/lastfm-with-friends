@@ -61,7 +61,7 @@ export class ListeningTrendsComponent implements OnInit {
       !this.data.startRange ? null : this.data.startRange.format(),
       !this.data.endRange ? null : this.data.endRange.format(),
       !this.data.userObject ? null : this.data.userObject.id
-    ).toPromise().then(data => {
+    ).toPromise().then((data: any) => {
         let masterTimestamps: any[] = []
         let chartDataTmp: any[] = []
         if (!cmdMode.includes("leaderboard")) {

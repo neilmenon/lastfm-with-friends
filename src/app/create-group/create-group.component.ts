@@ -27,7 +27,7 @@ export class CreateGroupComponent implements OnInit {
   onSubmit(formData) {
     if (this.groupForm.status == "VALID") {
       this.createLoading = true
-      this.userService.createGroup(formData).toPromise().then(data => {
+      this.userService.createGroup(formData).toPromise().then((data: any) => {
         this.createLoading = false
         this.messageService.save('Successfully created group '+data['name']+'.')
         this.router.navigate(['groups/' + data['join_code']])

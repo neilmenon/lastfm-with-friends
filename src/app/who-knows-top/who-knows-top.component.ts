@@ -41,7 +41,7 @@ export class WhoKnowsTopComponent implements OnInit {
 
   whoKnowsTop(wkMode, users, artistId, startRange, endRange, albumId=null, trackMode=false) {
     this.resultsObject = null
-    this.userService.whoKnowsTop(wkMode, users, artistId, startRange, endRange, albumId, trackMode).toPromise().then(data => {
+    this.userService.whoKnowsTop(wkMode, users, artistId, startRange, endRange, albumId, trackMode).toPromise().then((data: any) => {
       this.resultsObject = data
     }).catch(error => {
       this.messageService.open("Error getting top scrobbles. Please try again.")

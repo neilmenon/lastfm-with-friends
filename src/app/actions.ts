@@ -1,0 +1,1 @@
+export const UPDATE_USER_MODEL = "UPDATE_USER_MODEL"

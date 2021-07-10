@@ -84,7 +84,7 @@ export class ScrobbleHistoryComponent implements OnInit {
       offset,
       startRange,
       endRange
-    ).toPromise().then(data => {
+    ).toPromise().then((data: any) => {
       this.resultsObject = data
       if (this.resultsObject === null) {
         this.length = 0
@@ -118,7 +118,7 @@ export class ScrobbleHistoryComponent implements OnInit {
     payload['startDate'] = this.historyStartDate
     payload['endDate'] = this.historyEndDate
     if (wkObject == null) {
-      this.userService.wkArtist(entry.artist, users.map(u => u.id)).toPromise().then(data => {
+      this.userService.wkArtist(entry.artist, users.map(u => u.id)).toPromise().then((data: any) => {
         payload['wkObject'] = data
         this.wkFromTopDialog.emit(payload)
         this.dialogRef.close()

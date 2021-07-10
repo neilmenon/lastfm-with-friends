@@ -7,6 +7,7 @@ import { discreteTimePeriods, releaseTypes } from '../constants';
 import { MessageService } from '../message.service';
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { TimePeriodModel } from '../models/timePeriodModel';
+import { UserModel } from '../models/userGroupModel';
 import { UserService } from '../user.service';
 
 @Component({
@@ -15,7 +16,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./user-settings.component.css']
 })
 export class UserSettingsComponent implements OnInit {
-  user;
+  user: UserModel;
   confirmFullScrape: boolean = false;
   confirmDeleteAccount: boolean = false;
   fullScrapeInProgress: boolean = false;
@@ -34,7 +35,7 @@ export class UserSettingsComponent implements OnInit {
   ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
-      this.userService.getUser().toPromise().then(data => {
+      this.userService.getUser().toPromise().then((data: any) => {
         this.user = data
         this.fullScrapeInProgress = this.user.last_update && !this.user.progress? false : true
         this.updateInterval = this.userInterval()
@@ -72,7 +73,7 @@ export class UserSettingsComponent implements OnInit {
   userInterval() {
     return setInterval(() => {
       if (document.visibilityState == "visible") {
-        this.userService.getUser(true).toPromise().then(data => {
+        this.userService.getUser(true).toPromise().then((data: any) => {
           this.user = data
           this.fullScrapeInProgress = this.user.last_update && !this.user.progress? false : true
           console.log("Getting user data for Settings page...")
@@ -84,7 +85,7 @@ export class UserSettingsComponent implements OnInit {
   fullScrape() {
     if (this.confirmFullScrape) {
       this.fullScrapeInProgress = true
-      this.userService.updateUser(this.user, true).toPromise().then(data => {
+      this.userService.updateUser(this.user, true).toPromise().then((data: any) => {
         this.messageService.open("Full scrape complete!")
         this.fullScrapeInProgress = false;
         this.confirmFullScrape = false;
@@ -101,7 +102,7 @@ export class UserSettingsComponent implements OnInit {
 
   deleteAccount() {
     if (this.confirmDeleteAccount) {
-      this.userService.deleteUser(this.user).toPromise().then(data => {
+      this.userService.deleteUser(this.user).toPromise().then((data: any) => {
         this.messageService.open("Your account has been deleted. Thanks for using Last.fm with Friends! Redirecting you...")
         this.signed_in = false
         setTimeout(() => {

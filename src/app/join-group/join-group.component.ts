@@ -31,7 +31,7 @@ export class JoinGroupComponent implements OnInit {
   onSubmit(formData) {
     if (this.joinForm.status == "VALID") {
       this.joinLoading = true
-      this.userService.joinGroup(formData['joinCode']).toPromise().then(data => {
+      this.userService.joinGroup(formData['joinCode']).toPromise().then((data: any) => {
         this.joinLoading = false
         this.messageService.save("You have joined " + data['name'] + ".")
         this.joinSuccess.emit()

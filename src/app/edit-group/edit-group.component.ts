@@ -2,6 +2,7 @@ import { Component, OnInit, Input, SimpleChanges, Output, EventEmitter } from '@
 import { FormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { MessageService } from '../message.service';
+import { GroupDetailModel, UserModel } from '../models/userGroupModel';
 import { UserService } from '../user.service';
 
 @Component({
@@ -21,8 +22,8 @@ export class EditGroupComponent implements OnInit {
     });
   }
   
-  @Input() group: any;
-  @Input() user: any;
+  @Input() group: GroupDetailModel;
+  @Input() user: UserModel;
   @Output() onGroupChange: EventEmitter<any> = new EventEmitter()
   
   ngOnInit(): void {
@@ -41,7 +42,7 @@ export class EditGroupComponent implements OnInit {
       if (this.groupForm.status == "VALID") {
         this.editConfirmed = false
         this.loadingEdit = true
-        this.userService.editGroup(this.group.join_code, formData).toPromise().then(data => {
+        this.userService.editGroup(this.group.join_code, formData).toPromise().then((data: any) => {
           this.messageService.open("Successfully edited " + this.group.name + ".", "right")
           this.group = data
           this.loadingEdit = false

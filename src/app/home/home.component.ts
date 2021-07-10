@@ -6,6 +6,7 @@ import { UserService } from '../user.service'
 import * as moment from 'moment';
 import { BuildModel, BuildService } from '../build.service';
 import { SettingsModel } from '../models/settingsModel';
+import { UserModel } from '../models/userGroupModel';
 
 @Component({
   selector: 'app-home',
@@ -14,7 +15,7 @@ import { SettingsModel } from '../models/settingsModel';
 })
 export class HomeComponent implements OnInit {
   signed_in: boolean = undefined;
-  user: any = undefined;
+  user: UserModel = undefined;
   moment: any = moment;
   commit;
   buildInfo: BuildModel;
@@ -23,12 +24,12 @@ export class HomeComponent implements OnInit {
   constructor(public router: Router, public messageService: MessageService, public http: HttpClient, private userService: UserService, private buildService: BuildService) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
-      this.userService.getUser().toPromise().then(data => {
+      this.userService.getUser().toPromise().then((data: any) => {
         this.user = data;
         // get latest commit hash from build.json
         // this.buildService.getBuildInfo().toPromise().then((data: BuildModel) => {
         //   this.buildInfo = data
-        //   this.buildService.getCommitInfo(this.buildInfo.commit).toPromise().then(data => {
+        //   this.buildService.getCommitInfo(this.buildInfo.commit).toPromise().then((data: any) => {
         //       this.commit = data
         //   })
         // })

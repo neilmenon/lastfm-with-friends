@@ -42,7 +42,7 @@ export class FooterComponent implements OnInit, AfterViewInit {
               })
               this.buildService.getBuildInfo().toPromise().then((data: BuildModel) => {
                 this.build = data
-                this.buildService.getCommitInfo(this.build.commit).toPromise().then(data => {
+                this.buildService.getCommitInfo(this.build.commit).toPromise().then((data: any) => {
                   this.commit = data
                 })
               })

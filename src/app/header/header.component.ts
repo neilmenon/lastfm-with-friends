@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message.service';
 import { JoinGroupComponent } from '../join-group/join-group.component';
+import { UserModel } from '../models/userGroupModel';
 
 @Component({
   selector: 'app-header',
@@ -15,7 +16,7 @@ import { JoinGroupComponent } from '../join-group/join-group.component';
 })
 export class HeaderComponent {
   signed_in: boolean = undefined;
-  user: any = undefined;
+  user: UserModel = undefined;
   moment: any = moment;
   userUpdateInterval: any = 30000;
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(map(result => result.matches), shareReplay());
@@ -36,7 +37,7 @@ export class HeaderComponent {
 
   checkUserUpdate() {
     if (document.visibilityState == "visible") {
-      this.userService.getUser(true).toPromise().then(data => {
+      this.userService.getUser(true).toPromise().then((data: any) => {
         this.user = data
         if (!this.user.last_update || this.userService.isRapidRefresh()) {
           this.userUpdateInterval = 5000
@@ -66,7 +67,7 @@ export class HeaderComponent {
   updateUser() {
     let tmp = this.user.last_update
     this.user.last_update = null
-    this.userService.updateUser(this.user, false).toPromise().then(data => {
+    this.userService.updateUser(this.user, false).toPromise().then((data: any) => {
       if (data['tracks_fetched'] == -1) {
         this.user.last_update = tmp
         this.messageService.open("You are up to date!")

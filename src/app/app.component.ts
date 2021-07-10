@@ -20,7 +20,7 @@ export class AppComponent {
     ) {
     let currentBuildUnix: number = null
     let currentCommitHash: string = null
-    this.userService.getUser()?.toPromise().then(data => {
+    this.userService.getUser()?.toPromise().then((data: any) => {
       this.user = data
     })
     let interval = setInterval(() => {

@@ -18,6 +18,7 @@ import { SettingsModel } from '../models/settingsModel';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { discreteTimePeriods, releaseTypes } from '../constants';
 import { TimePeriodModel } from '../models/timePeriodModel';
+import { UserGroupModel, UserModel } from '../models/userGroupModel';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -157,8 +158,8 @@ export class GroupDashboardComponent implements OnInit {
     this.leaderboardValueSubject = new BehaviorSubject<number>(this.leaderboardSelectedIndex);
   }
 
-  @Input() group: any;
-  @Input() user: any;
+  @Input() group: UserGroupModel;
+  @Input() user: UserModel;
 
   ngOnInit(): void {
       this.deviceInfo = this.detectorService.getDeviceInfo()
@@ -224,7 +225,7 @@ export class GroupDashboardComponent implements OnInit {
       // wk autocomplete
       this.wkAutoSubject.pipe(debounceTime(250)).subscribe(value => {
         if (value) {
-          this.userService.wkAutocomplete(value['wkMode'], value['query']).toPromise().then(data => {
+          this.userService.wkAutocomplete(value['wkMode'], value['query']).toPromise().then((data: any) => {
             if (value['wkMode'] == "artist") {
               this.wkArtistSuggestions = data
             } else if (value['wkMode'] == "album") {
@@ -264,7 +265,7 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistResults = null
       this.wkArtistDom.nativeElement.style.background = ''
     }
-    this.userService.wkArtist(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then(data => {
+    this.userService.wkArtist(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
       this.wkArtistDateLoading = false;
       this.wkArtistResults = data
       if (!fromSliderChange) {
@@ -300,7 +301,7 @@ export class GroupDashboardComponent implements OnInit {
 
   artistRedirects(artistString) {
     this.wkArtistRedirectLoading = true
-    this.userService.artistRedirects(artistString['query']).toPromise().then(data => {
+    this.userService.artistRedirects(artistString['query']).toPromise().then((data: any) => {
       this.wkArtistRedirectLoading = false
       if (data['artist']) {
         this.messageService.open("A redirect to \"" + data['artist'] + "\" was found. Adding to database...")
@@ -323,7 +324,7 @@ export class GroupDashboardComponent implements OnInit {
         this.wkAlbumResults = null
         this.wkAlbumDom.nativeElement.style.background = ''
       }
-      this.userService.wkAlbum(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then(data => {
+      this.userService.wkAlbum(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
         this.wkAlbumDateLoading = false;
         this.wkAlbumResults = data
         if (!fromSliderChange) {
@@ -366,7 +367,7 @@ export class GroupDashboardComponent implements OnInit {
         this.wkTrackResults = null
         this.wkTrackDom.nativeElement.style.background = ''
       }
-      this.userService.wkTrack(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then(data => {
+      this.userService.wkTrack(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
         this.wkTrackDateLoading = false;
         this.wkTrackResults = data
         if (!fromSliderChange) {
@@ -572,7 +573,7 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistCustomEndDate = entry['endDate']
       this.nowPlayingToWk(entry, null, entry['startDate'], entry['endDate'], false)
     })
-    let wkTopSub = dialogRef.componentInstance.wkFromTopDialog.subscribe(data => {
+    let wkTopSub = dialogRef.componentInstance.wkFromTopDialog.subscribe((data: any) => {
       this.whoKnowsTop(data.wkMode, data.wkObject, data.selectedUser, data['startDate'], data['endDate'])
     })
     dialogRef.afterClosed().subscribe(() => {
@@ -636,7 +637,7 @@ export class GroupDashboardComponent implements OnInit {
       startFinal = startRange
       endFinal = endRange
     }
-    this.userService.scrobbleLeaderboard(users, startFinal, endFinal).toPromise().then(data => {
+    this.userService.scrobbleLeaderboard(users, startFinal, endFinal).toPromise().then((data: any) => {
       this.leaderboardLoadedIndex = indexValue !== null ? indexValue : this.leaderboardLoadedIndex;
       this.leaderboardObject = data
       this.leaderboardLoading = false
@@ -763,7 +764,7 @@ export class GroupDashboardComponent implements OnInit {
     } else {
       this.chartIsCustomDate = false
     }
-    this.userService.charts(chartMode, this.chartReleaseType, users, startRange, endRange).toPromise().then(data => {
+    this.userService.charts(chartMode, this.chartReleaseType, users, startRange, endRange).toPromise().then((data: any) => {
       this.chartResults = data
       this.chartTopEntry = data[0]
       this.chartLoading = false;

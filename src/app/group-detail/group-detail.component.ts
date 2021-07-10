@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
+import { GroupDetailModel, UserModel } from '../models/userGroupModel';
 
 @Component({
   selector: 'app-group-detail',
@@ -10,8 +11,8 @@ import * as moment from 'moment';
   styleUrls: ['./group-detail.component.css']
 })
 export class GroupDetailComponent implements OnInit {
-  group;
-  user;
+  group: GroupDetailModel;
+  user: UserModel;
   moment: any = moment;
   deleteConfirmed: boolean = false;
   leaveConfirmed: boolean = false;
@@ -19,9 +20,9 @@ export class GroupDetailComponent implements OnInit {
   kickLoading: boolean = false;
   constructor(private route: ActivatedRoute, private userService: UserService, private messageService: MessageService, public router: Router) {
     this.route.paramMap.subscribe(params => {
-      this.userService.getGroup(params.get('joinCode')).toPromise().then(data => {
+      this.userService.getGroup(params.get('joinCode')).toPromise().then((data: any) => {
         this.group = data
-        this.userService.getUser().toPromise().then(data => {
+        this.userService.getUser().toPromise().then((data: any) => {
           this.user = data
         })
       }).catch(error => {
@@ -39,7 +40,7 @@ export class GroupDetailComponent implements OnInit {
 
   leaveGroup() {
     if (this.leaveConfirmed) {
-      this.userService.leaveGroup(this.group['join_code']).toPromise().then(data => {
+      this.userService.leaveGroup(this.group['join_code']).toPromise().then((data: any) => {
         this.messageService.save("You have left the group " + this.group['name'] + ".")
         this.router.navigate(['/'])
       }).catch(error => {
@@ -54,7 +55,7 @@ export class GroupDetailComponent implements OnInit {
 
   deleteGroup() {
     if (this.deleteConfirmed) {
-      this.userService.deleteGroup(this.group['join_code']).toPromise().then(data => {
+      this.userService.deleteGroup(this.group['join_code']).toPromise().then((data: any) => {
         this.messageService.save("You have deleted the group " + this.group['name'] + ".")
         this.router.navigate(['/'])
       }).catch(error => {
@@ -70,7 +71,7 @@ export class GroupDetailComponent implements OnInit {
   kickMember(username) {
     if (this.kickingUser) {
       this.kickLoading = true
-      this.userService.kickMember(this.kickingUser, this.group['join_code']).toPromise().then(data => {
+      this.userService.kickMember(this.kickingUser, this.group['join_code']).toPromise().then((data: any) => {
         this.kickLoading = false
         this.group = data
         this.messageService.open("Successfully kicked " + username + ".")
@@ -85,7 +86,7 @@ export class GroupDetailComponent implements OnInit {
     }
   }
 
-  reflectChanges(group: any) {
+  reflectChanges(group: GroupDetailModel) {
     this.group = group
   }
 
