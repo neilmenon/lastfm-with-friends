@@ -8,10 +8,10 @@
         <p style="color: #bfbfbf;">Create a new group and start adding friends!</p>
         <button [routerLink]="['groups/create']" color="accent" mat-raised-button type="submit" style="margin-top: .4375em;">Create Group</button>
     </div>
-    <div *ngIf="user && user.groups.length > 0">
+    <div *ngIf="user && user.groups.length > 0 && userSettings">
         <div class="box">
             <p>
-                Welcome to Last.fm with Friends, {{ user.display_name ? user.display_name : user.username }}! You've scrobbled {{ user.scrobbles | pluralize:'track' }} over 
+                Welcome to Last.fm with Friends, {{ user.display_name ? user.display_name : user.username }}! You've scrobbled a total of {{ user.scrobbles | pluralize:'track' }} over the past
                 <span>{{ moment.unix(user.registered).locale("en-US").toNow(true) }}</span> — 
                 <span *ngIf="user.last_update" 
                         [matTooltip]="moment().add(30 - (moment().minute() % 30), 'minutes').startOf('minute').locale('en-US').format()" 
@@ -45,7 +45,7 @@
                 (alternatively, you can manually trigger a user update in the Last.fm with Friends menu at any time).
             </p>
         </div>
-        <div class="box" *ngIf="user.last_update && user.scrobbles > 0 && moment.utc().diff(moment.utc(user.last_update), 'weeks') >= 1">
+        <div class="box" *ngIf="user.last_update && user.scrobbles > 0 && moment.utc().diff(moment.utc(user.last_update), 'weeks') >= 1" style="padding: 15px 15px 11px 15px;">
             <h2 class="box-title center">Get Listening!</h2>
             <p class="center">
                 It looks like you haven't scrobbled anything recently — according to our data, you last scrobbled on 
@@ -87,7 +87,11 @@
                     </mat-icon>
                 </button>
             </div>
-            <app-group-dashboard [group]="group" [user]="user" *ngIf="userSettings.groupExpandedList[group.join_code] !== false"></app-group-dashboard>
+            <app-group-dashboard 
+                [group]="group" [user]="user" 
+                [userSettings]="userSettings"
+                *ngIf="userSettings.groupExpandedList[group.join_code] !== false"
+            ></app-group-dashboard>
         </div>
     </div>
 </div>

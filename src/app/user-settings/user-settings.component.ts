@@ -1,3 +1,4 @@
+import { NgRedux } from '@angular-redux/store';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,6 +9,7 @@ import { MessageService } from '../message.service';
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { TimePeriodModel } from '../models/timePeriodModel';
 import { UserModel } from '../models/userGroupModel';
+import { AppState } from '../store';
 import { UserService } from '../user.service';
 
 @Component({
@@ -16,14 +18,15 @@ import { UserService } from '../user.service';
   styleUrls: ['./user-settings.component.css']
 })
 export class UserSettingsComponent implements OnInit {
+  private subscription: Subscription = new Subscription()
   user: UserModel;
   confirmFullScrape: boolean = false;
   confirmDeleteAccount: boolean = false;
   fullScrapeInProgress: boolean = false;
+  reduxPatched: boolean = false
   signed_in: boolean;
-  updateInterval;
+  updateInterval: any;
   settingsForm: FormGroup
-  formSub: Subscription
   releaseTypes: Array<string> = releaseTypes
   discreteTimePeriods: Array<TimePeriodModel> = discreteTimePeriods
   randomTimePeriod: TimePeriodModel = {days: 0, label: 'Random'}
@@ -31,7 +34,8 @@ export class UserSettingsComponent implements OnInit {
     private userService: UserService, 
     public messageService: MessageService, 
     public router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private ngRedux: NgRedux<AppState>
   ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
@@ -54,20 +58,26 @@ export class UserSettingsComponent implements OnInit {
       chartTimePeriodDays: [null],
       leaderboardTimePeriodDays: [null]
     })
-    console.log(this.userService.getSettings())
-    this.settingsForm.patchValue(this.userService.getSettings())
 
-    this.formSub = this.settingsForm.valueChanges.pipe(debounceTime(200), distinctUntilChanged()).subscribe(() => {
-      this.userService.setSettings(getSettingsModel(this.settingsForm.getRawValue()))
-      console.log(this.userService.getSettings())
-      this.messageService.open("Successfully updated user settings.")
+    const sub1 = this.ngRedux.select(s => s.settingsModel).subscribe(obj => {
+      if (obj && !this.reduxPatched) {
+        this.settingsForm.patchValue(obj, { emitEvent: false })
+        this.reduxPatched = true
+      }
     })
+
+    const sub2 = this.settingsForm.valueChanges.pipe(debounceTime(200), distinctUntilChanged()).subscribe(() => {
+      this.userService.setSettings(getSettingsModel(this.settingsForm.getRawValue()), true)
+    })
+
+    this.subscription.add(sub1)
+    this.subscription.add(sub2)
   }
 
   ngOnDestroy() {
     clearInterval(this.updateInterval)
     this.userService.setRapidRefresh(false)
-    this.formSub.unsubscribe()
+    this.subscription.unsubscribe()
   }
 
   userInterval() {

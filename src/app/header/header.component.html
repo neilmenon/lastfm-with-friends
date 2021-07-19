@@ -29,6 +29,7 @@
             <mat-progress-bar mode="determinate" color="warn" [value]="user.progress" *ngIf="user.progress"></mat-progress-bar>
             <span class="navbar-menu-updated" *ngIf="user.last_update && !user.progress" [matTooltip]="moment(user.last_update).locale('en')" matTooltipPosition="above" matTooltipClass="tooltip">Last fetched track was played<br> {{ moment(user.last_update).locale('en').fromNow() }}</span>
           </span>
+          <button mat-menu-item [routerLink]="['/']">Home</button>
           <div [matTooltip]="!user.last_update ? 'An update is currently in progress...' : null" matTooltipPosition="left">
             <button [class.disable-click]="!user.last_update" mat-menu-item (click)="updateUser()">Update</button>
           </div>
@@ -78,6 +79,7 @@
               <mat-progress-bar mode="determinate" color="warn" [value]="user.progress" *ngIf="user.progress"></mat-progress-bar>
               <span class="navbar-menu-updated" *ngIf="user.last_update && !user.progress" [matTooltip]="moment(user.last_update).locale('en')" matTooltipPosition="above" matTooltipClass="tooltip">Last fetched track was played<br> {{ moment(user.last_update).locale('en').fromNow() }}</span>
             </span>
+            <button mat-menu-item [routerLink]="['/']">Home</button>
             <div [matTooltip]="!user.last_update ? 'An update is currently in progress...' : null" matTooltipPosition="left">
               <button [class.disable-click]="!user.last_update" mat-menu-item (click)="updateUser()">Update</button>
             </div>

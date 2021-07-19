@@ -7,7 +7,7 @@ import * as moment from 'moment';
 import { ScrobbleHistoryComponent } from '../scrobble-history/scrobble-history.component';
 import { WhoKnowsTopComponent } from '../who-knows-top/who-knows-top.component';
 import { MatSliderChange } from '@angular/material/slider';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { CustomDateRangeComponent } from '../custom-date-range/custom-date-range.component';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
@@ -26,9 +26,12 @@ import { UserGroupModel, UserModel } from '../models/userGroupModel';
   styleUrls: ['./group-dashboard.component.css']
 })
 export class GroupDashboardComponent implements OnInit {
+  @Input() group: UserGroupModel
+  @Input() user: UserModel
+  @Input() userSettings: SettingsModel
+
   moment: any = moment;
   deviceInfo: any = null;
-  userSettings: SettingsModel;
 
   // mappings for all date sliders/dropdowns
   leaderboardSliderMappings: Array<TimePeriodModel> = discreteTimePeriods;
@@ -140,31 +143,32 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistForm = this.formBuilder.group({query: ['']})
     this.wkAlbumForm = this.formBuilder.group({query: ['']})
     this.wkTrackForm = this.formBuilder.group({query: ['']})
-
-    this.userSettings = this.userService.getSettings()
     
-    // initialize setting-dependent configs
-    this.chartReleaseType = this.userSettings.chartReleaseType != "random" ? this.userSettings.chartReleaseType : 
-      this.chartReleaseTypeOptions[Math.floor(Math.random() * this.chartReleaseTypeOptions.length)]
-    
-    this.chartDropdownDate = this.userSettings.chartTimePeriodDays == 0 ? 
-      this.leaderboardSliderMappings[Math.floor(Math.random() * this.leaderboardSliderMappings.length)].days :
-      this.userSettings.chartTimePeriodDays
-
-    let tmpIndex: number = this.leaderboardSliderMappings.findIndex(x => x.days == this.userSettings.leaderboardTimePeriodDays)
-    let randomTimePeriodIndex: number = Math.floor(Math.random() * this.leaderboardSliderMappings.length)
-    this.leaderboardSelectedIndex = tmpIndex == -1 ? randomTimePeriodIndex : tmpIndex
-    this.leaderboardLoadedIndex = this.leaderboardSelectedIndex
-    this.leaderboardValueSubject = new BehaviorSubject<number>(this.leaderboardSelectedIndex);
   }
 
-  @Input() group: UserGroupModel;
-  @Input() user: UserModel;
-
   ngOnInit(): void {
+      // initialize setting-dependent configs
+      this.chartReleaseType = this.userSettings.chartReleaseType != "random" ? this.userSettings.chartReleaseType : 
+      this.chartReleaseTypeOptions[Math.floor(Math.random() * this.chartReleaseTypeOptions.length)]
+    
+      this.chartDropdownDate = this.userSettings.chartTimePeriodDays == 0 ? 
+        this.leaderboardSliderMappings[Math.floor(Math.random() * this.leaderboardSliderMappings.length)].days :
+        this.userSettings.chartTimePeriodDays
+
+      let tmpIndex: number = this.leaderboardSliderMappings.findIndex(x => x.days == this.userSettings.leaderboardTimePeriodDays)
+      let randomTimePeriodIndex: number = Math.floor(Math.random() * this.leaderboardSliderMappings.length)
+      this.leaderboardSelectedIndex = tmpIndex == -1 ? randomTimePeriodIndex : tmpIndex
+      this.leaderboardLoadedIndex = this.leaderboardSelectedIndex
+      this.leaderboardValueSubject = new BehaviorSubject<number>(this.leaderboardSelectedIndex);
+      
       this.deviceInfo = this.detectorService.getDeviceInfo()
+      
+      // launch charts
       let negOne = [-1]
       this.chartSelectedUser = negOne.concat(this.group.members.map(u => u.id))
+      this.charts()
+
+      // now playing
       this.nowPlayingStartInterval();
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState == "visible") {
@@ -174,16 +178,6 @@ export class GroupDashboardComponent implements OnInit {
           } else {
             this.nowPlaying();
           }
-        }
-      })
-      // leaderboard slider change
-      this.leaderboardValueSubject.pipe(debounceTime(1000)).subscribe(value => {
-        if (value == this.leaderboardSliderMappings.length-1) { // All time
-          this.scrobbleLeaderboard(value, this.group.members.map(u => u.id))
-        } else {
-          let endRange = moment.utc()
-          let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
-          this.scrobbleLeaderboard(value, this.group.members.map(u => u.id), startRange, endRange)
         }
       })
       // wkArtist slider change
@@ -222,6 +216,16 @@ export class GroupDashboardComponent implements OnInit {
           }
         }
       })
+      // scrobble leaderboard slider change
+      this.leaderboardValueSubject.pipe(debounceTime(1000)).subscribe(value => {
+        if (value == this.leaderboardSliderMappings.length-1) { // All time
+          this.scrobbleLeaderboard(value, this.group.members.map(u => u.id))
+        } else {
+          let endRange = moment.utc()
+          let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
+          this.scrobbleLeaderboard(value, this.group.members.map(u => u.id), startRange, endRange)
+        }
+      })
       // wk autocomplete
       this.wkAutoSubject.pipe(debounceTime(250)).subscribe(value => {
         if (value) {
@@ -236,8 +240,6 @@ export class GroupDashboardComponent implements OnInit {
           })
         }
       })
-      // charts
-      this.charts();
   }
 
   nowPlayingStartInterval() {
@@ -439,21 +441,11 @@ export class GroupDashboardComponent implements OnInit {
     }
   }
 
-  updateIntervalToggle(event: MatSlideToggleChange) {
-    this.userSettings.showUpdateInterval = event.checked
-    this.userService.setSettings(this.userSettings)
-  }
-
   nowPlaying(loading=false) {
     if (loading)
       this.nowPlayingResults = null
     this.userService.nowPlaying(this.group.join_code).toPromise().then((data: any) => {
-      this.nowPlayingResults = []
-      for (let entry of data) {
-        let checkCount = entry.check_count == null ? 0 : (entry.check_count == 0 ? 0.25 : entry.check_count)
-        entry['checkDisp'] = checkCount
-        this.nowPlayingResults.push(entry)
-      }
+      this.nowPlayingResults = data
     }).catch(error => {
       this.nowPlayingResults = undefined
     })

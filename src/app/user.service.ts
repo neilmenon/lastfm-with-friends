@@ -4,7 +4,10 @@ import { share } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { config } from './config'
 import { MessageService } from './message.service';
-import { getSettingsModel, SettingsModel } from './models/settingsModel';
+import { SettingsModel } from './models/settingsModel';
+import { NgRedux } from '@angular-redux/store';
+import { AppState } from './store';
+import { SETTINGS_MODEL } from './actions';
 
 @Injectable()
 export class UserService {
@@ -12,8 +15,11 @@ export class UserService {
   session_key: string = localStorage.getItem("lastfm_session");
   user: Observable<any>;
   rapidRefresh: boolean = false;
-  userSettings: SettingsModel = getSettingsModel(localStorage.getItem("lfmwf_settings"));
-  constructor(private http: HttpClient, public messageService: MessageService) { }
+  constructor(
+    private http: HttpClient, 
+    public messageService: MessageService,
+    private ngRedux: NgRedux<AppState>
+  ) { }
 
   isSignedIn() {
     return (localStorage.getItem("lastfm_username") != null) && (localStorage.getItem("lastfm_session") != null);
@@ -56,13 +62,21 @@ export class UserService {
     }
   }
 
-  getSettings(): SettingsModel {
-    return this.userSettings
-  }
-
-  setSettings(settings: SettingsModel) {
-    localStorage.setItem("lfmwf_settings", JSON.stringify(settings))
-    this.userSettings = settings
+  setSettings(settings: SettingsModel, showMessage: boolean) {
+    this.http.post(config.api_root + '/users/' + this.username + '/settings', {
+      'settings': JSON.stringify(settings),
+      'session_key': this.session_key
+    }).toPromise().then(() => {
+      this.ngRedux.dispatch({ type: SETTINGS_MODEL, settingsModel: settings })
+      if (showMessage) {
+        this.messageService.open("Successfully updated user settings.")
+      }
+    }).catch(error => {
+      console.log(error)
+      if (showMessage) {
+        this.messageService.open("Unable to save user settings. Please try again.")
+      }
+    })
   }
 
   updateUser(userObject: any, fullScrape: boolean) {

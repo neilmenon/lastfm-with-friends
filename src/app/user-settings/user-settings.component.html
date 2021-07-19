@@ -1,7 +1,6 @@
 <div class="box center">
-    <div class="settings center-all">
-        <h1 class="clear-color-full" style="margin-bottom: 5px;">Settings</h1>
-        <p>The below settings are per-browser/device.</p>
+    <div class="settings center-all" *ngIf="reduxPatched">
+        <h1 class="clear-color-full">Settings</h1>
         <form [formGroup]="settingsForm" class="settings-form">
             <h3 class="box-title">Individual & Group Charts</h3>
             <p>Default release type selection for charts.</p>
@@ -61,4 +60,5 @@
             </p>
         </div>
     </div>
+    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="!reduxPatched" style="padding-bottom: 10px;"></mat-spinner>
 </div>
