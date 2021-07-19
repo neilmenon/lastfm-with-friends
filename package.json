@@ -11,6 +11,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular-redux/store": "^9.0.0",
     "@angular/animations": "~11.0.4",
     "@angular/cdk": "^11.0.3",
     "@angular/common": "~11.0.4",
@@ -27,6 +28,7 @@
     "moment": "^2.29.1",
     "ng-redux": "^4.4.3",
     "ngx-device-detector": "^2.0.6",
+    "redux": "^4.0.1",
     "rxjs": "~6.6.0",
     "tassign": "^1.0.0",
     "ts-md5": "^1.2.7",

@@ -18,7 +18,7 @@ export class GroupDetailComponent implements OnInit {
   leaveConfirmed: boolean = false;
   kickingUser: string = null;
   kickLoading: boolean = false;
-  constructor(private route: ActivatedRoute, private userService: UserService, private messageService: MessageService, public router: Router) {
+  constructor(private route: ActivatedRoute, private userService: UserService, public messageService: MessageService, public router: Router) {
     this.route.paramMap.subscribe(params => {
       this.userService.getGroup(params.get('joinCode')).toPromise().then((data: any) => {
         this.group = data

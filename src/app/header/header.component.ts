@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
@@ -8,15 +8,21 @@ import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message.service';
 import { JoinGroupComponent } from '../join-group/join-group.component';
 import { UserModel } from '../models/userGroupModel';
+import { NgRedux } from '@angular-redux/store';
+import { AppState } from '../store';
+import { SETTINGS_MODEL, USER_MODEL } from '../actions'
+import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit, OnDestroy {
+  private subscription: Subscription = new Subscription()
   signed_in: boolean = undefined;
   user: UserModel = undefined;
+  settingsModel: SettingsModel
   moment: any = moment;
   userUpdateInterval: any = 30000;
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(map(result => result.matches), shareReplay());
@@ -26,6 +32,7 @@ export class HeaderComponent {
     private userService: UserService, 
     public dialog: MatDialog, 
     private messageService: MessageService,
+    private ngRedux: NgRedux<AppState>
   ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
@@ -34,11 +41,18 @@ export class HeaderComponent {
       this.user = null;
     }
   }
-
+  
   checkUserUpdate() {
     if (document.visibilityState == "visible") {
       this.userService.getUser(true).toPromise().then((data: any) => {
         this.user = data
+
+        // put user and settings DTOs into Redux
+        this.ngRedux.dispatch({ type: USER_MODEL, userModel: this.user })
+        if (!this.settingsModel) {
+          this.ngRedux.dispatch({ type: SETTINGS_MODEL, settingsModel: getSettingsModel(this.user?.settings) })
+        }
+
         if (!this.user.last_update || this.userService.isRapidRefresh()) {
           this.userUpdateInterval = 5000
         } else {
@@ -59,11 +73,19 @@ export class HeaderComponent {
     }
     this.initUpdate = false
   }
-
+  
   ngOnInit() {
+    const settingsSub = this.ngRedux.select(s => s.settingsModel).subscribe(result => {
+      this.settingsModel = result
+    })
     
+    this.subscription.add(settingsSub)
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe()
+  }
+  
   updateUser() {
     let tmp = this.user.last_update
     this.user.last_update = null

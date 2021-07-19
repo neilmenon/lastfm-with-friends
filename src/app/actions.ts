@@ -1,1 +1,2 @@
-export const UPDATE_USER_MODEL = "UPDATE_USER_MODEL"
+export const USER_MODEL = "USER_MODEL"
+export const SETTINGS_MODEL = "SETTINGS_MODEL"

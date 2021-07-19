@@ -54,6 +54,8 @@ import { CustomDateRangeComponent } from './custom-date-range/custom-date-range.
 import { ListeningTrendsComponent } from './listening-trends/listening-trends.component';
 import { FooterComponent } from './footer/footer.component';
 import { PluralizePipe } from './pluralize.pipe';
+import { NgRedux, NgReduxModule } from '@angular-redux/store';
+import { INITIAL_STATE, rootReducer } from './store';
 
 @NgModule({
   declarations: [
@@ -106,6 +108,7 @@ import { PluralizePipe } from './pluralize.pipe';
     MatSlideToggleModule,
     NgxChartsModule,
     MatRadioModule,
+    NgReduxModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},
@@ -120,4 +123,8 @@ import { PluralizePipe } from './pluralize.pipe';
   providers: [UserService],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+  constructor(ngRedux: NgRedux<{}>) {
+    ngRedux.configureStore(rootReducer, INITIAL_STATE)
+  }
+}
