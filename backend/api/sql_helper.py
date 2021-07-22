@@ -30,7 +30,7 @@ def esc_db(item):
     return item.replace("'", "\\'")
 
 def sanitize_db_field(db_field):
-    special_chars_replace_with_blank = ['"', "\\'", ',']
+    special_chars_replace_with_blank = ['"', "\\'"]
     special_chars_replace_with_space = ['•']
     sanitized = "REPLACE({}, '{}', '')".format(db_field, special_chars_replace_with_blank.pop(0))
     for s in special_chars_replace_with_blank:
@@ -40,7 +40,7 @@ def sanitize_db_field(db_field):
     return sanitized
 
 def sanitize_query(query):
-    special_chars_replace_with_blank = ['"', "'", ',']
+    special_chars_replace_with_blank = ['"', "'"]
     special_chars_replace_with_space = ['•']
     for s in special_chars_replace_with_blank:
         query = query.replace(s, '')

@@ -1,7 +1,10 @@
+import { NgRedux } from '@angular-redux/store';
 import { Component, ViewEncapsulation } from '@angular/core';
 import * as moment from 'moment';
 import { BuildModel, BuildService } from './build.service';
 import { MessageService } from './message.service';
+import { UserModel } from './models/userGroupModel';
+import { AppState } from './store';
 import { UserService } from './user.service';
 
 @Component({
@@ -12,12 +15,18 @@ import { UserService } from './user.service';
 })
 export class AppComponent {
   title = 'lastfm-with-friends';
-  user;
+  user: UserModel;
   constructor(
     private buildService: BuildService, 
     private messageService: MessageService,
-    private userService: UserService
+    private ngRedux: NgRedux<AppState>
     ) {
+    const sub1 = this.ngRedux.select(s => s.userModel).subscribe(obj => {
+      if (obj) {
+        this.user = obj
+      }
+    })
+    
     let currentBuildUnix: number = null
     let currentCommitHash: string = null
     let interval = setInterval(() => {
