@@ -164,8 +164,12 @@ export class GroupDashboardComponent implements OnInit {
       this.deviceInfo = this.detectorService.getDeviceInfo()
       
       // launch charts
-      let negOne = [-1]
-      this.chartSelectedUser = negOne.concat(this.group.members.map(u => u.id))
+      if (this.userSettings.chartUser == "everyone") {
+        let negOne = [-1]
+        this.chartSelectedUser = negOne.concat(this.group.members.map(u => u.id))
+      } else {
+        this.chartSelectedUser = [this.user.user_id]
+      }
       this.charts()
 
       // now playing

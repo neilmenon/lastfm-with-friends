@@ -6,6 +6,8 @@ export class SettingsModel {
     chartTimePeriodDays: number
     leaderboardTimePeriodDays: number
     groupExpandedList: any
+    trendMode: string
+    chartUser: string
 
     constructor() {
         this.showUpdateInterval = false
@@ -13,6 +15,8 @@ export class SettingsModel {
         this.chartTimePeriodDays = 30
         this.leaderboardTimePeriodDays = 7
         this.groupExpandedList = {}
+        this.trendMode = "leaderboard-cu"
+        this.chartUser = "everyone"
     }
 }
 

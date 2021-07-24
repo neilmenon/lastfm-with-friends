@@ -11,6 +11,14 @@
                     <mat-option value="random">Random</mat-option>
                 </mat-select>
             </mat-form-field>
+            <p>Default user selection for charts.</p>
+            <mat-form-field appearance="legacy" color="accent">
+                <mat-label>Chart User Selection</mat-label>
+                <mat-select formControlName="chartUser" name="chartUser">
+                    <mat-option value="everyone">Everyone</mat-option>
+                    <mat-option value="individual">{{ user?.username }} (you)</mat-option>
+                </mat-select>
+            </mat-form-field>
             <p>Default time period selection for charts.</p>
             <mat-form-field appearance="legacy" color="accent">
                 <mat-label>Chart Time Period</mat-label>
@@ -26,6 +34,15 @@
                 <mat-select formControlName="leaderboardTimePeriodDays" name="leaderboardTimePeriodDays">
                     <mat-option *ngFor="let d of discreteTimePeriods" [value]="d.days">{{ d.label }}</mat-option>
                     <mat-option [value]="randomTimePeriod.days">{{ randomTimePeriod.label }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <h3 class="box-title">Listening Trends</h3>
+            <p>Default mode for displaying scrobbles on the Listening Trends graph.</p>
+            <mat-form-field appearance="legacy" color="accent">
+                <mat-label>Listening Trends Mode</mat-label>
+                <mat-select formControlName="trendMode" name="trendMode">
+                    <mat-option value="leaderboard-cu">Cumulative</mat-option>
+                    <mat-option value="leaderboard-noncu">Non-Cumulative</mat-option>
                 </mat-select>
             </mat-form-field>
         </form>

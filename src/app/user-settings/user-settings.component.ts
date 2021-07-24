@@ -56,7 +56,9 @@ export class UserSettingsComponent implements OnInit {
     this.settingsForm = this.fb.group({
       chartReleaseType: [null],
       chartTimePeriodDays: [null],
-      leaderboardTimePeriodDays: [null]
+      leaderboardTimePeriodDays: [null],
+      trendMode: [null],
+      chartUser: [null]
     })
 
     const sub1 = this.ngRedux.select(s => s.settingsModel).subscribe(obj => {

@@ -1,8 +1,8 @@
--- MariaDB dump 10.18  Distrib 10.5.8-MariaDB, for osx10.15 (x86_64)
+-- MariaDB dump 10.19  Distrib 10.6.3-MariaDB, for osx10.16 (x86_64)
 --
 -- Host: localhost    Database: lastfm_with_friends
 -- ------------------------------------------------------
--- Server version	10.5.8-MariaDB
+-- Server version	10.6.3-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -238,7 +238,7 @@ CREATE TABLE `users` (
   `scrobbles` bigint(20) NOT NULL,
   `last_update` datetime DEFAULT NULL,
   `progress` float NOT NULL,
-  `settings` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `settings` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`user_id`,`username`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -253,4 +253,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-08 23:11:35
+-- Dump completed on 2021-07-24 19:34:50

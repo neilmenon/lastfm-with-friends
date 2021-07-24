@@ -12,6 +12,7 @@ import { NgRedux } from '@angular-redux/store';
 import { AppState } from '../store';
 import { SETTINGS_MODEL, USER_MODEL } from '../actions'
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -32,7 +33,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private userService: UserService, 
     public dialog: MatDialog, 
     private messageService: MessageService,
-    private ngRedux: NgRedux<AppState>
+    private ngRedux: NgRedux<AppState>,
+    public router: Router
   ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
