@@ -56,6 +56,7 @@ import { FooterComponent } from './footer/footer.component';
 import { PluralizePipe } from './pluralize.pipe';
 import { NgRedux, NgReduxModule } from '@angular-redux/store';
 import { INITIAL_STATE, rootReducer } from './store';
+import { ConfirmPopupComponent } from './confirm-popup/confirm-popup.component';
 
 @NgModule({
   declarations: [
@@ -77,6 +78,7 @@ import { INITIAL_STATE, rootReducer } from './store';
     ListeningTrendsComponent,
     FooterComponent,
     PluralizePipe,
+    ConfirmPopupComponent,
   ],
   imports: [
     BrowserModule,

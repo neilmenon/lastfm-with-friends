@@ -1,0 +1,14 @@
+<div class="center" style="margin-bottom: -16px;">
+    <h3 mat-dialog-title>{{ data?.title }}</h3>
+</div>
+<div mat-dialog-content>
+    {{ data?.message }}
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="cancel()">
+        {{ data?.secondaryButton ? data.secondaryButton : "Cancel" }}
+    </button>
+    <button mat-button [mat-dialog-close]="true" cdkFocusInitial>
+        {{ data?.primaryButton ? data.primaryButton : "OK" }}
+    </button>
+</div>

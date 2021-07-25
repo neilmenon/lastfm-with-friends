@@ -1,9 +1,11 @@
 import { NgRedux } from '@angular-redux/store';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { discreteTimePeriods, releaseTypes } from '../constants';
 import { MessageService } from '../message.service';
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
@@ -35,7 +37,8 @@ export class UserSettingsComponent implements OnInit {
     public messageService: MessageService, 
     public router: Router,
     private fb: FormBuilder,
-    private ngRedux: NgRedux<AppState>
+    private ngRedux: NgRedux<AppState>,
+    public dialog: MatDialog
   ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
@@ -134,4 +137,19 @@ export class UserSettingsComponent implements OnInit {
     }
   }
 
+  restoreDefaultSettings() {
+    const dialogRef = this.dialog.open(ConfirmPopupComponent, {
+      data: { 
+        title: "Reset to Default Settings",
+        message: "Are you sure you want to resset your settings to their default?",
+        primaryButton: "Reset"
+      }
+    })
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.userService.setSettings(getSettingsModel(null), true)
+        this.settingsForm.patchValue(new SettingsModel(), { emitEvent: false })
+      }
+    })
+  }
 }
