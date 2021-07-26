@@ -273,22 +273,35 @@ export class GroupDashboardComponent implements OnInit {
     }
     this.userService.wkArtist(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
       this.wkArtistDateLoading = false;
-      this.wkArtistResults = data
-      if (!fromSliderChange) {
-        this.wkArtistDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkArtistResults['artist']['image_url']+')'
-        this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
-        this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-        this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
-      }
-      if (this.detectorService.isMobile()) {
-        this.wkArtistInput.closePanel()
-        this.wkArtistInputRaw.nativeElement.blur();  
-      }
-      if (data['artist']['fallback'] && !data['artist']['redirect']) {
-        this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
-      } else if (data['artist']['redirect']) {
-        this.messageService.open("Redirected to " + data['artist']['name'] + ".")
-      }
+      // check if this entry is in the top for each user
+      let wkUsers: Array<number> = data?.users.map(u => u.id)
+      this.userService.wkCharts(wkUsers, data.artist.id, null, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+        if (results) {
+          for (let i = 0; i < results?.length; i++) {
+            data?.users.forEach(x => {
+              if (results[i].id == x.id) {
+                x.rankNum = results[i].rank
+              }
+            })
+          }
+        }
+        this.wkArtistResults = data
+        if (!fromSliderChange) {
+          this.wkArtistDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkArtistResults['artist']['image_url']+')'
+          this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
+          this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+          this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
+        }
+        if (this.detectorService.isMobile()) {
+          this.wkArtistInput.closePanel()
+          this.wkArtistInputRaw.nativeElement.blur();  
+        }
+        if (data['artist']['fallback'] && !data['artist']['redirect']) {
+          this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
+        } else if (data['artist']['redirect']) {
+          this.messageService.open("Redirected to " + data['artist']['name'] + ".")
+        }
+      })
     }).catch(error => {
       if (this.detectorService.isMobile()) {
         this.wkArtistInput.closePanel()
@@ -332,17 +345,30 @@ export class GroupDashboardComponent implements OnInit {
       }
       this.userService.wkAlbum(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
         this.wkAlbumDateLoading = false;
-        this.wkAlbumResults = data
-        if (!fromSliderChange) {
-          this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
-          this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
-          this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-          this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
-        }
-        if (this.detectorService.isMobile()) {
-          this.wkAlbumInput.closePanel()
-          this.wkAlbumInputRaw.nativeElement.blur();
-        }
+        // check if this entry is in the top for each user
+        let wkUsers: Array<number> = data?.users.map(u => u.id)
+        this.userService.wkCharts(wkUsers, data.artist.id, data.album.id, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+          if (results) {
+            for (let i = 0; i < results?.length; i++) {
+              data?.users.forEach(x => {
+                if (results[i].id == x.id) {
+                  x.rankNum = results[i].rank
+                }
+              })
+            }
+          }
+          this.wkAlbumResults = data
+          if (!fromSliderChange) {
+            this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
+            this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
+            this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+            this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
+          }
+          if (this.detectorService.isMobile()) {
+            this.wkAlbumInput.closePanel()
+            this.wkAlbumInputRaw.nativeElement.blur();
+          }
+        })
       }).catch(error => {
         if (this.detectorService.isMobile()) {
           this.wkAlbumInput.closePanel()
@@ -375,17 +401,30 @@ export class GroupDashboardComponent implements OnInit {
       }
       this.userService.wkTrack(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
         this.wkTrackDateLoading = false;
-        this.wkTrackResults = data
-        if (!fromSliderChange) {
-          this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
-          this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
-          this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-          this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
-        }
-        if (this.detectorService.isMobile()) {
-          this.wkTrackInput.closePanel()
-          this.wkTrackInputRaw.nativeElement.blur();
-        }
+        // check if this entry is in the top for each user
+        let wkUsers: Array<number> = data?.users.map(u => u.id)
+        this.userService.wkCharts(wkUsers, data.artist.id, null, data.track.name, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+          if (results) {
+            for (let i = 0; i < results?.length; i++) {
+              data?.users.forEach(x => {
+                if (results[i].id == x.id) {
+                  x.rankNum = results[i].rank
+                }
+              })
+            }
+          }
+          this.wkTrackResults = data
+          if (!fromSliderChange) {
+            this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
+            this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
+            this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+            this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
+          }
+          if (this.detectorService.isMobile()) {
+            this.wkTrackInput.closePanel()
+            this.wkTrackInputRaw.nativeElement.blur();
+          }
+        })
       }).catch(error => {
         if (this.detectorService.isMobile()) {
           this.wkTrackInput.closePanel()
@@ -669,6 +708,8 @@ export class GroupDashboardComponent implements OnInit {
     this.wkArtistDateLoading = true;
     this.wkArtistSelectedIndex = event.value
     this.wkArtistIsCustomDateRange = false;
+    this.wkArtistCustomStartDate = null
+    this.wkArtistCustomEndDate = null
     this.wkArtistValueSubject.next(event.value);
   }
 
@@ -676,6 +717,8 @@ export class GroupDashboardComponent implements OnInit {
     this.wkAlbumDateLoading = true;
     this.wkAlbumSelectedIndex = event.value
     this.wkAlbumIsCustomDateRange = false;
+    this.wkAlbumCustomStartDate = null
+    this.wkAlbumCustomEndDate = null
     this.wkAlbumValueSubject.next(event.value);
   }
 
@@ -683,6 +726,8 @@ export class GroupDashboardComponent implements OnInit {
     this.wkTrackDateLoading = true;
     this.wkTrackSelectedIndex = event.value
     this.wkTrackIsCustomDateRange = false;
+    this.wkTrackCustomStartDate = null
+    this.wkTrackCustomEndDate = null
     this.wkTrackValueSubject.next(event.value);
   }
 
@@ -730,7 +775,7 @@ export class GroupDashboardComponent implements OnInit {
     this.wkAutoSubject.next({'wkMode': wkMode, 'query': event})
   }
 
-  charts(customStartDate: moment.Moment=null, customEndDate: moment.Moment=null, everyoneToggled=false) {
+  charts(customStartDate: moment.Moment=null, customEndDate: moment.Moment=null, everyoneToggled=false, fromWk=false) {
     if (everyoneToggled) {
       let negOne = [-1]
       if (this.chartEveryoneSelected.selected) {
@@ -752,13 +797,21 @@ export class GroupDashboardComponent implements OnInit {
     if (customStartDate && customEndDate) {
       startRange = customStartDate.format()
       endRange = customEndDate.format()
+      this.chartCustomStartDate = customStartDate
+      this.chartCustomEndDate = customEndDate
       this.chartIsCustomDate = true
+      this.chartDropdownDate = -2
     } else if (this.chartDropdownDate != -1) {
       endRange = moment.utc().format()
       startRange = moment.utc().subtract(this.chartDropdownDate, 'd').format()
       this.chartIsCustomDate = false
     } else {
       this.chartIsCustomDate = false
+    }
+    if (window.innerWidth <= 960) {
+      this.chartsDom.nativeElement.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
+    } else if (fromWk) {
+      this.wkArtistDom.nativeElement.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
     }
     this.userService.charts(chartMode, this.chartReleaseType, users, startRange, endRange).toPromise().then((data: any) => {
       this.chartResults = data

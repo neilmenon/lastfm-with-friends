@@ -96,7 +96,17 @@
                 <tbody>
                     <tr *ngFor="let entry of wkArtistResults.users; let i = index">
                         <td>{{ i+1 }}</td>
-                        <td>{{ entry.username }}</td>
+                        <td>
+                            <span *ngIf="!entry.rankNum">{{ entry.username }}</span>
+                            <span 
+                                *ngIf="entry?.rankNum" class="wk-rank clickable" [class.wk-rank-num1]="entry?.rankNum == 1"
+                                matTooltip="{{ wkArtistResults.artist.name }} is #{{ entry?.rankNum }} in {{ entry.username }}'s top artists for this period!" 
+                                matTooltipPosition="right"
+                                (click)="chartSelectedUser = [entry.id]; chartReleaseType = 'artist'; chartDropdownDate = leaderboardSliderMappings[wkArtistSelectedIndex].days; charts(wkArtistCustomStartDate, wkArtistCustomEndDate, null, true)"
+                            >
+                                {{ entry.username }} - #{{ entry?.rankNum }}
+                            </span>
+                        </td>
                         <td>{{ entry.scrobbles | number }}</td>
                         <td>{{ entry.percent | number: '1.2-2' }}</td>
                         <td class="wk-actions">
@@ -179,7 +189,17 @@
                 <tbody>
                     <tr *ngFor="let entry of wkAlbumResults.users; let i = index">
                         <td>{{ i+1 }}</td>
-                        <td>{{ entry.username }}</td>
+                        <td>
+                            <span *ngIf="!entry?.rankNum">{{ entry.username }}</span>
+                            <span 
+                                *ngIf="entry?.rankNum" class="wk-rank clickable" [class.wk-rank-num1]="entry?.rankNum == 1"
+                                matTooltip="{{ wkAlbumResults.album.name }} is #{{ entry?.rankNum }} in {{ entry.username }}'s top albums for this period!" 
+                                matTooltipPosition="right"
+                                (click)="chartSelectedUser = [entry.id]; chartReleaseType = 'album'; chartDropdownDate = leaderboardSliderMappings[wkAlbumSelectedIndex].days; charts(wkAlbumCustomStartDate, wkAlbumCustomEndDate, null, true)"
+                            >
+                            {{ entry.username }} - #{{ entry?.rankNum }}
+                            </span>
+                        </td>
                         <td>{{ entry.scrobbles | number }}</td>
                         <td>{{ entry.percent | number: '1.2-2'}}</td>
                         <td class="wk-actions">
@@ -258,7 +278,17 @@
                 <tbody>
                     <tr *ngFor="let entry of wkTrackResults.users; let i = index">
                         <td>{{ i+1 }}</td>
-                        <td>{{ entry.username }}</td>
+                        <td>
+                            <span *ngIf="!entry?.rankNum">{{ entry.username }}</span>
+                            <span 
+                                *ngIf="entry?.rankNum" class="wk-rank clickable" [class.wk-rank-num1]="entry?.rankNum == 1"
+                                matTooltip="{{ wkTrackResults.track.name }} is #{{ entry?.rankNum }} in {{ entry.username }}'s top tracks for this period!" 
+                                matTooltipPosition="right"
+                                (click)="chartSelectedUser = [entry.id]; chartReleaseType = 'track'; chartDropdownDate = leaderboardSliderMappings[wkTrackSelectedIndex].days; charts(wkTrackCustomStartDate, wkTrackCustomEndDate, null, true)"
+                            >
+                                {{ entry.username }} - #{{ entry?.rankNum }}
+                            </span>
+                        </td>
                         <td>{{ entry.scrobbles | number }}</td>
                         <td>{{ entry.percent | number: '1.2-2' }}</td>
                         <td class="wk-actions">
@@ -370,6 +400,7 @@
             <mat-form-field color="accent" style="width: 70px;">
                 <mat-label>Time Period</mat-label>
                 <mat-select [(ngModel)]="chartDropdownDate" [(value)]="chartDropdownDate" (selectionChange)="charts()">
+                    <mat-option disabled [value]="-2" *ngIf="chartDropdownDate == -2">Custom</mat-option>
                     <mat-option *ngFor="let o of leaderboardSliderMappings" [value]="o.days">{{ o.label }}</mat-option>
                 </mat-select>
             </mat-form-field>

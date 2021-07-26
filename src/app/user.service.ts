@@ -295,4 +295,17 @@ export class UserService {
       'db_store': false
     })
   }
+
+  wkCharts(users: Array<number>, artistId: number, albumId: number=null, track: string=null, startRange=null, endRange=null) {
+    return this.http.post(config.api_root + "/commands/wkcharts", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'users': users,
+      'artist_id': artistId,
+      'album_id': albumId,
+      'track': track,
+      'start_range': startRange,
+      'end_range': endRange
+    })
+  }
 }

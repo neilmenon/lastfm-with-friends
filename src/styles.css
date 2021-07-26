@@ -413,6 +413,21 @@ div.history-options-container > mat-paginator {
     pointer-events: none;
     opacity: 0.5;
 }
+.wk-rank {
+    background: #ba0000;
+    border-radius: 2.5px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 7px 6px 6px 6px;
+    line-height: 5.5px;
+    display: inline-block;
+    white-space: nowrap;
+}
+.wk-rank-num1 {
+    background: darkseagreen!important;
+    color: #000!important;
+}
 
 /* SCROLLBARS */
 .wk-actions-dialog {
