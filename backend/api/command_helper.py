@@ -642,3 +642,30 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
 
     mdb.close()
     return scrobbles
+
+def quick_wk_charts(users, artist_id, album_id, track, start_range, end_range):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SET time_zone='+00:00';")
+    
+    if start_range and end_range:
+        range_sql = " AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}'".format(start_range, end_range)
+    else:
+        range_sql = ""
+    album_sql = " AND album_id = {}".format(album_id) if album_id else ""
+    track_sql = " AND UPPER({}) = UPPER('{}')".format(sql_helper.sanitize_db_field("track"), sql_helper.esc_db(track)) if track else ""
+    wk_field = "track" if track else ("album_id" if album_id else "artist_id")
+    wk_value = track if track else (album_id if album_id else artist_id)
+    sql_groupby = "artist_id, track" if track else ("album_id" if album_id else "artist_id")
+
+    records = []
+    for u in users:
+        sql = "SELECT {}, artist_id as artist, COUNT(*) as scrobbles FROM track_scrobbles WHERE user_id = {}{} GROUP BY {} ORDER BY scrobbles DESC LIMIT 10".format(wk_field, u, range_sql, sql_groupby)
+        cursor.execute(sql)
+        result = [entry | {'rank': i+1} for i, entry, in enumerate(list(cursor))]
+        filtered_list = list(filter(lambda x: str(x[wk_field]).lower() == str(wk_value).lower() and x['artist'] == artist_id, result))
+        if filtered_list:
+            tmp = { 'id': u, 'rank': filtered_list[0]['rank'] }
+            records.append(tmp)
+    mdb.close()
+    return records
