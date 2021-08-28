@@ -393,8 +393,8 @@
                 <mat-label>Users</mat-label>
                 <mat-select multiple [(ngModel)]="chartSelectedUser" [(value)]="chartSelectedUser">
                     <mat-select-trigger *ngIf="chartSelectedUser.includes(-1)">Everyone</mat-select-trigger>
-                    <mat-option [value]="-1" #chartEveryone (click)="charts(null, null, true)">Everyone</mat-option>
-                    <mat-option *ngFor="let u of group.members" [value]="u.id" (click)="chartSelectedUser.includes(-1) ? {} : charts()" [disabled]="chartSelectedUser.includes(-1)">{{ u.username }}<span *ngIf="u.username == user.username"> (you)</span></mat-option>
+                    <mat-option [value]="-1" #chartEveryone (click)="charts(chartCustomStartDate, chartCustomEndDate, true)">Everyone</mat-option>
+                    <mat-option *ngFor="let u of group.members" [value]="u.id" (click)="chartSelectedUser.includes(-1) ? {} : charts(chartCustomStartDate, chartCustomEndDate)" [disabled]="chartSelectedUser.includes(-1)">{{ u.username }}<span *ngIf="u.username == user.username"> (you)</span></mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field color="accent" style="width: 70px;">

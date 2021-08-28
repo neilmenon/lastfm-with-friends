@@ -272,10 +272,10 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistDom.nativeElement.style.background = ''
     }
     this.userService.wkArtist(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
-      this.wkArtistDateLoading = false;
       // check if this entry is in the top for each user
       let wkUsers: Array<number> = data?.users.map(u => u.id)
       this.userService.wkCharts(wkUsers, data.artist.id, null, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+        this.wkArtistDateLoading = false;
         if (results) {
           for (let i = 0; i < results?.length; i++) {
             data?.users.forEach(x => {
@@ -344,10 +344,10 @@ export class GroupDashboardComponent implements OnInit {
         this.wkAlbumDom.nativeElement.style.background = ''
       }
       this.userService.wkAlbum(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
-        this.wkAlbumDateLoading = false;
         // check if this entry is in the top for each user
         let wkUsers: Array<number> = data?.users.map(u => u.id)
         this.userService.wkCharts(wkUsers, data.artist.id, data.album.id, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+          this.wkAlbumDateLoading = false;
           if (results) {
             for (let i = 0; i < results?.length; i++) {
               data?.users.forEach(x => {
@@ -400,10 +400,10 @@ export class GroupDashboardComponent implements OnInit {
         this.wkTrackDom.nativeElement.style.background = ''
       }
       this.userService.wkTrack(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
-        this.wkTrackDateLoading = false;
         // check if this entry is in the top for each user
         let wkUsers: Array<number> = data?.users.map(u => u.id)
         this.userService.wkCharts(wkUsers, data.artist.id, null, data.track.name, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+          this.wkTrackDateLoading = false;
           if (results) {
             for (let i = 0; i < results?.length; i++) {
               data?.users.forEach(x => {
@@ -511,6 +511,7 @@ export class GroupDashboardComponent implements OnInit {
       }
     } else if (!(startRange && endRange)) {
       this.wkArtistSelectedIndex = this.leaderboardSliderMappings.length - 1
+      this.wkArtistIsCustomDateRange = false
     }
     
     if (entry.album !== undefined) {
@@ -527,6 +528,7 @@ export class GroupDashboardComponent implements OnInit {
         }
       } else if (!(startRange && endRange)) {
         this.wkAlbumSelectedIndex = this.leaderboardSliderMappings.length - 1
+        this.wkAlbumIsCustomDateRange = false
       }
       this.wkAlbumSubmit({'query': albumQuery}, this.group.members, startRange, endRange)
     }
@@ -544,6 +546,7 @@ export class GroupDashboardComponent implements OnInit {
         }
       } else if (!(startRange && endRange)) {
         this.wkTrackSelectedIndex = this.leaderboardSliderMappings.length - 1
+        this.wkTrackIsCustomDateRange = false
       }
       this.wkTrackSubmit({'query': trackQuery}, this.group.members, startRange, endRange)
     }
@@ -794,7 +797,7 @@ export class GroupDashboardComponent implements OnInit {
       chartMode = "individual"
     }
     users = this.chartSelectedUser
-    if (customStartDate && customEndDate) {
+    if ((customStartDate && customEndDate) || (customStartDate && customEndDate && this.chartDropdownDate == -2)) {
       startRange = customStartDate.format()
       endRange = customEndDate.format()
       this.chartCustomStartDate = customStartDate
@@ -805,10 +808,14 @@ export class GroupDashboardComponent implements OnInit {
       endRange = moment.utc().format()
       startRange = moment.utc().subtract(this.chartDropdownDate, 'd').format()
       this.chartIsCustomDate = false
+      this.chartCustomStartDate = null
+      this.chartCustomEndDate = null
     } else {
       this.chartIsCustomDate = false
+      this.chartCustomStartDate = null
+      this.chartCustomEndDate = null
     }
-    if (window.innerWidth <= 960) {
+    if (window.innerWidth <= 960 && fromWk) {
       this.chartsDom.nativeElement.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
     } else if (fromWk) {
       this.wkArtistDom.nativeElement.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
