@@ -1,3 +1,4 @@
+import random
 import mariadb
 import datetime
 from . import config
@@ -70,3 +71,32 @@ def app_stats(db_store):
 
     mdb.close()
     return stats
+
+def insert_demo_scrobbles(demo_users):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+
+    logger.log("====== INSERTING DEMO SCROBBLES ======")
+    for user in demo_users:
+        logger.log("Scrobbling for demo user {}.".format(user))
+        
+        # get session key of demo user
+        cursor.execute("SELECT session_key FROM sessions where username = '{}'".format(user))
+        result = list(cursor)
+        if result:
+            session_key = result[0]['session_key']
+        else:
+            logger.log("\t SKIPPED. No session key found in the database for this demo user.")
+            continue
+        
+        # find some random tracks to scrobble
+        random_num_tracks = random.randint(5, 50)
+        sql = "SELECT artists.name AS artist_name, track_scrobbles.track, albums.name as album_name FROM `track_scrobbles` LEFT JOIN artists ON track_scrobbles.artist_id = artists.id LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE albums.name <> '' ORDER BY RAND() LIMIT {}".format(random_num_tracks)
+        cursor.execute(sql)
+        tracks_to_scrobble = list(cursor)
+        logger.log("\t Scrobbling {} random tracks...".format(random_num_tracks))
+
+        # scrobble the tracks...
+
+    mdb.close()
+    return True

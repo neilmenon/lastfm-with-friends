@@ -67,6 +67,25 @@ def cleanup_artists_albums():
     response = task_helper.remove_unused_artists_albums()
     return jsonify(response)
 
+@task_api.route('/api/tasks/demoscrobbler', methods=['POST'])
+def demo_scrobbler():
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+            demo_users = params['demo_users']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    
+    response = task_helper.insert_demo_scrobbles(demo_users)
+    return jsonify(response)
+
 @task_api.route('/api/tasks/app-stats', methods=['POST'])
 def app_stats():
     params = request.get_json()
