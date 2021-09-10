@@ -4,7 +4,7 @@
     <mat-label>Join Code</mat-label>
     <input matInput name="joinCode" placeholder="" type="text" formControlName="joinCode" required>
     </mat-form-field>
-    <button color="accent" mat-raised-button type="submit" *ngIf="!joinLoading">Join Group</button>
+    <button color="accent" mat-raised-button type="submit" *ngIf="!joinLoading" [class.disable-click]="isDemo | async">Join Group</button>
 </form>
 <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="joinLoading"></mat-spinner>
 <br>

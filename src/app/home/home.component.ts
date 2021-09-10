@@ -5,11 +5,13 @@ import { MessageService } from '../message.service'
 import { UserService } from '../user.service'
 import * as moment from 'moment';
 import { BuildModel, BuildService } from '../build.service';
-import { SettingsModel } from '../models/settingsModel';
+import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { UserModel } from '../models/userGroupModel';
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux, select } from '@angular-redux/store';
 import { AppState } from '../store';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
+import { IS_DEMO_MODE } from '../actions';
+import { config } from '../config';
 
 @Component({
   selector: 'app-home',
@@ -17,6 +19,9 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  @select(s => s.isDemo)
+  isDemo: Observable<boolean>
+  
   private subscription: Subscription = new Subscription()
   signed_in: boolean = undefined;
   user: UserModel = undefined;
@@ -24,6 +29,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   commit;
   buildInfo: BuildModel;
   userSettings: SettingsModel
+
+  demoLoading: boolean = false
   @ViewChildren('groupDoms') groupDoms: QueryList<ElementRef>
   constructor(
     public router: Router, 
@@ -76,5 +83,30 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.userSettings.groupExpandedList[joinCode] = false
     }
     this.userService.setSettings(this.userSettings, false)
+  }
+
+  enterDemo() {
+    this.messageService.open("Entering demo mode, please wait...")
+    this.demoLoading = true
+    setTimeout(() => {
+      this.userService.getDemoUser().toPromise().then((response: any) => {
+        localStorage.setItem("lastfm_session", response['session_key'])
+        localStorage.setItem("lastfm_username", response['username'])
+        this.userService.username = response['username']
+        this.userService.session_key = response['session_key']
+        this.userService.setSettings(getSettingsModel(null), false)
+        // this.ngRedux.dispatch({ type: IS_DEMO_MODE, isDemo: true })
+        window.location.href = config.project_root
+      }).catch(error => {
+        console.log(error)
+        this.demoLoading = false
+        this.messageService.open("There was an issue signing into the demo user! Please try again later. We apologize for the inconvenience.")
+      })
+    }, 2000)
+  }
+
+  exitDemo() {
+    this.userService.clearLocalData()
+    window.location.href = config.project_root
   }
 }

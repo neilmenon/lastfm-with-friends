@@ -4,6 +4,8 @@ import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
 import { GroupDetailModel, UserModel } from '../models/userGroupModel';
+import { select } from '@angular-redux/store';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-group-detail',
@@ -11,6 +13,9 @@ import { GroupDetailModel, UserModel } from '../models/userGroupModel';
   styleUrls: ['./group-detail.component.css']
 })
 export class GroupDetailComponent implements OnInit {
+  @select(s => s.isDemo)
+  isDemo: Observable<boolean>
+  
   group: GroupDetailModel;
   user: UserModel;
   moment: any = moment;

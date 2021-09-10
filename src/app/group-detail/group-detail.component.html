@@ -32,7 +32,7 @@
             <div class="group-actions">
                 <div><button color="accent" mat-raised-button [routerLink]="['']">Visit Dashboard</button></div>
                 <div *ngIf="group.owner !== user.username && !leaveConfirmed">
-                    <button color="accent" mat-raised-button (click)="leaveGroup()">Leave Group</button>
+                    <button color="accent" mat-raised-button (click)="leaveGroup()" [class.disable-click]="isDemo | async">Leave Group</button>
                 </div>
                 <div *ngIf="group.owner == user.username && !deleteConfirmed">
                     <button color="primary" mat-raised-button (click)="deleteGroup()">Delete Group</button>

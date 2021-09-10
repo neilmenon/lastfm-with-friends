@@ -9,6 +9,16 @@
         <button [routerLink]="['groups/create']" color="accent" mat-raised-button type="submit" style="margin-top: .4375em;">Create Group</button>
     </div>
     <div *ngIf="user && user.groups.length > 0 && userSettings">
+        <div class="box" *ngIf="isDemo | async" style="padding: 15px 15px 11px 15px;">
+            <h2 class="box-title center">Welcome to Demo Mode!</h2>
+            <p class="center">
+                Nice! You're signed into a Last.fm demo user. You now have access to stats for the demo group.
+                When you're ready to get started with your own account, you may exit the demo.
+            </p>
+            <p class="center">
+                <button color="accent" mat-raised-button (click)="exitDemo()">Exit Demo</button>
+            </p>
+        </div>
         <div class="box">
             <p>
                 Welcome to Last.fm with Friends, {{ user.display_name ? user.display_name : user.username }}! You've scrobbled a total of {{ user.scrobbles | pluralize:'track' }} over the past
@@ -97,7 +107,12 @@
 </div>
 <ng-template #signInPrompt>
     <div *ngIf="!signed_in" class="center-h-v">
-        <h2>Welcome to Last.fm with Friends.</h2>
-        <a [routerLink]="['lastfmauth']">Sign in</a> with your Last.fm account to get started.
+        <h2>Welcome to Last.fm with Friends!</h2>
+        Last.fm with Friends extends existing Last.fm features to give stats for a group of friends.<br>
+        Sign in with your Last.fm account to get started or try out our demo.<br><br>
+        <div>
+            <button color="primary" mat-raised-button [routerLink]="['/lastfmauth']" style="margin-right: 1rem;">Sign In with Last.fm</button>
+            <button color="accent" mat-raised-button (click)="enterDemo()" *ngIf="!demoLoading">Try Demo</button>
+        </div>
     </div>
 </ng-template>

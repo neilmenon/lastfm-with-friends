@@ -56,7 +56,7 @@
                 Flushes all of your scrobbles from our database and fetches them anew from Last.fm. 
                 This process can take time and should only be used if there is a data discrepancy between Last.fm and the app (for example, edited or deleted scrobbles).
             </p>
-            <button color="accent" mat-raised-button type="submit" *ngIf="!confirmFullScrape && !fullScrapeInProgress" (click)="fullScrape()">Trigger Full Scrape</button>
+            <button color="accent" mat-raised-button type="submit" *ngIf="!confirmFullScrape && !fullScrapeInProgress" (click)="fullScrape()" [class.disable-click]="isDemo | async">Trigger Full Scrape</button>
             <button color="warn" mat-raised-button type="submit" *ngIf="confirmFullScrape && !fullScrapeInProgress" (click)="fullScrape()">Confirm</button>
             <div *ngIf="fullScrapeInProgress">
                 <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="fullScrapeInProgress"></mat-spinner>
@@ -72,7 +72,7 @@
                 You are welcomed and encouraged to re-link your Last.fm account at any point in the future!
             </p>
             <p>
-                <button color="primary" mat-raised-button type="submit" *ngIf="!confirmDeleteAccount" (click)="deleteAccount()">Delete Account</button>
+                <button color="primary" mat-raised-button type="submit" *ngIf="!confirmDeleteAccount" (click)="deleteAccount()" [class.disable-click]="isDemo | async">Delete Account</button>
                 <button color="warn" mat-raised-button type="submit" *ngIf="confirmDeleteAccount" (click)="deleteAccount()">Confirm Delete</button>
             </p>
             <p style="font-size: 12px;">

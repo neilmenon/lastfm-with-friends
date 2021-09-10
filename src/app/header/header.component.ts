@@ -8,11 +8,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message.service';
 import { JoinGroupComponent } from '../join-group/join-group.component';
 import { UserModel } from '../models/userGroupModel';
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux, select } from '@angular-redux/store';
 import { AppState } from '../store';
 import { SETTINGS_MODEL, USER_MODEL } from '../actions'
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { Router } from '@angular/router';
+import { config } from '../config';
 
 @Component({
   selector: 'app-header',
@@ -20,6 +21,9 @@ import { Router } from '@angular/router';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  @select(s => s.isDemo)
+  isDemo: Observable<boolean>
+
   private subscription: Subscription = new Subscription()
   signed_in: boolean = undefined;
   user: UserModel = undefined;
@@ -114,5 +118,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     dialogRef.componentInstance.joinSuccess.subscribe(() => {
       this.dialog.closeAll()
     })
+  }
+
+  exitDemo() {
+    this.userService.clearLocalData()
+    window.location.href = config.project_root
   }
 }

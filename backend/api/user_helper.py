@@ -151,3 +151,14 @@ def set_settings(username, settings):
     cursor.execute("UPDATE users SET settings = '{}' WHERE username = '{}'".format(settings, username))
     mdb.commit()
     mdb.close()
+
+def get_demo_user():
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    sql = "SELECT username, session_key FROM sessions where username = '{}'".format(cfg['demo_user'])
+    cursor.execute(sql)
+    result = list(cursor)
+    mdb.close()
+    if result:
+        return result[0]
+    return

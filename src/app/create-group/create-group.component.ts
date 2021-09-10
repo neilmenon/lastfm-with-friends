@@ -1,7 +1,9 @@
+import { select } from '@angular-redux/store';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 
@@ -12,9 +14,18 @@ import { UserService } from '../user.service';
   styleUrls: ['./create-group.component.css']
 })
 export class CreateGroupComponent implements OnInit {
+  @select(s => s.isDemo)
+  isDemo: Observable<boolean>
+  
   groupForm;
   createLoading: boolean = false;
-  constructor( private formBuilder: FormBuilder, private messageService: MessageService, private userService: UserService, public router: Router) { 
+  constructor(
+    private formBuilder: FormBuilder, 
+    private messageService: MessageService, 
+    private userService: UserService, 
+    public router: Router,
+    
+  ) { 
     this.groupForm = this.formBuilder.group({
       name: ['', Validators.required],
       description: ['', Validators.required]

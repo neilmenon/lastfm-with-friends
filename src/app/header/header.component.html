@@ -59,7 +59,7 @@
         *ngIf="isHandset$ | async">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>-->
-      <span [routerLink]="['/']" style="cursor: pointer;outline: none;">Last.fm with Friends </span> <span class="beta">BETA</span>
+      <span [routerLink]="['/']" style="cursor: pointer;outline: none;">Last.fm with Friends </span> <span class="beta">BETA</span> <span *ngIf="isDemo | async" style="background: #517a8c;" class="beta">DEMO</span>
       <span class="spacer"></span>
       <span *ngIf="!(isHandset$ | async)">
         <a *ngIf="signed_in && user" class="navbar-user-button" mat-button [matMenuTriggerFor]="menu">
@@ -98,11 +98,12 @@
               </button>
             </mat-menu>
             <button mat-menu-item [routerLink]="['/settings']">Settings</button>
-            <button mat-menu-item [routerLink]="['/signout']">Sign Out</button>
+            <button mat-menu-item [routerLink]="['/signout']" *ngIf="!(isDemo | async)">Sign Out</button>
+            <button mat-menu-item (click)="exitDemo()" *ngIf="isDemo | async">Exit Demo</button>
           </mat-menu>
         </a>
       </span>
-      <button *ngIf="signed_in == false && !router.url.includes('lastfmauth')" color="primary" class="sign-in" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
+      <button *ngIf="false && signed_in == false && !router.url.includes('lastfmauth')" color="primary" class="sign-in" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
       <mat-spinner *ngIf="!user?.username && signed_in" diameter="25" color="accent"></mat-spinner>
     </mat-toolbar>
     <ng-content></ng-content>

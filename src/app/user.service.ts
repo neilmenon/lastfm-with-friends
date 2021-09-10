@@ -308,4 +308,8 @@ export class UserService {
       'end_range': endRange
     })
   }
+
+  getDemoUser() {
+    return this.http.post(config.api_root + "/demo", { "username": config.demo_user })
+  }
 }

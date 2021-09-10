@@ -1,9 +1,9 @@
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux, select } from '@angular-redux/store';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { discreteTimePeriods, releaseTypes } from '../constants';
@@ -20,6 +20,9 @@ import { UserService } from '../user.service';
   styleUrls: ['./user-settings.component.css']
 })
 export class UserSettingsComponent implements OnInit {
+  @select(s => s.isDemo)
+  isDemo: Observable<boolean>
+
   private subscription: Subscription = new Subscription()
   user: UserModel;
   confirmFullScrape: boolean = false;
@@ -141,7 +144,7 @@ export class UserSettingsComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmPopupComponent, {
       data: { 
         title: "Reset to Default Settings",
-        message: "Are you sure you want to resset your settings to their default?",
+        message: "Are you sure you want to reset your settings to their default?",
         primaryButton: "Reset"
       }
     })

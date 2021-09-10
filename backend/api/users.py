@@ -170,3 +170,23 @@ def set_settings(username):
         abort(401)
     user_helper.set_settings(username, settings)
     return jsonify({"data": "success"})
+
+@user_api.route('/api/demo', methods=['POST'])
+def get_demo():
+    params = request.get_json()
+    if params:
+        try:
+            username = params['username']
+        except KeyError as e:
+            abort(401)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if username == cfg['demo_user']:
+        result = user_helper.get_demo_user()
+        if result:
+            return jsonify(result)
+        else:
+            abort(404)
+    else:
+        abort(401)

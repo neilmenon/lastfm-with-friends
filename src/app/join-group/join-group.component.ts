@@ -4,6 +4,8 @@ import { MessageService } from '../message.service';
 import { FormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { UserService } from '../user.service';
+import { select } from '@angular-redux/store';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-join-group',
@@ -11,6 +13,9 @@ import { UserService } from '../user.service';
   styleUrls: ['./join-group.component.css']
 })
 export class JoinGroupComponent implements OnInit {
+  @select(s => s.isDemo)
+  isDemo: Observable<boolean>
+
   joinForm;
   joinLoading: boolean = false;
   @Output() joinSuccess: EventEmitter<any> = new EventEmitter(true)

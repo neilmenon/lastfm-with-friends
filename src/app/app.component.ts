@@ -1,7 +1,9 @@
 import { NgRedux } from '@angular-redux/store';
 import { Component, ViewEncapsulation } from '@angular/core';
 import * as moment from 'moment';
+import { IS_DEMO_MODE } from './actions';
 import { BuildModel, BuildService } from './build.service';
+import { config } from './config';
 import { MessageService } from './message.service';
 import { UserModel } from './models/userGroupModel';
 import { AppState } from './store';
@@ -21,6 +23,7 @@ export class AppComponent {
     private messageService: MessageService,
     private ngRedux: NgRedux<AppState>
     ) {
+    this.ngRedux.dispatch({ type: IS_DEMO_MODE, isDemo: localStorage.getItem("lastfm_username") == config.demo_user })
     const sub1 = this.ngRedux.select(s => s.userModel).subscribe(obj => {
       if (obj) {
         this.user = obj

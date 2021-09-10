@@ -3,6 +3,9 @@ import { Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import { config } from '../config'
+import { NgRedux } from '@angular-redux/store';
+import { AppState } from '../store';
+import { IS_DEMO_MODE } from '../actions';
 
 @Component({
   selector: 'app-signout',
@@ -11,7 +14,12 @@ import { config } from '../config'
 })
 export class SignoutComponent implements OnInit {
 
-  constructor(private messageService: MessageService, private userService: UserService, public router: Router) { }
+  constructor(
+    private messageService: MessageService, 
+    private userService: UserService, 
+    public router: Router,
+    private ngRedux: NgRedux<AppState>
+  ) { }
 
   ngOnInit(): void {
     this.signOut()
@@ -22,6 +30,7 @@ export class SignoutComponent implements OnInit {
     this.userService.signOut().toPromise().then(response => {
       localStorage.removeItem("lastfm_session");
       localStorage.removeItem("lastfm_username");
+      this.ngRedux.dispatch({ type: IS_DEMO_MODE, isDemo: false })
       window.location.href = config.project_root;
     }).catch(error => {
       this.messageService.save("An error occured while trying to sign you out! Please try again.");

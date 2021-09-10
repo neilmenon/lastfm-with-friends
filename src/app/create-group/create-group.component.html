@@ -11,7 +11,7 @@
             <textarea matInput #description placeholder="Much scrobbles, many music, big friends." type="text" formControlName="description" required maxlength="100"></textarea>
             <mat-hint align="end">{{description.value?.length || 0}}/100</mat-hint>
         </mat-form-field>
-        <button color="accent" mat-raised-button type="submit" *ngIf="!createLoading">Create</button>
+        <button color="accent" mat-raised-button type="submit" *ngIf="!createLoading" [class.disable-click]="isDemo | async">Create</button>
     </form>
     <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="createLoading"></mat-spinner>
     <br>
