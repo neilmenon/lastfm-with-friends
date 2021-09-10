@@ -1,8 +1,10 @@
 import random
+import requests
 import mariadb
 import datetime
 from . import config
 from . import sql_helper
+from . import auth_helper
 from . import api_logger as logger
 cfg = config.config
 
@@ -90,13 +92,30 @@ def insert_demo_scrobbles(demo_users):
             continue
         
         # find some random tracks to scrobble
-        random_num_tracks = random.randint(5, 50)
+        random_num_tracks = random.randint(2, 10)
         sql = "SELECT artists.name AS artist_name, track_scrobbles.track, albums.name as album_name FROM `track_scrobbles` LEFT JOIN artists ON track_scrobbles.artist_id = artists.id LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE albums.name <> '' ORDER BY RAND() LIMIT {}".format(random_num_tracks)
         cursor.execute(sql)
         tracks_to_scrobble = list(cursor)
         logger.log("\t Scrobbling {} random tracks...".format(random_num_tracks))
 
-        # scrobble the tracks...
-
+        # scrobble the tracks
+        for index, entry in enumerate(tracks_to_scrobble):
+            data = {}
+            data['api_key'] = cfg['api']['key']
+            data['sk'] = session_key
+            data['method'] = 'track.scrobble'
+            data['artist'] = entry['artist_name']
+            data['track'] = entry['track']
+            data['album'] = entry['album_name']
+            # random timestamp in the past hour
+            data['timestamp'] = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()) - random.randint(1, 1*60*60))
+            signed_data = auth_helper.get_signed_object(data)
+            try:
+                logger.log("\t [{}/{}] Scrobbling {} - {}".format(index+1, len(tracks_to_scrobble), data['artist'], data['track']))
+                scrobble_req = requests.post("https://ws.audioscrobbler.com/2.0", data=signed_data).json()
+                t = scrobble_req['scrobbles']
+            except Exception as e:
+                logger.log("\t\t Error scrobbling this track: {}".format(scrobble_req))
+            
     mdb.close()
     return True

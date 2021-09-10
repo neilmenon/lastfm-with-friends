@@ -129,7 +129,9 @@ def get_signed_object(data):
         signed_signature = signed_signature + key + data[key]
         signed_object[key] = data[key] # make sure object is in same order, just in case
     signed_signature += cfg['api']['secret'] # secret key needs to appended to end of signature according to API docs
-    hashed_signature = hashlib.md5(urllib.parse.quote(signed_signature).encode('utf-8')).hexdigest()
+    # escaped_signature = urllib.parse.quote(signed_signature, safe=" ").encode('utf-8')
+    escaped_signature = signed_signature.encode('utf-8')
+    hashed_signature = hashlib.md5(escaped_signature).hexdigest()
     signed_object['api_sig'] = hashed_signature
     signed_object['format'] = "json" # add return format **after** hashing, signature will be invalid otherwise
     return signed_object
