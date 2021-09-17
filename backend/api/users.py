@@ -87,7 +87,7 @@ def create():
 def get(username):
     try:
         params = request.args
-        result = user_helper.get_user(username)
+        result = user_helper.get_user(username, get_session=True)
         if result:
             return jsonify(result)
         else:

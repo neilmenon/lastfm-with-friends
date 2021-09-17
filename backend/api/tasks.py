@@ -6,6 +6,7 @@ from . import api_logger as logger
 from . import lastfm_scraper
 from . import command_helper
 from . import task_helper
+from . import group_session_helper
 cfg = config.config
 
 task_api = Blueprint('tasks', __name__)
@@ -104,4 +105,38 @@ def app_stats():
         abort(401)
     
     response = task_helper.app_stats(db_store)
+    return jsonify(response)
+
+@task_api.route('/api/tasks/group-session-scrobbler', methods=['POST'])
+def group_scrobbler():
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    response = group_session_helper.group_session_scrobbler()
+    return jsonify(response)
+
+@task_api.route('/api/tasks/prune-group-sessions', methods=['POST'])
+def prune_group_sessions():
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    response = group_session_helper.prune_sessions()
     return jsonify(response)

@@ -1,8 +1,8 @@
--- MariaDB dump 10.19  Distrib 10.6.3-MariaDB, for osx10.16 (x86_64)
+-- MariaDB dump 10.19  Distrib 10.6.4-MariaDB, for osx10.16 (x86_64)
 --
 -- Host: localhost    Database: lastfm_with_friends
 -- ------------------------------------------------------
--- Server version	10.6.3-MariaDB
+-- Server version	10.6.4-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,24 +14,6 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Table structure for table `album_scrobbles`
---
-
-DROP TABLE IF EXISTS `album_scrobbles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `album_scrobbles` (
-  `album_id` int(11) NOT NULL,
-  `username` varchar(191) NOT NULL,
-  `scrobbles` int(11) NOT NULL,
-  PRIMARY KEY (`album_id`,`username`),
-  KEY `username` (`username`),
-  CONSTRAINT `album_scrobbles_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `album_scrobbles_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `albums`
@@ -69,24 +51,6 @@ CREATE TABLE `artist_redirects` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `artist_scrobbles`
---
-
-DROP TABLE IF EXISTS `artist_scrobbles`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `artist_scrobbles` (
-  `artist_id` bigint(20) NOT NULL,
-  `username` varchar(191) NOT NULL,
-  `scrobbles` int(11) NOT NULL,
-  PRIMARY KEY (`artist_id`,`username`),
-  KEY `foreign_key_user` (`username`),
-  CONSTRAINT `artist_scrobbles_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `foreign_key_user` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `artists`
 --
 
@@ -100,6 +64,27 @@ CREATE TABLE `artists` (
   `image_url` varchar(400) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `group_sessions`
+--
+
+DROP TABLE IF EXISTS `group_sessions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `group_sessions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner` varchar(191) NOT NULL,
+  `group_jc` varchar(191) NOT NULL,
+  `is_silent` tinyint(1) NOT NULL,
+  `created` datetime NOT NULL,
+  PRIMARY KEY (`id`,`owner`),
+  KEY `fk_owner` (`owner`),
+  KEY `fk_group_jc` (`group_jc`),
+  CONSTRAINT `fk_group_jc` FOREIGN KEY (`group_jc`) REFERENCES `groups` (`join_code`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_owner` FOREIGN KEY (`owner`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -205,6 +190,24 @@ CREATE TABLE `track_scrobbles` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `user_group_sessions`
+--
+
+DROP TABLE IF EXISTS `user_group_sessions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_group_sessions` (
+  `username` varchar(191) NOT NULL,
+  `session_id` int(11) NOT NULL,
+  `last_timestamp` varchar(191) NOT NULL,
+  PRIMARY KEY (`username`,`session_id`),
+  KEY `fk_session_id` (`session_id`),
+  CONSTRAINT `fk_session_id` FOREIGN KEY (`session_id`) REFERENCES `group_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `user_groups`
 --
 
@@ -253,4 +256,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-07-24 19:34:50
+-- Dump completed on 2021-09-17  2:43:34
