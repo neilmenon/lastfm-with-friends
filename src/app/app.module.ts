@@ -57,6 +57,7 @@ import { PluralizePipe } from './pluralize.pipe';
 import { NgRedux, NgReduxModule } from '@angular-redux/store';
 import { INITIAL_STATE, rootReducer } from './store';
 import { ConfirmPopupComponent } from './confirm-popup/confirm-popup.component';
+import { GroupSessionComponent } from './group-session/group-session.component';
 
 @NgModule({
   declarations: [
@@ -79,6 +80,7 @@ import { ConfirmPopupComponent } from './confirm-popup/confirm-popup.component';
     FooterComponent,
     PluralizePipe,
     ConfirmPopupComponent,
+    GroupSessionComponent,
   ],
   imports: [
     BrowserModule,

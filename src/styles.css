@@ -236,6 +236,7 @@ hr {
 .group-dashboard-subtext {
     display: flex; 
     padding: 0px 5px;
+    padding-top: 3px;
 }
 .now-playing-container {
     height: 255px;
@@ -280,14 +281,14 @@ hr {
     margin-left: 2px;
     font-size: 13px;
 }
-.group-dashboard-subtext > span:last-child {
+/* .group-dashboard-subtext > span:last-child{
     width: 45%;
     max-width: 300px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     text-align: right;
-}
+} */
 .beta {
     background: #ba0000;
     padding: 4px;
@@ -368,6 +369,19 @@ div.history-options-container > mat-paginator {
 
 .full-width {
     width: 100%;
+}
+
+.group-session {
+    background: #517a8c;
+    position: absolute;
+    top: 33px;
+    right: 5px;
+    padding-right: 5px;
+}
+
+.group-session > span {
+    padding-right: 1px;
+    padding-left: 2px;
 }
 
 .mat-dialog-container {

@@ -2,7 +2,7 @@
 <div class="box center now-playing-container">
     <div style="position: relative;">
         <h2 class="box-title">Listening Activity</h2> 
-        <a class="refresh clickable" (click)="scrobbleHistory('overall', null, group.members)" matTooltip="Group Scrobble History — Overall" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
+        <a class="refresh clickable" style="top: -8px;" (click)="scrobbleHistory('overall', null, group.members)" matTooltip="Group Scrobble History — Overall" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
     </div>
     <div class="now-playing-errors" *ngIf="!nowPlayingResults || nowPlayingTimeoutReached">
         <span *ngIf="nowPlayingTimeoutReached; else errorBlock">Listening activity interval expired. Please refresh.</span>

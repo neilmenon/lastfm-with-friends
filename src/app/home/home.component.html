@@ -83,7 +83,8 @@
                         </span>
                     </span>
                     <span class="spacer"></span>
-                    <span><em>{{ group.description }}</em></span>
+                    <!-- <span><em>{{ group.description }}</em></span> -->
+                    <span [class.disable-click]="isDemo | async" class="beta group-session clickable" [style.display]="userSettings.groupExpandedList[group.join_code] == false ? 'none' : 'unset'"><span><i class="fas fa-plus"></i></span> GROUP SESSION</span>
                 </div>
                 <button mat-icon-button color="accent"(click)="toggleGroup(group.join_code)"
                 [ngClass]="userSettings.groupExpandedList[group.join_code] !== false ? 'group-dashboard-collapse' : 'group-dashboard-expand'">

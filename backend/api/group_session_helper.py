@@ -10,7 +10,7 @@ from . import command_helper
 from . import auth_helper
 cfg = config.config
 
-def get_current_session(username, session_id=None):
+def get_current_session(username=None, session_id=None):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     where_sql = "group_sessions.id = {}".format(session_id) if session_id else "username = '{}'".format(username)
@@ -79,10 +79,25 @@ def leave_session(username, session_id):
 def join_session(username, session_id, catch_up_timestamp):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
+
+    if not catch_up_timestamp:
+        session = get_current_session(session_id=session_id)
+        # get owner's user_id
+        cursor.execute("SELECT user_id FROM users WHERE username = '{}'".format(session['owner']))
+        owner_id = list(cursor)[0]['user_id']
+
+        # update owner so we can properly set update timestamp for joiner
+        lastfm_scraper.update_user(session['owner'])
+
+        # get most recent track's timestamp for owner 
+        final_timestamp = str(int(command_helper.play_history("overall", None, [owner_id], None, None, limit=1)['records'][0]['timestamp']) + 1)
+    else:
+        final_timestamp = catch_up_timestamp
+
     data = { 
         "username": username, 
         "session_id": session_id,
-        'last_timestamp': str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())) if not catch_up_timestamp else catch_up_timestamp
+        'last_timestamp': final_timestamp
     }
     cursor.execute(sql_helper.insert_into("user_group_sessions", data))
     mdb.commit()
@@ -128,7 +143,7 @@ def group_session_scrobbler():
         # loop through the members
         unix_now = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
         # owner's nowplaying track, if any
-        cursor.execute("SELECT artist, track, album FROM now_playing WHERE username = '{}' AND check_count IS NULL".format(session['owner']))
+        cursor.execute("SELECT artist, track, album FROM now_playing WHERE username = '{}' AND timestamp = 0".format(session['owner']))
         result = list(cursor)
         np_entry = result[0] if len(result) else None
         for member in members:
@@ -156,26 +171,30 @@ def group_session_scrobbler():
                 continue
             else:
                 # loop through tracks and scrobble them
-                logger.log("\t Scrobbling {} track(s) for {}.".format(len(play_history['records']), member['username']))
-                for entry in play_history['records']:
-                    data = {}
-                    data['api_key'] = cfg['api']['key']
-                    data['sk'] = member['session_key']
-                    data['method'] = 'track.scrobble'
-                    data['artist'] = entry['artist']
-                    data['track'] = entry['track']
-                    data['album'] = entry['album']
-                    data['timestamp'] = entry['timestamp']
-                    signed_data = auth_helper.get_signed_object(data)
-                    try:
-                        scrobble_req = requests.post("https://ws.audioscrobbler.com/2.0", data=signed_data).json()
-                        t = scrobble_req['scrobbles']
-                    except Exception as e:
-                        logger.log("\t\t Error scrobbling {} - {}: {}".format(data['artist'], data['track'], scrobble_req))
+                if len(play_history['records']) > 0:
+                    logger.log("\t Scrobbling {} track(s) for {}.".format(len(play_history['records']), member['username']))
+                    for entry in play_history['records']:
+                        data = {}
+                        data['api_key'] = cfg['api']['key']
+                        data['sk'] = member['session_key']
+                        data['method'] = 'track.scrobble'
+                        data['artist'] = entry['artist']
+                        data['track'] = entry['track']
+                        data['album'] = entry['album']
+                        data['timestamp'] = entry['timestamp']
+                        signed_data = auth_helper.get_signed_object(data)
+                        try:
+                            scrobble_req = requests.post("https://ws.audioscrobbler.com/2.0", data=signed_data).json()
+                            t = scrobble_req['scrobbles']
+                        except Exception as e:
+                            logger.log("\t\t Error scrobbling {} - {}: {}".format(data['artist'], data['track'], scrobble_req))
 
-                # (3) update new timestamp
-                cursor.execute("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(unix_now, member['username']))
-                mdb.commit()
+                    # (3) set update timestamp to timestamp of last scrobbled track + 1 second
+                    cursor.execute("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']))
+                    mdb.commit()
+                else:
+                    logger.log("\t No scrobbles to sync at this time.")
+
     mdb.close()
 
 def prune_sessions():
