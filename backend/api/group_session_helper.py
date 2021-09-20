@@ -135,10 +135,11 @@ def make_non_silent(session_id):
     mdb.commit()
     mdb.close()
 
-def get_sessions(join_code):
+def get_sessions(join_code, get_silent=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SELECT id FROM group_sessions WHERE group_jc = '{}'".format(join_code))
+    silent_sql = " AND is_silent = '0'" if not get_silent else ""
+    cursor.execute("SELECT id FROM group_sessions WHERE group_jc = '{}'{}".format(join_code, silent_sql))
     ids = [s['id'] for s in list(cursor)]
     mdb.close()
     sessions = []
