@@ -213,7 +213,7 @@ def group_session_scrobbler(delay=True, session_id=None):
                 continue
             else:
                 # loop through tracks and scrobble them
-                if len(play_history['records']) > 0:
+                if len(play_history['records']) > 0 and len(play_history['records']) < 60:
                     logger.log("\t Scrobbling {} track(s) for {}.".format(len(play_history['records']), member['username']))
                     for entry in play_history['records']:
                         data = {}
@@ -231,6 +231,11 @@ def group_session_scrobbler(delay=True, session_id=None):
                         except Exception as e:
                             logger.log("\t\t Error scrobbling {} - {}: {}".format(data['artist'], data['track'], scrobble_req))
 
+                    # (3) set update timestamp to timestamp of last scrobbled track + 1 second
+                    cursor.execute("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']))
+                    mdb.commit()
+                elif len(play_history['records']) >= 60:
+                    logger.log("\t [WARNING] A large amount of scrobbles were set to be scrobbled. These were declined.")
                     # (3) set update timestamp to timestamp of last scrobbled track + 1 second
                     cursor.execute("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']))
                     mdb.commit()
