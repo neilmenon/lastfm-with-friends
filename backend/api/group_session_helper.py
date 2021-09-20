@@ -62,6 +62,10 @@ def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_
         cursor.execute(sql_helper.insert_into("user_group_sessions", data))
         mdb.commit()
     mdb.close()
+
+    # update the user on create so that the prune task doesn't incorrectly end the session immediately.
+    lastfm_scraper.update_user(final_owner)
+
     return get_current_session(username=initiator, with_members=True)
 
 def end_session(session_id):
