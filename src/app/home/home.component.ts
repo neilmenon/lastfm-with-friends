@@ -66,6 +66,13 @@ export class HomeComponent implements OnInit, OnDestroy {
        }
      })
 
+     setTimeout(() => {
+      const sub2 = this.ngRedux.select(s => s.userModel).subscribe(obj => {
+        this.user.group_session = JSON.parse(JSON.stringify(obj?.group_session))
+      })
+      this.subscription.add(sub2)
+     }, 10000)
+
      this.subscription.add(sub1)
   }
   

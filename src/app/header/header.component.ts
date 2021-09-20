@@ -54,7 +54,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.user = data
 
         // put user and settings DTOs into Redux
-        this.ngRedux.dispatch({ type: USER_MODEL, userModel: this.user })
+        this.ngRedux.dispatch({ type: USER_MODEL, userModel: JSON.parse(JSON.stringify(this.user)) })
         if (!this.settingsModel) {
           this.ngRedux.dispatch({ type: SETTINGS_MODEL, settingsModel: getSettingsModel(this.user?.settings) })
         }

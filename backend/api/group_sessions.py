@@ -153,3 +153,4 @@ def sessions_list():
         abort(401)
     response = group_session_helper.get_sessions(join_code)
     return jsonify(response)
+

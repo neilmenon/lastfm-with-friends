@@ -249,7 +249,7 @@ def prune_sessions():
     cursor.execute("SELECT id,owner FROM group_sessions")
     sessions = list(cursor)
     for session in sessions:
-        cursor.execute("SELECT timestamp FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE users.username = '{}' ORDER BY timestamp DESC".format(session['owner']))
+        cursor.execute("SELECT timestamp FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE users.username = '{}' ORDER BY timestamp DESC LIMIT 1".format(session['owner']))
         timestamp = list(cursor)[0]['timestamp']
         dt = datetime.datetime.utcfromtimestamp(int(timestamp))
         now = datetime.datetime.utcnow()
