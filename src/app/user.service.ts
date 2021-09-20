@@ -312,4 +312,49 @@ export class UserService {
   getDemoUser() {
     return this.http.post(config.api_root + "/demo", { "username": config.demo_user })
   }
+
+  leaveSession(sessionId: number) {
+    return this.http.post(config.api_root + "/group-sessions/leave", { 
+      'username': this.username,
+      'session_key': this.session_key,
+      'session_id': sessionId
+    })
+  }
+
+  endSession(sessionId: number) {
+    return this.http.post(config.api_root + "/group-sessions/end", { 
+      'username': this.username,
+      'session_key': this.session_key,
+      'session_id': sessionId
+    })
+  }
+
+  createSession(payload: any) {
+    return this.http.post(config.api_root + "/group-sessions/create", { 
+      'username': this.username,
+      'session_key': this.session_key,
+      ...payload
+    })
+  }
+
+  joinSession(sessionId: number, catch_up_timestamp: string) {
+    return this.http.post(config.api_root + "/group-sessions/join", { 
+      'username': this.username,
+      'session_key': this.session_key,
+      'session_id': sessionId,
+      'catch_up_timestamp': catch_up_timestamp
+    })
+  }
+
+  getSessions(joinCode: string) {
+    return this.http.post(config.api_root + "/group-sessions/list", { 
+      'username': this.username,
+      'session_key': this.session_key,
+      'join_code': joinCode
+    })
+  } 
+
+  getRecentTracks(username: string) {
+    return this.http.get(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${username}&api_key=${config.api_key}&format=json`)
+  }
 }

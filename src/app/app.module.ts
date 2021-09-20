@@ -30,6 +30,7 @@ import { MatMomentDateModule } from '@angular/material-moment-adapter';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 // Miscellaneous
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -113,6 +114,7 @@ import { GroupSessionComponent } from './group-session/group-session.component';
     NgxChartsModule,
     MatRadioModule,
     NgReduxModule,
+    MatCheckboxModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},

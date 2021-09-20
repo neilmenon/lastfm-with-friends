@@ -11,6 +11,7 @@ export class UserModel {
     settings: SettingsModel
     user_id: number
     username: string
+    group_session: GroupSessionModel
 }
 
 export class UserGroupModel {
@@ -45,4 +46,18 @@ export class GroupDetailMemberModel {
     scrobbles: number
     user_id: number
     username: string
+}
+
+export class GroupSessionModel {
+    created: string
+    group_jc: string
+    id: number
+    is_silent: boolean
+    members: Array<GroupSessionMemberModel>
+    owner: string
+}
+
+export class GroupSessionMemberModel {
+    username: string
+    profile_image: string
 }

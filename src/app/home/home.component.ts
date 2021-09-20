@@ -6,12 +6,14 @@ import { UserService } from '../user.service'
 import * as moment from 'moment';
 import { BuildModel, BuildService } from '../build.service';
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
-import { UserModel } from '../models/userGroupModel';
+import { GroupSessionModel, UserModel } from '../models/userGroupModel';
 import { NgRedux, select } from '@angular-redux/store';
 import { AppState } from '../store';
 import { Observable, Subscription } from 'rxjs';
 import { IS_DEMO_MODE } from '../actions';
 import { config } from '../config';
+import { MatDialog } from '@angular/material/dialog';
+import { GroupSessionComponent } from '../group-session/group-session.component';
 
 @Component({
   selector: 'app-home',
@@ -38,7 +40,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     public http: HttpClient, 
     private userService: UserService, 
     private buildService: BuildService,
-    private ngRedux: NgRedux<AppState>
+    private ngRedux: NgRedux<AppState>,
+    public dialog: MatDialog
   ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
@@ -108,5 +111,29 @@ export class HomeComponent implements OnInit, OnDestroy {
   exitDemo() {
     this.userService.clearLocalData()
     window.location.href = config.project_root
+  }
+
+  openGroupSession(group) {
+    let dialogRef = this.dialog.open(GroupSessionComponent, {
+      data: {
+        group: group,
+        user: this.user,
+      }
+    })
+
+    // when "End Session" or "Leave Session"
+    let removeSub = dialogRef.componentInstance.removeSession.subscribe(() => {
+      this.user.group_session = null
+    })
+
+    // when "Create Session" or "Join Session"
+    let createSub = dialogRef.componentInstance.createSessionEmitter.subscribe((data: GroupSessionModel) => {
+      this.user.group_session = data
+    })
+
+    dialogRef.afterClosed().subscribe(() => {
+      removeSub.unsubscribe()
+      createSub.unsubscribe()
+    })
   }
 }

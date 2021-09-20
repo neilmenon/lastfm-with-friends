@@ -1,1 +1,92 @@
-<p>group-session works!</p>
+<div class="center" style="margin-bottom: -16px;">
+    <h3 mat-dialog-title >Group Listening Session for {{ data.group.name }}</h3>
+</div>
+<div mat-dialog-content class="center">
+    <div *ngIf="session && session?.group_jc != data.group.join_code">
+        You are already in a session in a different group. Leave or end that session to start a session with this group.
+    </div>
+    <!-- Session Details | End/Leave Session -->
+    <div *ngIf="session?.group_jc == data.group.join_code" style="max-width: 350px;">
+        <div *ngIf="session.is_silent == false || (session.is_silent == true && user.username != session.owner)">
+            <div style="color: #bfbfbf; font-size: 16px; margin-bottom: 0.5rem;">Active Users</div>
+            <div class="container session-members" style="flex-wrap: wrap;">
+                <div *ngFor="let u of session.members" class="member-card">
+                    <img src="{{ u.profile_image }}" width="50px" style="border-radius: 50%;border: 2px solid;"><br>
+                    <a href="https://last.fm/user/{{ u.username }}" target="_blank">{{ u.username }}</a> 
+                    <i class="fa fa-star" style="color: #e9c267;" matTooltip="Session Owner" matTooltipPosition="above" *ngIf="u.username == session.owner"></i>
+                </div>
+            </div>
+            <div class="session-notes">
+                <span >
+                    Active for {{ moment(session.created).locale('en').toNow(true) }}.
+                </span>
+                <span *ngIf="session.is_silent">This is a <u>silent</u> session. <span style="color: #e2e2e2;">{{ session.owner }}</span> will not see that you are following them.</span>
+            </div>
+            <div style="padding-top: 0.5rem;">
+                <button color="accent" mat-raised-button (click)="leaveSession()" *ngIf="user.username != session.owner && !leaveEndLoading">Leave Session</button>
+                <button color="accent" mat-raised-button (click)="endSession()" *ngIf="user.username == session.owner && !leaveEndLoading">End Session</button>
+                <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="leaveEndLoading" style="padding-top: 0.75rem;"></mat-spinner>
+            </div>
+        </div>
+    </div>
+    <!-- Create/Join Session -->
+    <div *ngIf="!session || (session.is_silent == true && user.username == session.owner)" style="padding-top: 0.5rem;">
+        <form [formGroup]="cForm" id="createSession">
+            <label>Select an existing session to join:</label>
+            <mat-form-field color="accent" *ngIf="existingSessions.length > 0">
+                <mat-select formControlName="silent_followee" name="silent_followee" (selectionChange)="selectSession($event)">
+                    <mat-option *ngFor="let s of existingSessions" [value]="s">[{{ moment(s.created).fromNow() }}] Session with {{ mapMembers(s.members) }}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div class="session-notes" *ngIf="existingSessions.length == 0">There are currently no active sessions.</div>
+            <div *ngIf="selectedSession">
+                <span><mat-checkbox [checked]="isJoinCatchUp" (change)="isJoinCatchUp = !isJoinCatchUp; getPlayHistory(null, true)">Already been listening with this session?</mat-checkbox></span>
+                <div [class.disable-click]="!isJoinCatchUp">
+                    <label>Select the last track you heard to catch up your scrobbles.</label>
+                    <mat-form-field color="accent">
+                        <mat-select [(value)]="joinCatchUpTimestamp">
+                            <mat-option *ngFor="let track of recentTracks" [value]="track.date.uts"><span style="color: #bfbfbf;">{{ "[" + moment.unix(track.date.uts).fromNow() + "] " }}</span>{{ track['artist']['#text'] + " - " + track.name }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-spinner diameter="19" color="accent" class="center-all" *ngIf="playHistoryLoading" style="display: inline; margin-left: 11px;"></mat-spinner>
+                </div>
+            </div>
+            <div style="padding-top: 0.5rem;">
+                <button color="accent" mat-raised-button (click)="joinSession()" [class.disable-click]="existingSessions.length == 0 || !selectedSession || selectedSession && isJoinCatchUp && !joinCatchUpTimestamp" *ngIf="!joinLoading">Join Session</button>
+                <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="joinLoading" style="padding-top: 0.75rem;"></mat-spinner>
+            </div>
+            <hr>
+            <div style="padding-bottom: 0.5rem;">
+                <label for="is_silent">What type of session would you like to create?</label>
+                <mat-radio-group formControlName="is_silent" name="is_silent">
+                    <mat-radio-button [value]="false" style="padding-right: 15px;">Group Session</mat-radio-button>
+                    <mat-radio-button [value]="true">Follow individual user</mat-radio-button> 
+                </mat-radio-group>
+            </div>
+            <div *ngIf="cForm.controls['is_silent'].value == true">
+                <label for="silent_followee">Which user do you want to follow?</label>
+                <mat-form-field color="accent">
+                    <mat-select formControlName="silent_followee" name="silent_followee" (selectionChange)="getPlayHistory($event)">
+                        <mat-option *ngFor="let u of groupMembersForDropdown" [value]="u.username" [disabled]="u.username == user.username">{{ u.username }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div *ngIf="(cForm.controls['is_silent'].value == true && cForm.controls['silent_followee'].value != null)">
+                <span><mat-checkbox [checked]="enableCatchUp" (change)="enableCatchUp = !enableCatchUp; getPlayHistory(null)">Already been listening with this user?</mat-checkbox></span>
+                <div [class.disable-click]="!enableCatchUp">
+                    <label for="silent_followee">Select the last track you heard to catch up your scrobbles.</label>
+                    <mat-form-field color="accent">
+                        <mat-select formControlName="catch_up_timestamp" name="catch_up_timestamp">
+                            <mat-option *ngFor="let track of recentTracks" [value]="track.date.uts"><span style="color: #bfbfbf;">{{ "[" + moment.unix(track.date.uts).fromNow() + "] " }}</span>{{ track['artist']['#text'] + " - " + track.name }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-spinner diameter="19" color="accent" class="center-all" *ngIf="playHistoryLoading" style="display: inline; margin-left: 11px;"></mat-spinner>
+                </div>
+            </div>
+            <div style="padding-top: 0.5rem;">
+                <button color="accent" mat-raised-button (click)="createSession()" [class.disable-click]="cForm?.valid == false" *ngIf="!leaveEndLoading">Create Session</button>
+                <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="leaveEndLoading" style="padding-top: 0.75rem;"></mat-spinner>
+            </div>
+        </form>
+    </div>
+</div>

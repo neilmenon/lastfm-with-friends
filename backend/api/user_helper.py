@@ -35,8 +35,8 @@ def get_user(username, extended=True, get_session=False):
             result[0]['members'] = result1
             user_data['groups'].append(result[0])
     if get_session:
-        current_session = group_session_helper.get_current_session(username)
-        user_data['group_session'] = [] if not current_session else current_session
+        current_session = group_session_helper.get_current_session(username=username, with_members=True)
+        user_data['group_session'] = None if not current_session else current_session
     mdb.close()
     return user_data
 

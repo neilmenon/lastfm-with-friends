@@ -37,7 +37,6 @@ export class FooterComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.subscription = this.ngRedux.select(s => s.userModel).subscribe(obj => {
       if (obj && !(this.build || this.stats)) {
-        console.log(obj)
         this.showFooter = true
         this.userService.appStats().toPromise().then((data: StatsModel) => {
           this.stats = data

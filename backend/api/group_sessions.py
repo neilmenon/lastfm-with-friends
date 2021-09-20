@@ -6,6 +6,7 @@ from . import api_logger as logger
 from . import lastfm_scraper
 from . import command_helper
 from . import group_session_helper
+from . import group_helper
 cfg = config.config
 
 group_session_api = Blueprint('group-sessions', __name__)
@@ -29,20 +30,22 @@ def create():
         abort(response)
     if not auth_helper.is_authenticated(username, session_key):
         abort(401)
-    current_session = group_session_helper.get_current_session(username)
+    current_session = group_session_helper.get_current_session(username, with_members=True)
     if current_session: # returns None if not in session
-        # if the session is silent (one user silently following another), end that session
+        # if the session is silent (one user silently following another), make non-silent
         if current_session['is_silent'] and not is_silent:
-            logger.log("Silent session was found for session created by {}. Ending...".format(username))
-            group_session_helper.end_session(current_session['id'])
+            logger.log("Silent session was found for session created by {}. Making non-silent...".format(username))
+            group_session_helper.make_non_silent(current_session['id'])
+            current_session['is_silent'] = False
+            return jsonify(current_session)
         else: # return "already in session error"
             response = make_response(jsonify(error="You are already in a session."), 400)
             abort(response)
     if is_silent and (not silent_followee or silent_followee == username):
         response = make_response(jsonify(error="Silent followee must be specified and must not be yourself."), 400)
         abort(response)
-    group_session_helper.create_group_session(username, group_jc, is_silent, silent_followee, catch_up_timestamp)
-    return jsonify({"data": "success"})
+    new_session = group_session_helper.create_group_session(username, group_jc, is_silent, silent_followee, catch_up_timestamp)
+    return jsonify(new_session)
 
 @group_session_api.route('/api/group-sessions/end', methods=['POST'])
 def end():
@@ -97,6 +100,9 @@ def leave():
         elif current_session['owner'] == username:
             response = make_response(jsonify(error="You cannot leave a session which you created."), 401)
             abort(response)
+        elif current_session['is_silent'] and current_session['owner'] != username:
+            group_session_helper.end_session(session_id)
+            return jsonify({"data": "success"})
     response = make_response(jsonify(error="Session not found."), 404)
     abort(response)
 
@@ -121,10 +127,29 @@ def join():
     if current_session: # returns None if not in session
         if not current_session['is_silent']:
             if not group_session_helper.is_in_session(username, session_id):
-                group_session_helper.join_session(username, session_id, catch_up_timestamp)
-                return jsonify({"data": "success"})
+                response = group_session_helper.join_session(username, session_id, catch_up_timestamp)
+                return jsonify(response)
             else: 
                 response = make_response(jsonify(error="You are already in this session."), 400)
                 abort(response)
     response = make_response(jsonify(error="Session not found."), 404)
     abort(response)
+
+@group_session_api.route('/api/group-sessions/list', methods=['POST'])
+def sessions_list():
+    params = request.get_json()
+    if params:
+        try:
+            username = params['username']
+            session_key = params['session_key']
+            join_code = params['join_code']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if not auth_helper.is_authenticated(username, session_key) or not group_helper.is_in_group(username, join_code):
+        abort(401)
+    response = group_session_helper.get_sessions(join_code)
+    return jsonify(response)

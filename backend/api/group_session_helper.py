@@ -10,18 +10,24 @@ from . import command_helper
 from . import auth_helper
 cfg = config.config
 
-def get_current_session(username=None, session_id=None):
+def get_current_session(username=None, session_id=None, with_members=False):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     where_sql = "group_sessions.id = {}".format(session_id) if session_id else "username = '{}'".format(username)
     cursor.execute("SELECT group_sessions.* FROM user_group_sessions LEFT JOIN group_sessions ON user_group_sessions.session_id = group_sessions.id WHERE {}".format(where_sql))
     result = list(cursor)
-    mdb.close()
     if len(result):
-        ret = result[0]
-        ret['is_silent'] = True if ret['is_silent'] else False
-        return ret
-    return None
+        session = result[0]
+        session['is_silent'] = True if session['is_silent'] else False
+    else:
+        mdb.close()
+        return None
+    if with_members:
+        cursor.execute("SELECT user_group_sessions.username, users.profile_image FROM user_group_sessions LEFT JOIN users ON users.username = user_group_sessions.username WHERE session_id = {}".format(session['id']))
+        result = list(cursor)
+        session['members'] = list(filter(lambda x: x['username'] == session['owner'], result)) + list(filter(lambda x: x['username'] != session['owner'], result))
+    mdb.close()
+    return session
 
 def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_up_timestamp):
     mdb = mariadb.connect(**(cfg['sql']))
@@ -56,13 +62,19 @@ def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_
         cursor.execute(sql_helper.insert_into("user_group_sessions", data))
         mdb.commit()
     mdb.close()
+    return get_current_session(username=initiator, with_members=True)
 
 def end_session(session_id):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
+
+    # when session ends, run scrobbler one more time
+    group_session_scrobbler(delay=False, session_id=session_id)
+
     # delete users from user_group_sessions table
     cursor.execute("DELETE FROM user_group_sessions WHERE session_id = {}".format(session_id))
     mdb.commit()
+    
     # delete session
     cursor.execute("DELETE FROM group_sessions WHERE id = {}".format(session_id))
     mdb.commit()
@@ -71,6 +83,10 @@ def end_session(session_id):
 def leave_session(username, session_id):
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
+
+    # give users pending scrobbles before they leave
+    group_session_scrobbler(delay=False, session_id=session_id)
+
     # delete users from user_group_sessions table
     cursor.execute("DELETE FROM user_group_sessions WHERE session_id = {} AND username = '{}'".format(session_id, username))
     mdb.commit()
@@ -102,6 +118,7 @@ def join_session(username, session_id, catch_up_timestamp):
     cursor.execute(sql_helper.insert_into("user_group_sessions", data))
     mdb.commit()
     mdb.close()
+    return get_current_session(session_id=session_id, with_members=True)
 
 def is_in_session(username, session_id):
     mdb = mariadb.connect(**(cfg['sql']))
@@ -111,17 +128,37 @@ def is_in_session(username, session_id):
     mdb.close()
     return True if len(result) else False
 
-def group_session_scrobbler():
+def make_non_silent(session_id):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("UPDATE group_sessions SET is_silent = '0' WHERE id = {}".format(session_id))
+    mdb.commit()
+    mdb.close()
+
+def get_sessions(join_code):
+    mdb = mariadb.connect(**(cfg['sql']))
+    cursor = mdb.cursor(dictionary=True)
+    cursor.execute("SELECT id FROM group_sessions WHERE group_jc = '{}'".format(join_code))
+    ids = [s['id'] for s in list(cursor)]
+    mdb.close()
+    sessions = []
+    for session_id in ids:
+        sessions.append(get_current_session(session_id=session_id, with_members=True))
+    return sessions
+
+def group_session_scrobbler(delay=True, session_id=None):
     # sleep 30 seconds for purposes of cron tasks
-    time.sleep(30)
+    if delay:
+        time.sleep(30)
 
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     cursor.execute("SET time_zone='+00:00';")
-    logger.log("===== GROUP SESSION SCROBBLER =====")
+    logger.log("===== GROUP SESSION SCROBBLER {}=====".format("(ID: {}) ".format(session_id) if session_id else ""))
     
     # get all active sessions
-    cursor.execute("SELECT * FROM group_sessions")
+    session_sql = " WHERE id = {}".format(session_id) if session_id else ""
+    cursor.execute("SELECT * FROM group_sessions{}".format(session_sql))
     sessions = list(cursor)
     if not sessions:
         logger.log("\t No active sessions! All done.")

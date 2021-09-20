@@ -84,7 +84,21 @@
                     </span>
                     <span class="spacer"></span>
                     <!-- <span><em>{{ group.description }}</em></span> -->
-                    <span [class.disable-click]="isDemo | async" class="beta group-session clickable" [style.display]="userSettings.groupExpandedList[group.join_code] == false ? 'none' : 'unset'"><span><i class="fas fa-plus"></i></span> GROUP SESSION</span>
+                    <span 
+                        [class.disable-click]="isDemo | async"
+                        [class.normal-session]="user.group_session?.group_jc == group.join_code && user.group_session?.is_silent == false"
+                        [class.silent-session]="user.group_session?.group_jc == group.join_code && user.group_session?.is_silent == true && user.username != user.group_session?.owner" 
+                        class="beta group-session clickable" (click)="openGroupSession(group)"
+                        [style.display]="userSettings.groupExpandedList[group.join_code] == false ? 'none' : 'unset'"
+                    >
+                        <span>
+                            <i class="fas" 
+                                [class.fa-plus]="user.group_session?.group_jc != group.join_code || (user.group_session?.is_silent == true && user.username == user.group_session?.owner)"
+                                [class.fa-user]="user.group_session?.group_jc == group.join_code && user.group_session?.is_silent == false" 
+                                [class.fa-user-secret]="user.group_session?.group_jc == group.join_code && user.group_session?.is_silent == true && user.username != user.group_session?.owner">
+                            </i>{{ user.group_session?.group_jc != group.join_code || (user.group_session?.is_silent == true && user.username == user.group_session?.owner) ? "" : " " + user.group_session.members.length + " |" }}
+                        </span> {{ user.group_session?.group_jc != group.join_code || (user.group_session?.is_silent == true && user.username == user.group_session?.owner) ? " GROUP SESSION" : " ACTIVE SESSION" }}
+                    </span>
                 </div>
                 <button mat-icon-button color="accent"(click)="toggleGroup(group.join_code)"
                 [ngClass]="userSettings.groupExpandedList[group.join_code] !== false ? 'group-dashboard-collapse' : 'group-dashboard-expand'">

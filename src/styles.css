@@ -379,6 +379,14 @@ div.history-options-container > mat-paginator {
     padding-right: 5px;
 }
 
+.group-session.normal-session {
+    background: #734db7;
+}
+
+.group-session.silent-session {
+    background: #7d7652;
+}
+
 .group-session > span {
     padding-right: 1px;
     padding-left: 2px;

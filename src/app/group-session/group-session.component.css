@@ -1,0 +1,21 @@
+.session-members > div {
+    padding-bottom: 0.5rem;
+}
+mat-form-field {
+    font-size: 12px;
+}
+form label {
+    display: block;
+    color: #e2e2e2;
+    padding-bottom: 0.25rem;
+}
+form {
+    color: #bfbfbf;
+}
+.session-notes {
+    font-size: 13px; 
+    color: #bfbfbf;
+}
+.session-notes > span {
+    display: block;
+}
