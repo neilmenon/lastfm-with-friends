@@ -19,3 +19,6 @@ form {
 .session-notes > span {
     display: block;
 }
+.session-members > div.member-card {
+    min-width: 110px;
+}

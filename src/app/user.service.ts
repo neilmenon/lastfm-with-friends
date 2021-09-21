@@ -337,11 +337,12 @@ export class UserService {
     })
   }
 
-  joinSession(sessionId: number, catch_up_timestamp: string) {
+  joinSession(sessionId: number, catch_up_timestamp: string, joinCode: string) {
     return this.http.post(config.api_root + "/group-sessions/join", { 
       'username': this.username,
       'session_key': this.session_key,
       'session_id': sessionId,
+      'group_jc': joinCode,
       'catch_up_timestamp': catch_up_timestamp
     })
   }

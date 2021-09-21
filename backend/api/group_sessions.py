@@ -32,8 +32,13 @@ def create():
         abort(401)
     current_session = group_session_helper.get_current_session(username, with_members=True)
     if current_session: # returns None if not in session
-        # if the session is silent (one user silently following another), make non-silent
-        if current_session['is_silent'] and not is_silent:
+        if current_session['group_jc'] != group_jc: # trying to create session in different group!
+            logger.log("{} trying to create session in different group!".format(username))
+            if current_session['owner'] == username: # if owner of session, end session
+                group_session_helper.end_session(current_session['id'])
+            else: # if just member, then leave session
+                group_session_helper.leave_session(username, current_session['id'])
+        elif current_session['is_silent'] and not is_silent: # if the session is silent (one user silently following another), make non-silent
             logger.log("Silent session was found for session created by {}. Making non-silent...".format(username))
             group_session_helper.make_non_silent(current_session['id'])
             current_session['is_silent'] = False
@@ -121,6 +126,7 @@ def join():
             username = params['username']
             session_key = params['session_key']
             session_id = params['session_id']
+            group_jc = params['group_jc']
             catch_up_timestamp = params['catch_up_timestamp']
         except KeyError as e:
             response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
@@ -132,6 +138,12 @@ def join():
         abort(401)
     current_session = group_session_helper.get_current_session(username, session_id)
     if current_session: # returns None if not in session
+        if current_session['group_jc'] != group_jc: # trying to join session in different group!
+            logger.log("{} trying to join session in different group!".format(username))
+            if current_session['owner'] == username: # if owner of session, end session
+                group_session_helper.end_session(current_session['id'])
+            else: # if just member, then leave session
+                group_session_helper.leave_session(username, current_session['id'])
         if not current_session['is_silent']:
             if not group_session_helper.is_in_session(username, session_id):
                 response = group_session_helper.join_session(username, session_id, catch_up_timestamp)

@@ -61,6 +61,10 @@ def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_
         }
         cursor.execute(sql_helper.insert_into("user_group_sessions", data))
         mdb.commit()
+
+    # set now playing count status to 1 to make sure it gets checked within two minutes, but not too soon in case the user creates the session and does not start the music immediately
+    cursor.execute("UPDATE now_playing SET check_count = 1 WHERE username = '{}' AND check_count IS NOT NULL".format(final_owner))
+    mdb.commit()
     mdb.close()
 
     # update the user on create so that the prune task doesn't incorrectly end the session immediately.

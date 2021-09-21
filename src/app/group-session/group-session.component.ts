@@ -59,6 +59,11 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const sub1 = this.ngRedux.select(s => s.userModel).subscribe(obj => {
       if (obj) {
+        if (this.session != null && obj.group_session == null) { // if session was ended externally
+          this.dialogRef.close()
+        } else if (this.session == null && obj.group_session != null) {
+          this.messageService.open("Session was created.")
+        }
         this.session = JSON.parse(JSON.stringify(obj?.group_session))
       }
     })
@@ -192,7 +197,7 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
       this.joinCatchUpTimestamp = null
     }
     this.joinLoading = true
-    this.userService.joinSession(this.selectedSession.id, this.joinCatchUpTimestamp).toPromise().then((data: GroupSessionModel) => {
+    this.userService.joinSession(this.selectedSession.id, this.joinCatchUpTimestamp, this.data.group.join_code).toPromise().then((data: GroupSessionModel) => {
       this.joinLoading = false
       this.messageService.open("Successfully joined session.")
       this.createSessionEmitter.emit(data)
@@ -246,7 +251,7 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
         }
         this.playHistoryLoading = false
       }).catch(error => {
-        this.messageService.open(`There was an issue getting ${selected.value}'s recent tracks. Please try again.'`)
+        this.messageService.open(`There was an issue getting ${selected.value}'s recent tracks. Please try again.`)
         this.playHistoryLoading = false
         this.joinCatchUpTimestamp = null
       })

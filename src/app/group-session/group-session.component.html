@@ -2,11 +2,11 @@
     <h3 mat-dialog-title >Group Listening Session for {{ data.group.name }}</h3>
 </div>
 <div mat-dialog-content class="center">
-    <div *ngIf="session && session?.group_jc != data.group.join_code">
+    <div *ngIf="session && session?.group_jc != data.group.join_code && session?.is_silent == false">
         You are already in a session in a different group. Leave or end that session to start a session with this group.
     </div>
     <!-- Session Details | End/Leave Session -->
-    <div *ngIf="session?.group_jc == data.group.join_code" style="max-width: 350px;">
+    <div *ngIf="session?.group_jc == data.group.join_code">
         <div *ngIf="session.is_silent == false || (session.is_silent == true && user.username != session.owner)">
             <div style="color: #bfbfbf; font-size: 16px; margin-bottom: 0.5rem;">Active Users</div>
             <div class="container session-members" style="flex-wrap: wrap;">
@@ -17,8 +17,11 @@
                 </div>
             </div>
             <div class="session-notes">
-                <span >
-                    Active for {{ moment(session.created).locale('en').toNow(true) }}.
+                <span *ngIf="user.username != session.owner">
+                    You're scrobbling {{ session.owner }}'s tracks. Session started {{ moment(session.created).locale('en').fromNow() }}.
+                </span>
+                <span *ngIf="user.username == session.owner">
+                    Your scrobbles are being tracked by {{ session.members.length - 1 | pluralize:'user' }}. Session started {{ moment(session.created).locale('en').fromNow() }}.
                 </span>
                 <span *ngIf="session.is_silent">This is a <u>silent</u> session. <span style="color: #e2e2e2;">{{ session.owner }}</span> will not see that you are following them.</span>
             </div>
