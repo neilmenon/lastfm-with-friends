@@ -10,7 +10,7 @@ import { GroupSessionModel, UserModel } from '../models/userGroupModel';
 import { NgRedux, select } from '@angular-redux/store';
 import { AppState } from '../store';
 import { Observable, Subscription } from 'rxjs';
-import { IS_DEMO_MODE } from '../actions';
+import { IS_DEMO_MODE, USER_MODEL } from '../actions';
 import { config } from '../config';
 import { MatDialog } from '@angular/material/dialog';
 import { GroupSessionComponent } from '../group-session/group-session.component';
@@ -31,6 +31,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   commit;
   buildInfo: BuildModel;
   userSettings: SettingsModel
+  now = moment()
 
   demoLoading: boolean = false
   @ViewChildren('groupDoms') groupDoms: QueryList<ElementRef>
@@ -68,7 +69,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
      setTimeout(() => {
       const sub2 = this.ngRedux.select(s => s.userModel).subscribe(obj => {
-        this.user.group_session = JSON.parse(JSON.stringify(obj?.group_session))
+        if (obj) {
+          this.user.group_session = JSON.parse(JSON.stringify(obj?.group_session))
+        }
       })
       this.subscription.add(sub2)
      }, 10000)
@@ -131,11 +134,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     // when "End Session" or "Leave Session"
     let removeSub = dialogRef.componentInstance.removeSession.subscribe(() => {
       this.user.group_session = null
+      this.ngRedux.dispatch({ type: USER_MODEL, userModel: JSON.parse(JSON.stringify(this.user)) })
     })
 
     // when "Create Session" or "Join Session"
     let createSub = dialogRef.componentInstance.createSessionEmitter.subscribe((data: GroupSessionModel) => {
       this.user.group_session = data
+      this.ngRedux.dispatch({ type: USER_MODEL, userModel: JSON.parse(JSON.stringify(this.user)) })
     })
 
     dialogRef.afterClosed().subscribe(() => {

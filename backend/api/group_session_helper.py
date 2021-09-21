@@ -64,7 +64,7 @@ def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_
     mdb.close()
 
     # update the user on create so that the prune task doesn't incorrectly end the session immediately.
-    lastfm_scraper.update_user(final_owner)
+    lastfm_scraper.update_user(final_owner, stall_if_existing=False)
 
     return get_current_session(username=initiator, with_members=True)
 
@@ -107,7 +107,7 @@ def join_session(username, session_id, catch_up_timestamp):
         owner_id = list(cursor)[0]['user_id']
 
         # update owner so we can properly set update timestamp for joiner
-        lastfm_scraper.update_user(session['owner'])
+        lastfm_scraper.update_user(session['owner'], stall_if_existing=False)
 
         # get most recent track's timestamp for owner 
         final_timestamp = str(int(command_helper.play_history("overall", None, [owner_id], None, None, limit=1)['records'][0]['timestamp']) + 1)
@@ -176,7 +176,7 @@ def group_session_scrobbler(delay=True, session_id=None):
         owner_id = list(cursor)[0]['user_id']
 
         # first, update the owner, whose scrobbles with propagate to other members in the session
-        lastfm_scraper.update_user(session['owner'])
+        lastfm_scraper.update_user(session['owner'], stall_if_existing=False)
 
         # get all children of the group session (aka not including owner)
         cursor.execute("SELECT user_group_sessions.username, user_group_sessions.last_timestamp, s.session_key FROM user_group_sessions LEFT JOIN group_sessions ON user_group_sessions.session_id = group_sessions.id LEFT JOIN sessions as s ON s.session_key = ( SELECT session_key from sessions WHERE sessions.username = user_group_sessions.username LIMIT 1 ) WHERE session_id = {} AND user_group_sessions.username != group_sessions.owner".format(session['id']))
@@ -256,15 +256,19 @@ def prune_sessions():
         end_session(session['id'])
 
     # prune sessions where owner hasn't scrobbled anything in a while
-    cursor.execute("SELECT id,owner FROM group_sessions")
+    cursor.execute("SELECT id,owner,created FROM group_sessions")
     sessions = list(cursor)
     for session in sessions:
-        cursor.execute("SELECT timestamp FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE users.username = '{}' ORDER BY timestamp DESC LIMIT 1".format(session['owner']))
-        timestamp = list(cursor)[0]['timestamp']
-        dt = datetime.datetime.utcfromtimestamp(int(timestamp))
+        # first check if session has existed for more than 20 minutes before trying to kill it
+        session_created = session['created']
         now = datetime.datetime.utcnow()
-        if (now - dt) >= datetime.timedelta(minutes=20):
-            logger.log("\t Ending session with ID: {} (no owner activity in {})".format(session['id'], now - dt))
-            end_session(session['id'])
+        if (now - session_created) >= datetime.timedelta(minutes=20):
+            # fetch most recent track by owner. is there anything played within the last 20 minutes?
+            cursor.execute("SELECT timestamp FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE users.username = '{}' ORDER BY timestamp DESC LIMIT 1".format(session['owner']))
+            timestamp = list(cursor)[0]['timestamp']
+            dt = datetime.datetime.utcfromtimestamp(int(timestamp))
+            if (now - dt) >= datetime.timedelta(minutes=20):
+                logger.log("\t Ending session with ID: {} (no owner activity in {})".format(session['id'], now - dt))
+                end_session(session['id'])
 
     mdb.close()

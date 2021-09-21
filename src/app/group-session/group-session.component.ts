@@ -1,11 +1,14 @@
-import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
+import { NgRedux } from '@angular-redux/store';
+import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSelectChange } from '@angular/material/select';
 import * as moment from 'moment';
+import { Subscription } from 'rxjs';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { MessageService } from '../message.service';
 import { GroupSessionModel, MemberModel, UserGroupModel, UserModel } from '../models/userGroupModel';
+import { AppState } from '../store';
 import { UserService } from '../user.service';
 
 @Component({
@@ -13,7 +16,8 @@ import { UserService } from '../user.service';
   templateUrl: './group-session.component.html',
   styleUrls: ['./group-session.component.css']
 })
-export class GroupSessionComponent implements OnInit {
+export class GroupSessionComponent implements OnInit, OnDestroy {
+  private subscription: Subscription = new Subscription()
   user: UserModel
   session: GroupSessionModel
   moment: any = moment
@@ -29,6 +33,7 @@ export class GroupSessionComponent implements OnInit {
   joinLoading: boolean
   isJoinCatchUp: boolean = false
   joinCatchUpTimestamp: string
+  jForm: FormGroup
 
   @Output() removeSession: EventEmitter<any> = new EventEmitter(true)
   @Output() createSessionEmitter: EventEmitter<GroupSessionModel> = new EventEmitter(true)
@@ -39,25 +44,49 @@ export class GroupSessionComponent implements OnInit {
     private userService: UserService,
     public messageService: MessageService,
     public dialogRef: MatDialogRef<GroupSessionComponent>,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private ngRedux: NgRedux<AppState>
   ) { 
     this.user = data.user
     this.session = data.user.group_session
     this.groupMembersForDropdown = data.group.members.filter(x => x.username != this.user.username)
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe()
+  }
+
   ngOnInit(): void {
+    const sub1 = this.ngRedux.select(s => s.userModel).subscribe(obj => {
+      if (obj) {
+        this.session = JSON.parse(JSON.stringify(obj?.group_session))
+      }
+    })
+    this.subscription.add(sub1)
+
     if (!this.session || (this.session.is_silent == true && this.user.username == this.session.owner)) {
-      this.createForm()
+      this.createNewForm()
+      this.createJoinForm()
       this.userService.getSessions(this.data.group.join_code).toPromise().then((data: Array<GroupSessionModel>) => {
         this.existingSessions = data
+        if (this.existingSessions.length > 0){
+          this.jForm.controls['session'].setValue(this.existingSessions[0])
+          this.selectSession({ "value": this.existingSessions[0], "source": null })
+        }
       }).catch(error => {
         this.messageService.open("There was an issue getting this group's active sessions. Please try again.")
       })
     }
   }
 
-  createForm() {
+  createJoinForm() {
+    this.jForm = this.fb.group({ 
+      session: [null],
+      catch_up_timestamp: [null]
+    })
+  }
+
+  createNewForm() {
     this.cForm = this.fb.group({ 
       is_silent: [null, Validators.required],
       group_jc: [this.data.group.join_code],
@@ -105,6 +134,8 @@ export class GroupSessionComponent implements OnInit {
           this.leaveEndLoading = false
           if (error['error']['error']) {
             this.messageService.open(error['error']['error'])
+          } else {
+            this.messageService.open("An unexpected error occured while trying to leave this session. Please refresh the page and try again.")
           }
         })
       }
@@ -131,6 +162,8 @@ export class GroupSessionComponent implements OnInit {
           this.leaveEndLoading = false
           if (error['error']['error']) {
             this.messageService.open(error['error']['error'])
+          } else {
+            this.messageService.open("An unexpected error occured while trying to end this session. Please refresh the page and try again.")
           }
         })
       }
@@ -148,6 +181,8 @@ export class GroupSessionComponent implements OnInit {
       this.leaveEndLoading = false
       if (error['error']['error']) {
         this.messageService.open(error['error']['error'])
+      } else {
+        this.messageService.open("There was an unexpected error when trying to create this session. Ensure there aren't any existing sessions that would conflict with this session and try again.")
       }
     })
   }
@@ -166,6 +201,8 @@ export class GroupSessionComponent implements OnInit {
       this.joinLoading = false
       if (error['error']['error']) {
         this.messageService.open(error['error']['error'])
+      } else {
+        this.messageService.open("An unexpected error occured while trying to join this session. Please refresh the page and try again.")
       }
     })
 
@@ -183,6 +220,7 @@ export class GroupSessionComponent implements OnInit {
       } 
     }
     this.recentTracks = []
+    this.joinCatchUpTimestamp = null
     if (!joinMode) {
       if (this.enableCatchUp) {
         this.cForm.controls['catch_up_timestamp'].setValue(null)
@@ -202,11 +240,15 @@ export class GroupSessionComponent implements OnInit {
         this.recentTracks = data['recenttracks']['track'].filter(x => typeof(x['date']) !== "undefined")
         if (!joinMode) {
           this.cForm.controls['catch_up_timestamp'].setValue(this.recentTracks[0].date.uts)
+        } else {
+          this.jForm.controls['catch_up_timestamp'].setValue(this.recentTracks[0].date.uts)
+          this.joinCatchUpTimestamp = this.recentTracks[0].date.uts
         }
         this.playHistoryLoading = false
       }).catch(error => {
         this.messageService.open(`There was an issue getting ${selected.value}'s recent tracks. Please try again.'`)
         this.playHistoryLoading = false
+        this.joinCatchUpTimestamp = null
       })
     }
   }

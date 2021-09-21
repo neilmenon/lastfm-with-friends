@@ -126,8 +126,8 @@ export class GroupDashboardComponent implements OnInit {
       relativeTime: {
         future: 'in %s',
         past: '%s',
-        s:  '%s',
-        ss: '%ss',
+        s:  '%ds',
+        ss: '%ds',
         m:  '1m',
         mm: '%dm',
         h:  '1h',

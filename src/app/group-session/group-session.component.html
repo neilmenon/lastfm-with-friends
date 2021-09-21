@@ -31,10 +31,10 @@
     </div>
     <!-- Create/Join Session -->
     <div *ngIf="!session || (session.is_silent == true && user.username == session.owner)" style="padding-top: 0.5rem;">
-        <form [formGroup]="cForm" id="createSession">
+        <form [formGroup]="jForm">
             <label>Select an existing session to join:</label>
             <mat-form-field color="accent" *ngIf="existingSessions.length > 0">
-                <mat-select formControlName="silent_followee" name="silent_followee" (selectionChange)="selectSession($event)">
+                <mat-select formControlName="session" name="session" (selectionChange)="selectSession($event)">
                     <mat-option *ngFor="let s of existingSessions" [value]="s">[{{ moment(s.created).fromNow() }}] Session with {{ mapMembers(s.members) }}</mat-option>
                 </mat-select>
             </mat-form-field>
@@ -44,7 +44,7 @@
                 <div [class.disable-click]="!isJoinCatchUp">
                     <label>Select the last track you heard to catch up your scrobbles.</label>
                     <mat-form-field color="accent">
-                        <mat-select [(value)]="joinCatchUpTimestamp">
+                        <mat-select [(value)]="joinCatchUpTimestamp" formControlName="catch_up_timestamp" name="catch_up_timestamp" >
                             <mat-option *ngFor="let track of recentTracks" [value]="track.date.uts"><span style="color: #bfbfbf;">{{ "[" + moment.unix(track.date.uts).fromNow() + "] " }}</span>{{ track['artist']['#text'] + " - " + track.name }}</mat-option>
                         </mat-select>
                     </mat-form-field>
@@ -55,7 +55,9 @@
                 <button color="accent" mat-raised-button (click)="joinSession()" [class.disable-click]="existingSessions.length == 0 || !selectedSession || selectedSession && isJoinCatchUp && !joinCatchUpTimestamp" *ngIf="!joinLoading">Join Session</button>
                 <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="joinLoading" style="padding-top: 0.75rem;"></mat-spinner>
             </div>
-            <hr>
+        </form>
+        <hr>
+        <form [formGroup]="cForm" id="createSession">
             <div style="padding-bottom: 0.5rem;">
                 <label for="is_silent">What type of session would you like to create?</label>
                 <mat-radio-group formControlName="is_silent" name="is_silent">

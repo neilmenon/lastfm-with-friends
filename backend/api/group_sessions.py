@@ -41,6 +41,13 @@ def create():
         else: # return "already in session error"
             response = make_response(jsonify(error="You are already in a session."), 400)
             abort(response)
+    else:
+        if is_silent:
+            current_sessions = group_session_helper.get_sessions(group_jc)
+            for s in current_sessions: # check if owner is in another session
+                if s['owner'] == silent_followee:
+                    response = make_response(jsonify(error="{} has already started a public session. Please join that one.".format(s['owner'])), 400)
+                    abort(response)
     if is_silent and (not silent_followee or silent_followee == username):
         response = make_response(jsonify(error="Silent followee must be specified and must not be yourself."), 400)
         abort(response)

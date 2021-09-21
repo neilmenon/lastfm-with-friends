@@ -12,7 +12,7 @@ from . import user_helper
 from . import api_logger as logger
 cfg = config.config
 
-def update_user(username, full=False, app=None, fix_count=False):
+def update_user(username, full=False, app=None, fix_count=False, stall_if_existing=True):
     logger.log("User update triggered for: " + username, app)
     user = user_helper.get_user(username, extended=False)
     last_update = user_helper.get_updated_date(username)
@@ -28,7 +28,7 @@ def update_user(username, full=False, app=None, fix_count=False):
             user_helper.change_updated_date(username, clear_date=True)
     else: # if full scrape, we always clear this date
         user_helper.change_updated_date(username, clear_date=True)
-        if user['progress']:
+        if user['progress'] and stall_if_existing: # we don't always want to stall, for example, user updates triggered from group sessions tasks
             logger.log("\tDetected a potential in-progress scrape ({}%). Stalling a bit to see if it's progressing...".format(user['progress']), app)
             time.sleep(60)
             current_progress = user_helper.get_user(username)['progress']
@@ -36,6 +36,9 @@ def update_user(username, full=False, app=None, fix_count=False):
                 logger.log("\t\tAnother process exists and is progressing. Exiting...", app)
                 return # kill this process as the other one already is doing something
             logger.log("\t\tOther process does not exist or is stuck. Continuing...", app)
+        elif not stall_if_existing and user['progress']: # we don't want to wait for existing processes if user update was fired a task other than the main update task!
+            logger.log("\tKilling user update due to other potential process ({}%).".format(user['progress']), app)
+            return
     mdb = mariadb.connect(**(cfg['sql']))
     cursor = mdb.cursor(dictionary=True)
     page = 1
