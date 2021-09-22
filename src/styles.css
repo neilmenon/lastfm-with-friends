@@ -460,6 +460,14 @@ div.history-options-container > mat-paginator {
     color: #000!important;
 }
 
+.kick {
+    color: #ba0000;
+}
+.kick:hover {
+    color: unset;
+}
+
+
 /* SCROLLBARS */
 .wk-actions-dialog {
     font-size: 18px;

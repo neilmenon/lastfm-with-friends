@@ -12,8 +12,9 @@ import { AppState } from '../store';
 import { Observable, Subscription } from 'rxjs';
 import { IS_DEMO_MODE, USER_MODEL } from '../actions';
 import { config } from '../config';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MatDialogState } from '@angular/material/dialog';
 import { GroupSessionComponent } from '../group-session/group-session.component';
+import { PluralizePipe } from '../pluralize.pipe';
 
 @Component({
   selector: 'app-home',
@@ -32,6 +33,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   buildInfo: BuildModel;
   userSettings: SettingsModel
   now = moment()
+  dialogRef: MatDialogRef<GroupSessionComponent, any>
 
   demoLoading: boolean = false
   @ViewChildren('groupDoms') groupDoms: QueryList<ElementRef>
@@ -42,7 +44,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private userService: UserService, 
     private buildService: BuildService,
     private ngRedux: NgRedux<AppState>,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private pluralizePipe: PluralizePipe
   ) {
     this.signed_in = this.userService.isSignedIn();
     if (this.signed_in) {
@@ -70,6 +73,16 @@ export class HomeComponent implements OnInit, OnDestroy {
      setTimeout(() => {
       const sub2 = this.ngRedux.select(s => s.userModel).subscribe(obj => {
         if (obj) {
+          // Notifications for people joining/leaving the session
+          if (obj.group_session && this.user.group_session && this.dialogRef?.getState() != MatDialogState.OPEN) {
+            if (obj.group_session.members.length < this.user.group_session.members.length) { // user(s) left session
+              let numLeft: number = this.user.group_session.members.length - obj.group_session.members.length
+              this.messageService.open(`${this.pluralizePipe.transform(numLeft, "user")} left the session.`)
+            } else if (obj.group_session.members.length > this.user.group_session.members.length) { // user(s) joined session
+              let numJoined: number = obj.group_session.members.length - this.user.group_session.members.length
+              this.messageService.open(`${this.pluralizePipe.transform(numJoined, "user")} joined the session.`)
+            }
+          }
           this.user.group_session = JSON.parse(JSON.stringify(obj?.group_session))
         }
       })
@@ -124,7 +137,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   openGroupSession(group) {
-    let dialogRef = this.dialog.open(GroupSessionComponent, {
+    this.dialogRef = this.dialog.open(GroupSessionComponent, {
       data: {
         group: group,
         user: this.user,
@@ -132,18 +145,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     })
 
     // when "End Session" or "Leave Session"
-    let removeSub = dialogRef.componentInstance.removeSession.subscribe(() => {
+    let removeSub = this.dialogRef.componentInstance.removeSession.subscribe(() => {
       this.user.group_session = null
       this.ngRedux.dispatch({ type: USER_MODEL, userModel: JSON.parse(JSON.stringify(this.user)) })
     })
 
     // when "Create Session" or "Join Session"
-    let createSub = dialogRef.componentInstance.createSessionEmitter.subscribe((data: GroupSessionModel) => {
+    let createSub = this.dialogRef.componentInstance.createSessionEmitter.subscribe((data: GroupSessionModel) => {
       this.user.group_session = data
       this.ngRedux.dispatch({ type: USER_MODEL, userModel: JSON.parse(JSON.stringify(this.user)) })
     })
 
-    dialogRef.afterClosed().subscribe(() => {
+    this.dialogRef.afterClosed().subscribe(() => {
       removeSub.unsubscribe()
       createSub.unsubscribe()
     })

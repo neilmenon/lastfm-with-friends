@@ -5,6 +5,7 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { MatSelectChange } from '@angular/material/select';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
+import { USER_MODEL } from '../actions';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { MessageService } from '../message.service';
 import { GroupSessionModel, MemberModel, UserGroupModel, UserModel } from '../models/userGroupModel';
@@ -61,8 +62,6 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
       if (obj) {
         if (this.session != null && obj.group_session == null) { // if session was ended externally
           this.dialogRef.close()
-        } else if (this.session == null && obj.group_session != null) {
-          this.messageService.open("Session was created.")
         }
         this.session = JSON.parse(JSON.stringify(obj?.group_session))
       }
@@ -169,6 +168,34 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
             this.messageService.open(error['error']['error'])
           } else {
             this.messageService.open("An unexpected error occured while trying to end this session. Please refresh the page and try again.")
+          }
+        })
+      }
+    })
+  }
+
+  kickUser(username: string) {
+    const dialogRef = this.dialog.open(ConfirmPopupComponent, {
+      data: { 
+        title: `Kick ${username}`,
+        message: `Are you sure you want to kick ${username} from this session?`,
+        primaryButton: "Confirm"
+      }
+    })
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.messageService.open(`Kicking ${username}...`, "center", true)
+        this.userService.kickUserFromSession(this.session.id, username).toPromise().then(() => {
+          // filter out kicked user from frontend model
+          this.session.members = this.session.members.filter(x => x.username != username)
+          this.user.group_session = this.session
+          this.ngRedux.dispatch({ type: USER_MODEL, userModel: JSON.parse(JSON.stringify(this.user)) })
+          this.messageService.open(`Successfully kicked ${username}.`)
+        }).catch(error => {
+          if (error['error']['error']) {
+            this.messageService.open(error['error']['error'])
+          } else {
+            this.messageService.open(`An unexpected error occured while trying to kick ${username}. Please try again.`)
           }
         })
       }

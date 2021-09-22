@@ -16,9 +16,3 @@
 .member-card i, .member-card mat-spinner {
     margin-left: 3px;
 }
-.kick {
-    color: #ba0000;
-}
-.kick:hover {
-    color: unset;
-}

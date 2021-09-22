@@ -126,7 +126,7 @@ import { GroupSessionComponent } from './group-session/group-session.component';
       {path: 'settings', component: UserSettingsComponent}
     ])
   ],
-  providers: [UserService],
+  providers: [UserService, PluralizePipe],
   bootstrap: [AppComponent]
 })
 export class AppModule {

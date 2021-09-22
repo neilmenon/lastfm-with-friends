@@ -173,3 +173,32 @@ def sessions_list():
     response = group_session_helper.get_sessions(join_code)
     return jsonify(response)
 
+@group_session_api.route('/api/group-sessions/kick', methods=['POST'])
+def kick_user():
+    params = request.get_json()
+    if params:
+        try:
+            username = params['username']
+            session_key = params['session_key']
+            session_id = params['session_id']
+            kick_user = params['kick_user']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if not auth_helper.is_authenticated(username, session_key):
+        abort(401)
+    current_session = group_session_helper.get_current_session(username)
+    if current_session:
+        if username == current_session['owner'] and session_id == current_session['id']:
+            if username != kick_user:
+                group_session_helper.leave_session(kick_user, session_id)
+                return jsonify({ "data": "success" })
+            else:
+                abort(make_response(jsonify(error="You cannot kick yourself."), 401))
+        else:
+           abort(make_response(jsonify(error="You to not have permissions to kick users in this session."), 401)) 
+    else:
+        abort(make_response(jsonify(error="Session not found."), 404))

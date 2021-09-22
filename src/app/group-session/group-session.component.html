@@ -13,12 +13,15 @@
                 <div *ngFor="let u of session.members" class="member-card">
                     <img src="{{ u.profile_image }}" width="50px" style="border-radius: 50%;border: 2px solid;"><br>
                     <a href="https://last.fm/user/{{ u.username }}" target="_blank">{{ u.username }}</a> 
-                    <i class="fa fa-star" style="color: #e9c267;" matTooltip="Session Owner" matTooltipPosition="above" *ngIf="u.username == session.owner"></i>
+                    <i class="fa fa-star" style="color: #e9c267;" matTooltip="Session Owner" matTooltipPosition="above" *ngIf="u.username == session.owner; else notOwner"></i>
+                    <ng-template #notOwner>
+                        <i (click)="kickUser(u.username)" class="fa fa-user-times kick clickable" matTooltip="Kick Member" matTooltipPosition="above" *ngIf="user.username == session.owner"></i>
+                    </ng-template>
                 </div>
             </div>
             <div class="session-notes">
                 <span *ngIf="user.username != session.owner">
-                    You're scrobbling {{ session.owner }}'s tracks. Session started {{ moment(session.created).locale('en').fromNow() }}.
+                    You're now scrobbling {{ session.owner }}'s tracks. Session started {{ moment(session.created).locale('en').fromNow() }}.
                 </span>
                 <span *ngIf="user.username == session.owner">
                     Your scrobbles are being tracked by {{ session.members.length - 1 | pluralize:'user' }}. Session started {{ moment(session.created).locale('en').fromNow() }}.
@@ -45,7 +48,7 @@
             <div *ngIf="selectedSession">
                 <span><mat-checkbox [checked]="isJoinCatchUp" (change)="isJoinCatchUp = !isJoinCatchUp; getPlayHistory(null, true)">Already been listening with this session?</mat-checkbox></span>
                 <div [class.disable-click]="!isJoinCatchUp">
-                    <label>Select the last track you heard to catch up your scrobbles.</label>
+                    <label>Select the first track you heard to catch up your scrobbles.</label>
                     <mat-form-field color="accent">
                         <mat-select [(value)]="joinCatchUpTimestamp" formControlName="catch_up_timestamp" name="catch_up_timestamp" >
                             <mat-option *ngFor="let track of recentTracks" [value]="track.date.uts"><span style="color: #bfbfbf;">{{ "[" + moment.unix(track.date.uts).fromNow() + "] " }}</span>{{ track['artist']['#text'] + " - " + track.name }}</mat-option>
@@ -79,7 +82,7 @@
             <div *ngIf="(cForm.controls['is_silent'].value == true && cForm.controls['silent_followee'].value != null)">
                 <span><mat-checkbox [checked]="enableCatchUp" (change)="enableCatchUp = !enableCatchUp; getPlayHistory(null)">Already been listening with this user?</mat-checkbox></span>
                 <div [class.disable-click]="!enableCatchUp">
-                    <label for="silent_followee">Select the last track you heard to catch up your scrobbles.</label>
+                    <label for="silent_followee">Select the first track you heard to catch up your scrobbles.</label>
                     <mat-form-field color="accent">
                         <mat-select formControlName="catch_up_timestamp" name="catch_up_timestamp">
                             <mat-option *ngFor="let track of recentTracks" [value]="track.date.uts"><span style="color: #bfbfbf;">{{ "[" + moment.unix(track.date.uts).fromNow() + "] " }}</span>{{ track['artist']['#text'] + " - " + track.name }}</mat-option>

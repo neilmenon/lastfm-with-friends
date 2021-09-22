@@ -22,3 +22,8 @@ form {
 .session-members > div.member-card {
     min-width: 110px;
 }
+.session-members .kick {
+    padding-left: 2px;
+    font-size: 13px;
+    display: inline-block;
+}

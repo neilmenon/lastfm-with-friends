@@ -353,7 +353,16 @@ export class UserService {
       'session_key': this.session_key,
       'join_code': joinCode
     })
-  } 
+  }
+  
+  kickUserFromSession(sessionId: number, kickUser: string) {
+    return this.http.post(config.api_root + "/group-sessions/kick", { 
+      'username': this.username,
+      'session_key': this.session_key,
+      'session_id': sessionId,
+      'kick_user': kickUser
+    })
+  }
 
   getRecentTracks(username: string) {
     return this.http.get(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${username}&api_key=${config.api_key}&format=json`)
