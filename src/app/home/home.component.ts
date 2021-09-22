@@ -6,7 +6,7 @@ import { UserService } from '../user.service'
 import * as moment from 'moment';
 import { BuildModel, BuildService } from '../build.service';
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
-import { GroupSessionModel, UserModel } from '../models/userGroupModel';
+import { GroupSessionMemberModel, GroupSessionModel, UserModel } from '../models/userGroupModel';
 import { NgRedux, select } from '@angular-redux/store';
 import { AppState } from '../store';
 import { Observable, Subscription } from 'rxjs';
@@ -76,11 +76,17 @@ export class HomeComponent implements OnInit, OnDestroy {
           // Notifications for people joining/leaving the session
           if (obj.group_session && this.user.group_session && this.dialogRef?.getState() != MatDialogState.OPEN) {
             if (obj.group_session.members.length < this.user.group_session.members.length) { // user(s) left session
-              let numLeft: number = this.user.group_session.members.length - obj.group_session.members.length
-              this.messageService.open(`${this.pluralizePipe.transform(numLeft, "user")} left the session.`)
+              let leftSession: Array<GroupSessionMemberModel> = this.user.group_session.members.filter(this.compareUsers(obj.group_session.members))
+              if (leftSession.length > 0) {
+                let listMembers: string = this.mapMembers(leftSession)
+                this.messageService.open(`${listMembers} left the session.`)
+              }
             } else if (obj.group_session.members.length > this.user.group_session.members.length) { // user(s) joined session
-              let numJoined: number = obj.group_session.members.length - this.user.group_session.members.length
-              this.messageService.open(`${this.pluralizePipe.transform(numJoined, "user")} joined the session.`)
+              let joinedSession: Array<GroupSessionMemberModel> = obj.group_session.members.filter(this.compareUsers(this.user.group_session.members))
+              if (joinedSession.length > 0) {
+                let listMembers: string = this.mapMembers(joinedSession)
+                this.messageService.open(`${listMembers} joined the session.`)
+              }
             }
           }
           this.user.group_session = JSON.parse(JSON.stringify(obj?.group_session))
@@ -160,5 +166,21 @@ export class HomeComponent implements OnInit, OnDestroy {
       removeSub.unsubscribe()
       createSub.unsubscribe()
     })
+  }
+
+  compareUsers(otherArray: Array<GroupSessionMemberModel>) {
+    return (current: GroupSessionMemberModel) => {
+      return otherArray.filter((other) => {
+        return other.username == current.username
+      }).length == 0
+    }
+  }
+
+  mapMembers(members: Array<any>) {
+    if (members.length == 1) { return members[0]['username'] }
+    const input = members.map(x => x.username)
+    const last = input.pop()
+    const result = input.join(', ') + ' and ' + last
+    return result
   }
 }
