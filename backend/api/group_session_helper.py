@@ -213,6 +213,9 @@ def group_session_scrobbler(delay=True, session_id=None):
                 # manually replace now playing status in database for quicker turnaround on frontend
                 np_entry['username'] = member['username']
                 np_entry['check_count'] = 2 # this is to make sure we don't make an extra call to Last.fm
+                np_entry['artist'] = sql_helper.esc_db(np_entry['artist'])
+                np_entry['track'] = sql_helper.esc_db(np_entry['track'])
+                np_entry['album'] = sql_helper.esc_db(np_entry['album'])
                 cursor.execute(sql_helper.replace_into("now_playing", np_entry))
                 mdb.commit()
 
