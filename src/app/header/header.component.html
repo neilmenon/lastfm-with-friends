@@ -105,7 +105,7 @@
         </a>
       </span>
       <button *ngIf="false && signed_in == false && !router.url.includes('lastfmauth')" color="primary" class="sign-in" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
-      <mat-spinner *ngIf="!user?.username && signed_in" diameter="25" color="accent"></mat-spinner>
+      <mat-spinner *ngIf="!user?.username && signed_in" diameter="25" color="accent" style="padding-right: 0.5rem;"></mat-spinner>
     </mat-toolbar>
     <ng-content></ng-content>
   </mat-sidenav-content>

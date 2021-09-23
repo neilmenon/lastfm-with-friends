@@ -189,7 +189,7 @@ def group_session_scrobbler(delay=True, session_id=None):
         # loop through the members
         unix_now = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
         # owner's nowplaying track, if any
-        cursor.execute("SELECT artist, track, album FROM now_playing WHERE username = '{}' AND timestamp = 0".format(session['owner']))
+        cursor.execute("SELECT * FROM now_playing WHERE username = '{}' AND timestamp = 0".format(session['owner']))
         result = list(cursor)
         np_entry = result[0] if len(result) else None
         for member in members:
@@ -209,6 +209,12 @@ def group_session_scrobbler(delay=True, session_id=None):
                     t = nowplaying_req['nowplaying']
                 except Exception as e:
                     logger.log("\t Error setting now playing status: {}".format(nowplaying_req))
+
+                # manually replace now playing status in database for quicker turnaround on frontend
+                np_entry['username'] = member['username']
+                np_entry['check_count'] = 2 # this is to make sure we don't make an extra call to Last.fm
+                cursor.execute(sql_helper.replace_into("now_playing", np_entry))
+                mdb.commit()
 
             # (2) catch up on scrobbles from owner
             play_history = command_helper.play_history("overall", None, [owner_id], str(datetime.datetime.utcfromtimestamp(int(member['last_timestamp']))), str(datetime.datetime.utcfromtimestamp(int(unix_now))))

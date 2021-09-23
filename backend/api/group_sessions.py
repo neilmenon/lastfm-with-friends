@@ -43,16 +43,24 @@ def create():
             group_session_helper.make_non_silent(current_session['id'])
             current_session['is_silent'] = False
             return jsonify(current_session)
+        elif current_session['is_silent'] and is_silent and current_session['owner'] == username:
+            group_session_helper.end_session(current_session['id'])
+            new_session = group_session_helper.create_group_session(username, group_jc, is_silent, silent_followee, catch_up_timestamp)
+            return jsonify(new_session)
         else: # return "already in session error"
             response = make_response(jsonify(error="You are already in a session."), 400)
             abort(response)
     else:
         if is_silent:
-            current_sessions = group_session_helper.get_sessions(group_jc)
+            current_sessions = group_session_helper.get_sessions(group_jc, get_silent=True)
             for s in current_sessions: # check if owner is in another session
-                if s['owner'] == silent_followee:
-                    response = make_response(jsonify(error="{} has already started a public session. Please join that one.".format(s['owner'])), 400)
-                    abort(response)
+                if s['owner'] == silent_followee and not s['is_silent']:
+                    abort(make_response(jsonify(error="{} has already started a public session. Please join that one.".format(s['owner'])), 400))
+                elif s['owner'] == silent_followee and s['is_silent']: # another user is already silently following the owner
+                    # make non-silent and add user to it
+                    group_session_helper.make_non_silent(s['id'])
+                    response = group_session_helper.join_session(username, s['id'], catch_up_timestamp)
+                    return jsonify(response)
     if is_silent and (not silent_followee or silent_followee == username):
         response = make_response(jsonify(error="Silent followee must be specified and must not be yourself."), 400)
         abort(response)
