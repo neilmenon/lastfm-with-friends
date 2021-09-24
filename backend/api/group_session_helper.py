@@ -211,13 +211,14 @@ def group_session_scrobbler(delay=True, session_id=None):
                     logger.log("\t Error setting now playing status: {}".format(nowplaying_req))
 
                 # manually replace now playing status in database for quicker turnaround on frontend
-                np_entry['username'] = member['username']
-                np_entry['check_count'] = 2 # this is to make sure we don't make an extra call to Last.fm
-                np_entry['artist'] = sql_helper.esc_db(np_entry['artist'])
-                np_entry['track'] = sql_helper.esc_db(np_entry['track'])
-                np_entry['album'] = sql_helper.esc_db(np_entry['album'])
-                cursor.execute(sql_helper.replace_into("now_playing", np_entry))
-                mdb.commit()
+                # np_entry['username'] = member['username']
+                # np_entry['check_count'] = 2 # this is to make sure we don't make an extra call to Last.fm
+                # np_entry['artist'] = sql_helper.esc_db(np_entry['artist'])
+                # np_entry['track'] = sql_helper.esc_db(np_entry['track'])
+                # np_entry['album'] = sql_helper.esc_db(np_entry['album'])
+                # logger.log(sql_helper.replace_into("now_playing", np_entry))
+                # cursor.execute(sql_helper.replace_into("now_playing", np_entry))
+                # mdb.commit()
 
             # (2) catch up on scrobbles from owner
             play_history = command_helper.play_history("overall", None, [owner_id], str(datetime.datetime.utcfromtimestamp(int(member['last_timestamp']))), str(datetime.datetime.utcfromtimestamp(int(unix_now))))
