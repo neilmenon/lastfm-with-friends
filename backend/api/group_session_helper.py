@@ -273,15 +273,15 @@ def prune_sessions():
     cursor.execute("SELECT id,owner,created FROM group_sessions")
     sessions = list(cursor)
     for session in sessions:
-        # first check if session has existed for more than 20 minutes before trying to kill it
+        # first check if session has existed for more than 30 minutes before trying to kill it
         session_created = session['created']
         now = datetime.datetime.utcnow()
-        if (now - session_created) >= datetime.timedelta(minutes=20):
-            # fetch most recent track by owner. is there anything played within the last 20 minutes?
+        if (now - session_created) >= datetime.timedelta(minutes=30):
+            # fetch most recent track by owner. is there anything played within the last 90 minutes?
             cursor.execute("SELECT timestamp FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE users.username = '{}' ORDER BY timestamp DESC LIMIT 1".format(session['owner']))
             timestamp = list(cursor)[0]['timestamp']
             dt = datetime.datetime.utcfromtimestamp(int(timestamp))
-            if (now - dt) >= datetime.timedelta(minutes=20):
+            if (now - dt) >= datetime.timedelta(minutes=90):
                 logger.log("\t Ending session with ID: {} (no owner activity in {})".format(session['id'], now - dt))
                 end_session(session['id'])
 
