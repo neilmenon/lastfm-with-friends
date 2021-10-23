@@ -103,6 +103,7 @@ export class ScrobbleHistoryComponent implements OnInit {
   wkTrigger(data) {
     data['startDate'] = this.historyStartDate
     data['endDate'] = this.historyEndDate
+    data['isFromChart'] = this.data.chartUser ? true : false
     this.wkFromDialog.emit(data)
     this.dialogRef.close()
   }

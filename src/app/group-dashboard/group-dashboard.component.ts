@@ -582,20 +582,25 @@ export class GroupDashboardComponent implements OnInit {
         chartUser: chartUser
       }
     })
-    let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry) => {
+    let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry: any) => {
       let targetIndex: number, isCustomDate: boolean
-      if (wkMode == "track") {
-        targetIndex = this.wkTrackSelectedIndex
-        isCustomDate = this.wkTrackIsCustomDateRange
-      } else if (wkMode == "album") {
-        targetIndex = this.wkAlbumSelectedIndex
-        isCustomDate = this.wkAlbumIsCustomDateRange
-      } else if (wkMode == "artist") {
-        targetIndex = this.wkArtistSelectedIndex
-        isCustomDate = this.wkArtistIsCustomDateRange
-      } else if (wkMode == "overall") {
-        targetIndex = this.leaderboardSelectedIndex
-        isCustomDate = this.isCustomDateRange
+      if (entry['isFromChart']) { // who knows called from Charts
+        targetIndex = this.leaderboardSliderMappings.findIndex(o => o.days == this.chartDropdownDate)
+        isCustomDate = this.chartIsCustomDate
+      } else {
+        if (wkMode == "track") {
+          targetIndex = this.wkTrackSelectedIndex
+          isCustomDate = this.wkTrackIsCustomDateRange
+        } else if (wkMode == "album") {
+          targetIndex = this.wkAlbumSelectedIndex
+          isCustomDate = this.wkAlbumIsCustomDateRange
+        } else if (wkMode == "artist") {
+          targetIndex = this.wkArtistSelectedIndex
+          isCustomDate = this.wkArtistIsCustomDateRange
+        } else if (wkMode == "overall") {
+          targetIndex = this.leaderboardSelectedIndex
+          isCustomDate = this.isCustomDateRange
+        }
       }
       this.wkTrackSelectedIndex = targetIndex
       this.wkTrackIsCustomDateRange = isCustomDate
@@ -804,6 +809,8 @@ export class GroupDashboardComponent implements OnInit {
       this.chartCustomEndDate = customEndDate
       this.chartIsCustomDate = true
       this.chartDropdownDate = -2
+    } else if (this.chartDropdownDate == -2) {
+      this.chartIsCustomDate = true
     } else if (this.chartDropdownDate != -1) {
       endRange = moment.utc().format()
       startRange = moment.utc().subtract(this.chartDropdownDate, 'd').format()
