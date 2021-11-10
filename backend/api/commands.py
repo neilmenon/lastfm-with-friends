@@ -8,6 +8,7 @@ from . import auth_helper
 from . import user_helper
 from . import api_logger as logger
 from . import command_helper
+from . import auth_helper
 cfg = config.config
 
 command_api = Blueprint('commands', __name__)
@@ -266,6 +267,23 @@ def quick_wk_charts():
         params = request.get_json()
         if auth_helper.is_authenticated(params['username'], params['session_key']):
             response = command_helper.quick_wk_charts(params.get('users'), params.get('artist_id'), params.get('album_id'), params.get('track'), params.get('start_range'), params.get('end_range'))
+            return jsonify(response)
+        else:
+            abort(401)
+    except mariadb.Error as e:
+        logger.log("Database error: " + str(e))
+        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+        abort(response)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)
+
+@command_api.route('/api/commands/get-signed-scrobbles', methods=['POST'])
+def get_signed_scrobbles():
+    try:
+        params = request.get_json()
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            response = auth_helper.generate_scrobble_body(params['session_key'], params['tracks'])
             return jsonify(response)
         else:
             abort(401)

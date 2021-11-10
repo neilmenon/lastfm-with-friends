@@ -293,6 +293,7 @@
                         <td>{{ entry.percent | number: '1.2-2' }}</td>
                         <td class="wk-actions">
                             <a (click)="whoKnowsTop('track', wkTrackResults, entry, wkTrackIsCustomDateRange ? wkTrackCustomStartDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc().subtract(leaderboardSliderMappings[wkTrackSelectedIndex].days, 'd')), wkTrackIsCustomDateRange ? wkTrackCustomEndDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc()))" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
+                            <a [class.disable-click]="isDemo | async" (click)="scrobbleTrack()" *ngIf="user.username == entry.username" matTooltip="Manually Scrobble Track" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">file_upload</mat-icon></a>
                         </td>                     
                     </tr>
                 </tbody>

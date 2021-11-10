@@ -7,7 +7,7 @@ import * as moment from 'moment';
 import { ScrobbleHistoryComponent } from '../scrobble-history/scrobble-history.component';
 import { WhoKnowsTopComponent } from '../who-knows-top/who-knows-top.component';
 import { MatSliderChange } from '@angular/material/slider';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { CustomDateRangeComponent } from '../custom-date-range/custom-date-range.component';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
@@ -19,6 +19,9 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { discreteTimePeriods, releaseTypes } from '../constants';
 import { TimePeriodModel } from '../models/timePeriodModel';
 import { UserGroupModel, UserModel } from '../models/userGroupModel';
+import { select } from '@angular-redux/store';
+import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
+import { HttpScrobbleModel } from '../models/httpScrobbleModel';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -26,6 +29,9 @@ import { UserGroupModel, UserModel } from '../models/userGroupModel';
   styleUrls: ['./group-dashboard.component.css']
 })
 export class GroupDashboardComponent implements OnInit {
+  @select(s => s.isDemo)
+  isDemo: Observable<boolean>
+
   @Input() group: UserGroupModel
   @Input() user: UserModel
   @Input() userSettings: SettingsModel
@@ -859,6 +865,35 @@ export class GroupDashboardComponent implements OnInit {
         endRange: endRange,
         group: this.group,
         userObject: userObject
+      }
+    })
+  }
+
+  scrobbleTrack() {
+    let entry: HttpScrobbleModel = new HttpScrobbleModel()
+    entry.artist = this.wkTrackResults['artist']['name']
+    entry.track = this.wkTrackResults['track']['name']
+    entry.album = this.wkTrackResults['track']['album_name']
+    const dialogRef = this.dialog.open(ConfirmPopupComponent, {
+      data: { 
+        title: `Scrobble ${entry.artist} - ${entry.track}`,
+        message: "Are you sure you want to manually scrobble this track?",
+        primaryButton: "Submit Scrobble"
+      }
+    })
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.messageService.open(`Scrobbling ${entry.artist} - ${entry.track}...`, "center", true)
+        this.userService.getHttpScrobblePayload([entry]).toPromise().then((tracks: Array<any>) => {
+          this.userService.scrobbleTrack(tracks[0]).toPromise().then((data: any) => {
+            console.log(data)
+            this.messageService.open("Successfully submitted scrobble.")
+          }).catch(error1 => {
+            this.messageService.open("There was an error submitting this scrobble to Last.fm. Please try again.")
+          })
+        }).catch(error2 => {
+          this.messageService.open("There was an error getting the signed object from the backend. Please try again.")
+        })
       }
     })
   }

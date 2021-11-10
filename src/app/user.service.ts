@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { share } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { config } from './config'
@@ -8,6 +8,7 @@ import { SettingsModel } from './models/settingsModel';
 import { NgRedux } from '@angular-redux/store';
 import { AppState } from './store';
 import { SETTINGS_MODEL } from './actions';
+import { HttpScrobbleModel } from './models/httpScrobbleModel';
 
 @Injectable()
 export class UserService {
@@ -366,5 +367,20 @@ export class UserService {
 
   getRecentTracks(username: string) {
     return this.http.get(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${username}&api_key=${config.api_key}&format=json`)
+  }
+
+  getHttpScrobblePayload(tracks: Array<HttpScrobbleModel>) {
+    return this.http.post(config.api_root + "/commands/get-signed-scrobbles", {
+      'username': this.username,
+      'session_key': this.session_key,
+      'tracks': tracks
+    })
+  }
+
+  scrobbleTrack(payload: any) {
+
+    return this.http.post("https://ws.audioscrobbler.com/2.0", (new URLSearchParams(payload)).toString(), {
+      headers: new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+    })
   }
 }

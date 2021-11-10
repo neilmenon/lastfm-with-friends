@@ -135,3 +135,21 @@ def get_signed_object(data):
     signed_object['api_sig'] = hashed_signature
     signed_object['format'] = "json" # add return format **after** hashing, signature will be invalid otherwise
     return signed_object
+
+def generate_scrobble_body(session_key, tracks):
+    http_datas = []
+    for track in tracks:
+        data = {}
+        data['api_key'] = cfg['api']['key']
+        data['sk'] = session_key
+        data['method'] = 'track.scrobble'
+        data['artist'] = track['artist']
+        data['track'] = track['track']
+        if track['album']:
+            data['album'] = track['album']
+        data['timestamp'] = track['timestamp'] if track['timestamp'] else str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
+        signed_data = get_signed_object(data)
+
+        http_datas.append(signed_data)
+    
+    return http_datas
