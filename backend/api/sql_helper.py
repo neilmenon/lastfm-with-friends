@@ -1,4 +1,9 @@
 from requests.utils import quote
+import mariadb
+from . import api_logger as logger
+from flask import abort, make_response, jsonify
+from . import config
+cfg = config.config
 
 def insert_into(table, data):
     columns = ', '.join("`" + str(x) + "`" for x in data.keys())
@@ -54,3 +59,21 @@ def format_lastfm_string(url_string):
         url_string = url_string.replace(" ", "+")
         safe += "+"
     return quote(url_string, safe=safe)
+
+def execute_db(sql, commit=False):
+   mdb = mariadb.connect(**(cfg['sql']))
+   cursor = mdb.cursor(dictionary=True)
+   cursor.execute("SET time_zone='+00:00';")
+
+   try:
+      logger.debug("Executing SQL: {}".format(sql))
+      cursor.execute(sql)
+      records = [] if commit else list(cursor)
+      if commit:
+         mdb.commit()
+   except mariadb.Error as e:
+      mdb.close()
+      abort(make_response(jsonify(error="A database error occured: {}".format(e)), 500))
+
+   mdb.close()
+   return records
