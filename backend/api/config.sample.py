@@ -11,5 +11,6 @@ config = {
         'secret': '', # Last.fm Secret key. See https://www.last.fm/api/account/create
     },
     'server': False, # False if running on localhost, True running with uWSGI / NGINX
-    'demo_user': "" # username of demo user
+    'demo_user': "", # username of demo user
+    'sql_logging': False # enable for logging all SQL queries
 }

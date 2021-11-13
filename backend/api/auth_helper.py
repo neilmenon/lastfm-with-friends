@@ -1,4 +1,3 @@
-import mariadb
 import datetime
 import requests
 import hashlib
@@ -20,44 +19,27 @@ def is_authenticated(username, session_key):
         returns False if the above are false
     '''
     try:
-        mdb = mariadb.connect(**(cfg['sql']))
-        cursor = mdb.cursor(dictionary=True)
         sql = 'SELECT * FROM sessions WHERE session_key = "{}";'.format(session_key)
-        cursor.execute(sql)
-        result = list(cursor)
+        result = sql_helper.execute_db(sql)
         if len(result) > 0:
             session = result[0]
             if session['username'] != username: # user does not match session key
-                mdb.close()
                 return False
             # session key is valid; updated last_used field in sessions table then return True
             sql = "UPDATE `sessions` SET `last_used` = '"+str(datetime.datetime.utcnow())+"' WHERE `sessions`.`session_key` = '"+session_key+"'"
-            cursor.execute(sql)
-            mdb.commit()
-            mdb.close()
+            sql_helper.execute_db(sql, commit=True)
             return True
         else: # session key not found in database, user is not authenticated
-            mdb.close()
             return False
-    except mariadb.Error as e:
-        logger.log("Database error while checking if " + username + " is authenticated: " + str(e))
-        return False
     except Exception as e:
         logger.log("Error while checking if {} is authenticated: ".format(username) + str(e))
         return False
 
 def remove_session(username, session_key):
     try:
-        mdb = mariadb.connect(**(cfg['sql']))
-        cursor = mdb.cursor(dictionary=True)
         sql = 'DELETE FROM sessions WHERE session_key = "'+session_key+'";'
-        cursor.execute(sql)
-        mdb.commit()
-        mdb.close()
+        sql_helper.execute_db(sql, True)
         return True
-    except mariadb.Error as e:
-        logger.log("Database error while removing session key for " + username + ": " + str(e))
-        return False
     except Exception as e:
         logger.log("Error while removing session key for " + username + ": " + str(e))
         return False
@@ -96,23 +78,17 @@ def get_and_store_session(token):
         thread.start()
     # store session key in sessions table
     try:
-        mdb = mariadb.connect(**(cfg['sql']))
-        cursor = mdb.cursor(dictionary=True)
         table_data = {}
         table_data['username'] = username
         table_data['session_key'] = session_key
         table_data['last_used'] = str(datetime.datetime.utcnow())
         sql = sql_helper.insert_into_where_not_exists("sessions", table_data, "session_key")
-        cursor.execute(sql)
-        mdb.commit()
-        mdb.close()
+        sql_helper.execute_db(sql, commit=True)
         return {"username": username, "session_key": session_key}
-    except mariadb.Error as e:
-        logger.log("Database error while storing session for " + username + ": " + str(e))
-        return False
     except Exception as e:
         logger.log("Error while storing session for " + username + ": " + str(e))
         return False
+
 def get_signed_object(data):
     '''
         Creates hashed API signature and returns signed object for authentication - https://www.last.fm/api/webauth

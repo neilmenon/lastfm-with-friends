@@ -1,4 +1,3 @@
-import mariadb
 import datetime
 import requests
 import dateutil.parser
@@ -12,8 +11,6 @@ from . import api_logger as logger
 cfg = config.config
 
 def find_artist(query, skip_sanitize=False):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     fallback = False
     redirect = False
     # find artist in the database
@@ -22,45 +19,35 @@ def find_artist(query, skip_sanitize=False):
     else:
         sanitized_query = query
     sql = "SELECT * from artists WHERE UPPER({}) = UPPER('{}')".format(sql_helper.sanitize_db_field("name"), sanitized_query)
-    cursor.execute(sql)
-    result = list(cursor)
+    result = sql_helper.execute_db(sql)
     if not result:
         # fallback to LIKE
         sql = "SELECT * from artists WHERE {} LIKE '%{}%'".format(sql_helper.sanitize_db_field("name"), sanitized_query)
-        cursor.execute(sql)
-        result = list(cursor)
+        result = sql_helper.execute_db(sql)
         if not result:
             # check artist redirects
             sql = "SELECT * from artist_redirects WHERE UPPER({}) = UPPER('{}')".format(sql_helper.sanitize_db_field("artist_name"), sql_helper.esc_db(sanitized_query))
-            cursor.execute(sql)
-            result = list(cursor)
+            result = sql_helper.execute_db(sql)
             if not result:
-                mdb.close()
                 return None
             redirect = True
             redirected_name = result[0]['redirected_name']
             sql = "SELECT * from artists WHERE name = '{}'".format(sql_helper.esc_db(redirected_name))
-            cursor.execute(sql)
-            result = list(cursor)
+            result = sql_helper.execute_db(sql)
         fallback = True
     single_check = list(filter(lambda x: x['name'].upper() == query.upper(), result))
     artist = result[0] if len(single_check) != 1 else single_check[0]
     artist['fallback'] = fallback
     artist['redirect'] = redirect
-    mdb.close()
     return artist
 
 def find_album_tracks(album_id):
     # find the tracks that are associated with this album
     # need to do this because, technically, tracks can appear in several albums, but Last.fm still counts them all towards
     # the album being viewed
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     sql = "SELECT track from track_scrobbles WHERE album_id = {} GROUP BY track".format(album_id)
-    cursor.execute(sql)
-    result = list(cursor)
+    result = sql_helper.execute_db(sql)
     album_tracks_list = ', '.join('"' + str(sql_helper.esc_db(track)).replace('"', '\\"') + '"' for track in [r['track'] for r in result])
-    mdb.close()
     return album_tracks_list
 
 def wk_artist(query, users, start_range, end_range):
@@ -70,20 +57,14 @@ def wk_artist(query, users, start_range, end_range):
     if not artist:
         return None
 
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SET time_zone='+00:00';")
-
     # find users who have scrobbled this artist
     users_list = ", ".join(str(u) for u in users)
     if start_range and end_range:
         sql = 'SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN "{}" AND "{}" GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'], start_range, end_range)
     else:
         sql = 'SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'])
-    cursor.execute(sql)
-    result = list(cursor)
+    result = sql_helper.execute_db(sql, tz=True)
     total_scrobbles = sum([u['scrobbles'] for u in result])
-    mdb.close()
     return {'artist': artist, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
 def wk_album(query, users, start_range, end_range):
@@ -98,19 +79,13 @@ def wk_album(query, users, start_range, end_range):
     if not artist:
         return None
 
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-
     # find album in the database
     sql = "SELECT * from albums WHERE artist_name = '{}' AND UPPER({}) = UPPER('{}')".format(sql_helper.esc_db(artist['name']), sql_helper.sanitize_db_field("name"), sql_helper.esc_db(album_query))
-    cursor.execute(sql)
-    result = list(cursor)
+    result = sql_helper.execute_db(sql, tz=True)
     if not result:
         sql = "SELECT * from albums WHERE artist_name = '{}' AND {} LIKE '%{}%'".format(sql_helper.esc_db(artist['name']), sql_helper.sanitize_db_field("name"), sql_helper.esc_db(album_query))
-        cursor.execute(sql)
-        result = list(cursor)
+        result = sql_helper.execute_db(sql, tz=True)
         if not result:
-            mdb.close()
             return None
     album = result[0]
 
@@ -124,13 +99,11 @@ def wk_album(query, users, start_range, end_range):
             sql = 'SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) AND from_unixtime(track_scrobbles.timestamp) BETWEEN "{}" AND "{}" GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'], album_tracks_list, start_range, end_range)
         else:
             sql = 'SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) GROUP BY users.username order by scrobbles DESC'.format(users_list, artist['id'], album_tracks_list)
-        cursor.execute(sql)
-        result = list(cursor)
+        result = sql_helper.execute_db(sql)
         total_scrobbles = sum([u['scrobbles'] for u in result])
     else:
         result = []
         total_scrobbles = 0
-    mdb.close()
     return {'artist': artist, 'album': album, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
 def wk_track(query, users, start_range, end_range):
@@ -145,20 +118,13 @@ def wk_track(query, users, start_range, end_range):
     if not artist:
         return None
 
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SET time_zone='+00:00';")
-
     # find track in the database
     sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND UPPER({}) = UPPER('{}')".format(artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(track_query))
-    cursor.execute(sql)
-    result = list(cursor)
+    result = sql_helper.execute_db(sql, tz=True)
     if not result:
         sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND {} LIKE '%{}%'".format(artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(track_query))
-        cursor.execute(sql)
-        result = list(cursor)
+        result = sql_helper.execute_db(sql, tz=True)
         if not result:
-            mdb.close()
             return None
         track = result[0]
     track = result[0]
@@ -169,20 +135,15 @@ def wk_track(query, users, start_range, end_range):
         sql = "SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track = '{}' AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY users.username order by scrobbles DESC".format(users_list, artist['id'], sql_helper.esc_db(track['name']), start_range, end_range)
     else:
         sql = "SELECT users.user_id as id, users.username, COUNT(*) as scrobbles, CAST(ROUND((COUNT(*)/users.scrobbles)*100, 2) AS FLOAT) as percent FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track = '{}' GROUP BY users.username order by scrobbles DESC".format(users_list, artist['id'], sql_helper.esc_db(track['name']))
-    cursor.execute(sql)
-    result = list(cursor)
+    result = sql_helper.execute_db(sql)
     total_scrobbles = sum([u['scrobbles'] for u in result])
-    mdb.close()
     return {'artist': artist, 'track': track, 'users': result, 'total_scrobbles': total_scrobbles, 'total_users': len(users)}
 
 def nowplaying(single_user=None):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     if not single_user:
         logger.log("=== Running now playing task... ===")
         sql = "SELECT username FROM users;"
-        cursor.execute(sql)
-        users = list(cursor)
+        users = sql_helper.execute_db(sql)
     else:
         logger.log("[User-triggered now playing update] {}".format(single_user))
         users = [{'username': single_user}]
@@ -191,12 +152,10 @@ def nowplaying(single_user=None):
     for user in users:
         if single_user: # if update is user-triggered, no need to calculate next update (yet)
             sql = "UPDATE now_playing SET check_count = NULL WHERE username = '{}'".format(user['username'])
-            cursor.execute(sql)
-            mdb.commit()
+            sql_helper.execute_db(sql, commit=True)
         else:
             sql = "SELECT check_count,timestamp FROM now_playing WHERE username = '{}'".format(user['username'])
-            cursor.execute(sql)
-            result = list(cursor)
+            result = sql_helper.execute_db(sql)
             if result:
                 check_count = result[0]['check_count']
                 timestamp = int(result[0]['timestamp'])
@@ -218,18 +177,15 @@ def nowplaying(single_user=None):
                         if new_count:
                             logger.log("New now playing interval for {}: {}.".format(user['username'], new_count))
                             sql = "UPDATE now_playing SET check_count = {} WHERE username = '{}'".format(new_count, user['username'])
-                            cursor.execute(sql)
-                            mdb.commit()
+                            sql_helper.execute_db(sql, commit=True)
                             continue
                 elif check_count == 0: # check nowplaying status
                     sql = "UPDATE now_playing SET check_count = NULL WHERE username = '{}'".format(user['username'])
-                    cursor.execute(sql)
-                    mdb.commit()
+                    sql_helper.execute_db(sql, commit=True)
                 elif check_count > 0: # decrement interval and skip check
                     new_count = check_count - 1
                     sql = "UPDATE now_playing SET check_count = {} WHERE username = '{}'".format(new_count, user['username'])
-                    cursor.execute(sql)
-                    mdb.commit()
+                    sql_helper.execute_db(sql, commit=True)
                     continue
             else: # user does not have a nowplaying row in table, so check nowplaying status
                 pass
@@ -245,7 +201,6 @@ def nowplaying(single_user=None):
             continue
         except Exception as e:
             logger.log("[FATAL] Error getting most recently played track for {}: {}".format(user['username'], e))
-            mdb.close()
             return False
         
         tmp_user = user
@@ -267,19 +222,12 @@ def nowplaying(single_user=None):
             now_playing_users.append(tmp_user)
 
         sql = sql_helper.replace_into("now_playing", tmp_user)
-        cursor.execute(sql)
-        mdb.commit()
-    mdb.close()
+        sql_helper.execute_db(sql, commit=True)
     return True
 
 def get_nowplaying(join_code):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     sql = "SELECT now_playing.* FROM user_groups LEFT JOIN now_playing ON now_playing.username = user_groups.username WHERE user_groups.group_jc = '{}' AND now_playing.username IS NOT NULL ORDER BY IF(now_playing.timestamp = 0, 9999999999, now_playing.timestamp) DESC, user_groups.joined ASC".format(join_code)
-    cursor.execute(sql)
-    result = list(cursor)
-    mdb.close()
-    return result
+    return sql_helper.execute_db(sql)
 
 def play_history(wk_mode, artist_id, users, start_range, end_range, track=None, album_id=None, sort_by="track_scrobbles.timestamp", sort_order="DESC", limit=50, offset=0):
     users_list = ", ".join(str(u) for u in users)
@@ -300,7 +248,7 @@ def play_history(wk_mode, artist_id, users, start_range, end_range, track=None, 
         sql = "SELECT users.user_id ,users.username, artists.name as artist, artists.url as artist_url, albums.url as album_url, track_scrobbles.track, albums.name as album, track_scrobbles.timestamp FROM `track_scrobbles` LEFT JOIN users ON users.user_id = track_scrobbles.user_id LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) {} ORDER BY {} {}, track_scrobbles.timestamp DESC LIMIT {} OFFSET {}".format(users_list, date_sql, sort_by, sort_order, limit, offset)
     else:
         return False
-    records = sql_helper.execute_db(sql)
+    records = sql_helper.execute_db(sql, tz=True)
     if not records:
         return None
     total = sql_helper.execute_db("SELECT COUNT(*) as total FROM track_scrobbles")[0]['total']
@@ -315,9 +263,6 @@ def play_history(wk_mode, artist_id, users, start_range, end_range, track=None, 
     return data
 
 def wk_top(wk_mode, users, artist_id, start_range, end_range, album_id=None, track_mode=False):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SET time_zone='+00:00';")
     users_list = ", ".join(str(u) for u in users)
 
     if start_range and end_range:
@@ -333,46 +278,36 @@ def wk_top(wk_mode, users, artist_id, start_range, end_range, album_id=None, tra
     elif wk_mode == "album":
         album_tracks_list = find_album_tracks(album_id)
         sql = "SELECT albums.name as album, albums.id as album_id, track_scrobbles.track, albums.url as album_url, albums.image_url, COUNT(*) as scrobbles FROM track_scrobbles LEFT JOIN artists on artists.id = track_scrobbles.artist_id LEFT JOIN albums on albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id IN ({}) AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}){} GROUP BY track_scrobbles.track ORDER BY scrobbles DESC".format(users_list, artist_id, album_tracks_list, range_sql)
-    cursor.execute(sql)
-    records = list(cursor)
+    records = sql_helper.execute_db(sql, tz=True)
     if not records:
         return None
     elif wk_mode == "album" or track_mode:
         for r in records:
             r['track_url'] = r['album_url'] + "/" + sql_helper.format_lastfm_string(r['track'])
-    mdb.close()
     
     return records
 
 def scrobble_leaderboard(users, start_range, end_range):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     users_list = ", ".join(str(u) for u in users)
 
     if not start_range or not end_range:
         sql = "SELECT users.username, users.profile_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN users on users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC".format(users_list)
     else:
-        cursor.execute("SET time_zone='+00:00';")
         sql = "SELECT users.username, users.profile_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN users on users.user_id = track_scrobbles.user_id WHERE from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC;".format(start_range, end_range, users_list)
-    cursor.execute(sql)
-    leaderboard = list(cursor)
+    leaderboard = sql_helper.execute_db(sql, tz=True)
     total = sum([u['scrobbles'] for u in leaderboard])
-    mdb.close()
     return {'leaderboard': leaderboard, 'start_range': start_range, 'end_range': end_range, 'total': total}
 
 def wk_autocomplete(wk_mode, query):
     if len(query.strip()) < 2:
         return []
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
 
     sanitized_query = sql_helper.sanitize_query(query)
     partial_result = False
 
     if wk_mode == "artist":
         sql = "SELECT name from artists WHERE {} LIKE '%{}%' LIMIT 10".format(sql_helper.sanitize_db_field("name"), sanitized_query)
-        cursor.execute(sql)
-        artists = list(cursor)
+        artists = sql_helper.execute_db(sql)
         suggestions = [r["name"] for r in artists]
     else: # album or track
         release_query = ""
@@ -390,27 +325,23 @@ def wk_autocomplete(wk_mode, query):
                         sql = "SELECT name from albums WHERE artist_name = '{}' AND {} LIKE '%{}%' LIMIT 10".format(sql_helper.esc_db(valid_artist['name']), sql_helper.sanitize_db_field("name"), sql_helper.esc_db(release_query))
                     else:
                         sql = "SELECT name from albums WHERE artist_name = '{}' LIMIT 10".format(sql_helper.esc_db(valid_artist['name']))
-                    cursor.execute(sql)
-                    albums = list(cursor)
+                    albums = sql_helper.execute_db(sql)
                     suggestions = [valid_artist['name'] + " - " + a['name'] for a in albums]
                 else: # track
                     if release_query:
                         sql = "SELECT DISTINCT track as name FROM track_scrobbles WHERE artist_id = {} AND {} LIKE '%{}%' LIMIT 10".format(valid_artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(release_query))
                     else:
                         sql = "SELECT track as name, COUNT(*) as scrobbles FROM track_scrobbles WHERE artist_id = {} GROUP BY track ORDER BY scrobbles DESC LIMIT 10".format(valid_artist['id'])
-                    cursor.execute(sql)
-                    tracks = list(cursor)
+                    tracks = sql_helper.execute_db(sql)
                     suggestions = [valid_artist['name'] + " - " + t['name'] for t in tracks]
             else:
                 suggestions = []
         else:
             sql = "SELECT name from artists WHERE {} LIKE '%{}%' LIMIT 10".format(sql_helper.sanitize_db_field("name"), sanitized_query)
-            cursor.execute(sql)
-            artists = list(cursor)
+            artists = sql_helper.execute_db(sql)
             suggestions = [r["name"] + " - " for r in artists]
             partial_result = True
     
-    mdb.close()
     return {'suggestions': suggestions, 'partial_result': partial_result}
 
 def check_artist_redirect(artist_string):
@@ -437,33 +368,21 @@ def check_artist_redirect(artist_string):
                     return False
             else:
                 return False
-            
-            mdb = mariadb.connect(**(cfg['sql']))
-            cursor = mdb.cursor(dictionary=True)
 
             data = {'artist_name': sql_helper.esc_db(artist_string), 'redirected_name': sql_helper.esc_db(artist_name)}
             sql = sql_helper.insert_into_where_not_exists("artist_redirects", data, "artist_name")
-            cursor.execute(sql)
-            mdb.commit()
-            mdb.close()
+            sql_helper.execute_db(sql, commit=True)
             return {'artist': artist_name}
     except (KeyError, TypeError) as e: # this probably means the artist doesn't even exist in Last.fm's db either
-        try:
-            mdb.close()
-        except Exception:
-            pass
         return False
 
 def charts(chart_mode, chart_type, users, start_range, end_range):
     if not users:
         return []
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     entry_limit = 250
     user_charts = []
     group_chart = {}
     days_range = 365
-    cursor.execute("SET time_zone='+00:00';")
     
     if chart_mode == "individual":
         users = [users[0]]
@@ -486,10 +405,8 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
                 sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id WHERE track_scrobbles.user_id = {} GROUP BY track_scrobbles.artist_id ORDER BY scrobbles DESC LIMIT {}".format(user, entry_limit)
             else:
                 sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.artist_id ORDER BY scrobbles DESC LIMIT {}".format(user, start_range, end_range, entry_limit)
-        cursor.execute(sql)
-        result = list(cursor)
+        result = sql_helper.execute_db(sql, tz=True)
         user_charts.append(result)
-    mdb.close()
    
     if chart_mode == "individual":
         result = user_charts[0]
@@ -522,10 +439,6 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
         return group_chart_final
 
 def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SET time_zone='+00:00';")
-
     # get list of users in group
     group = group_helper.get_group(join_code, short=False)
     
@@ -544,8 +457,7 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
                 sql = "SELECT track,timestamp FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND artist_id = {}{}{}ORDER BY timestamp ASC".format(u['user_id'], start_range, end_range, wk_options['artist_id'], album_sql, track_sql)
             else:
                 sql = "SELECT track,timestamp FROM `track_scrobbles` WHERE user_id = {} AND artist_id = {}{}{}ORDER BY timestamp ASC".format(u['user_id'], wk_options['artist_id'], album_sql, track_sql)
-            cursor.execute(sql)
-            result = [r['timestamp'] for r in list(cursor)]
+            result = [r['timestamp'] for r in sql_helper.execute_db(sql, tz=True)]
             if result:
                 scrobbles.append({u['username']: result})
     elif cmd_mode == "user-track": # timeline of different track's scrobbles
@@ -556,15 +468,13 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
             sql = "SELECT track FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND artist_id = {}{}GROUP BY track ORDER BY COUNT(*) DESC LIMIT 20".format(wk_options['user_id'], start_range, end_range, wk_options['artist_id'], album_sql)
         else:
             sql = "SELECT track FROM `track_scrobbles` WHERE user_id = {} AND artist_id = {}{}GROUP BY track ORDER BY COUNT(*) DESC LIMIT 20".format(wk_options['user_id'], wk_options['artist_id'], album_sql)    
-        cursor.execute(sql)
-        selected_tracks = [t['track'] for t in list(cursor)]
+        selected_tracks = [t['track'] for t in sql_helper.execute_db(sql, tz=True)]
         for track in selected_tracks:
             if start_range and end_range:
                 sql = "SELECT track,timestamp FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.artist_id = {} AND track = '{}' ORDER BY timestamp ASC".format(wk_options['user_id'], start_range, end_range, wk_options['artist_id'], sql_helper.esc_db(track))
             else:
                 sql = "SELECT track,timestamp FROM `track_scrobbles` WHERE user_id = {} AND track_scrobbles.artist_id = {} AND track = '{}' ORDER BY timestamp ASC".format(wk_options['user_id'], wk_options['artist_id'], sql_helper.esc_db(track))
-            cursor.execute(sql)
-            result = [r['timestamp'] for r in list(cursor)]
+            result = [r['timestamp'] for r in sql_helper.execute_db(sql, tz=True)]
             if result:
                 scrobbles.append({track: result})
     elif cmd_mode == "user-album":
@@ -573,15 +483,13 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
             sql = "SELECT track_scrobbles.album_id,albums.name FROM track_scrobbles LEFT JOIN albums on track_scrobbles.album_id = albums.id WHERE track_scrobbles.user_id = {} AND track_scrobbles.artist_id = {} AND albums.name != '' AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.album_id ORDER BY COUNT(*) DESC LIMIT 10".format(wk_options['user_id'], wk_options['artist_id'], start_range, end_range)
         else:
             sql = "SELECT track_scrobbles.album_id,albums.name FROM track_scrobbles LEFT JOIN albums on track_scrobbles.album_id = albums.id WHERE track_scrobbles.user_id = {} AND track_scrobbles.artist_id = {} AND albums.name != '' GROUP BY track_scrobbles.album_id ORDER BY COUNT(*) DESC LIMIT 10".format(wk_options['user_id'], wk_options['artist_id'])
-        cursor.execute(sql)
-        selected_albums = list(cursor)
+        selected_albums = sql_helper.execute_db(sql, tz=True)
         for record in selected_albums:
             if start_range and end_range:
                 sql = "SELECT albums.name,track_scrobbles.timestamp FROM track_scrobbles LEFT JOIN albums on track_scrobbles.album_id = albums.id WHERE track_scrobbles.user_id = {} AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' ORDER BY track_scrobbles.timestamp ASC".format(wk_options['user_id'], wk_options['artist_id'], find_album_tracks(record['album_id']), start_range, end_range)
             else:
                 sql = "SELECT albums.name,track_scrobbles.timestamp FROM track_scrobbles LEFT JOIN albums on track_scrobbles.album_id = albums.id WHERE track_scrobbles.user_id = {} AND track_scrobbles.artist_id = {} AND track_scrobbles.track IN ({}) ORDER BY track_scrobbles.timestamp ASC".format(wk_options['user_id'], wk_options['artist_id'], find_album_tracks(record['album_id']))
-            cursor.execute(sql)
-            result = list(cursor)
+            result = sql_helper.execute_db(sql, tz=True)
             album_scrobbles = [r['timestamp'] for r in result]
             if album_scrobbles:
                 scrobbles.append({record['name']: album_scrobbles})
@@ -600,8 +508,7 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
         if days_range == -1:
             users_list = ", ".join(str(u['user_id']) for u in group['users'])
             sql = "SELECT timestamp from track_scrobbles WHERE user_id IN ({}) ORDER BY timestamp ASC LIMIT 1".format(users_list)
-            cursor.execute(sql)
-            result = list(cursor)
+            result = sql_helper.execute_db(sql, tz=True)
             start = datetime.datetime.utcfromtimestamp(int(result[0]['timestamp']))
             end = datetime.datetime.utcnow()
             days_range = (end - start).days
@@ -621,11 +528,11 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
                     scrbl_tmp.append({ int(start_tmp.timestamp()): 0 })
                 else:
                     sql = "SELECT COUNT(*) as total FROM `track_scrobbles` WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}'".format(u['user_id'], start_tmp.strftime("%Y-%m-%dT%H:%M:%SZ"), end_tmp.strftime("%Y-%m-%dT%H:%M:%SZ"))
-                    cursor.execute(sql)
+                    res = sql_helper.execute_db(sql, tz=True)
                     if cmd_mode == "leaderboard-cu": # cumulative mode
-                        scrbl_count += int(list(cursor)[0]['total'])
+                        scrbl_count += int(res[0]['total'])
                     else: # non-cumulative mode
-                        scrbl_count = int(list(cursor)[0]['total'])
+                        scrbl_count = int(res[0]['total'])
                     scrbl_tmp.append({ int(start_tmp.timestamp()): scrbl_count })
                 days_tmp += 1
             if cmd_mode == "leaderboard-cu":
@@ -634,14 +541,9 @@ def listening_trends(join_code, cmd_mode, wk_options, start_range, end_range):
             else:
                 scrobbles.append({ u['username']: scrbl_tmp})
 
-    mdb.close()
     return scrobbles
 
 def quick_wk_charts(users, artist_id, album_id, track, start_range, end_range):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SET time_zone='+00:00';")
-    
     if start_range and end_range:
         range_sql = " AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}'".format(start_range, end_range)
     else:
@@ -655,11 +557,10 @@ def quick_wk_charts(users, artist_id, album_id, track, start_range, end_range):
     records = []
     for u in users:
         sql = "SELECT {}, artist_id as artist, COUNT(*) as scrobbles FROM track_scrobbles WHERE user_id = {}{} GROUP BY {} ORDER BY scrobbles DESC LIMIT 10".format(wk_field, u, range_sql, sql_groupby)
-        cursor.execute(sql)
-        result = [entry | {'rank': i+1} for i, entry, in enumerate(list(cursor))]
+        result = sql_helper.execute_db(sql, tz=True)
+        result = [entry | {'rank': i+1} for i, entry, in enumerate(result)]
         filtered_list = list(filter(lambda x: str(x[wk_field]).lower() == str(wk_value).lower() and x['artist'] == artist_id, result))
         if filtered_list:
             tmp = { 'id': u, 'rank': filtered_list[0]['rank'] }
             records.append(tmp)
-    mdb.close()
     return records

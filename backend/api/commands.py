@@ -1,7 +1,6 @@
 import sys
 from flask import *
 import json
-import mariadb
 import datetime
 from . import config
 from . import auth_helper
@@ -24,10 +23,6 @@ def wk_artist():
             return jsonify(result)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -45,10 +40,6 @@ def wk_album():
             return jsonify(result)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -66,10 +57,6 @@ def wk_track():
             return jsonify(result)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -83,37 +70,28 @@ def nowplaying():
             return jsonify(result)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
 
 @command_api.route('/api/commands/nowplayingdb', methods=['POST'])
 def nowplayingdb():
-    try:
-        params = request.get_json()
-        if params:
-            try:
-                secret_key = params['secret_key']
-            except KeyError as e:
-                response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
-                abort(response)
-        else:
-            response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
             abort(response)
-        if secret_key != cfg['api']['secret']:
-            abort(401)
-        result = command_helper.nowplaying()
-        if not result:
-            abort(500)
-        return jsonify({'data': 'success'})
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
         abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    result = command_helper.nowplaying()
+    if not result:
+        abort(500)
+    return jsonify({'data': 'success'})
 
 @command_api.route('/api/commands/history', methods=['POST'])
 def history():
@@ -134,10 +112,6 @@ def history():
             return jsonify(result)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -159,10 +133,6 @@ def wk_top():
             return jsonify(result)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -176,10 +146,6 @@ def leaderboard():
             return jsonify(result)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -196,10 +162,6 @@ def wk_autocomplete():
                 abort(400)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -219,10 +181,6 @@ def artist_redirects():
             abort(500)
         else:
             return jsonify(response)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -236,10 +194,6 @@ def charts():
             return jsonify(response)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -253,10 +207,6 @@ def listening_trends():
             return jsonify(response)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -270,10 +220,6 @@ def quick_wk_charts():
             return jsonify(response)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
@@ -287,10 +233,6 @@ def get_signed_scrobbles():
             return jsonify(response)
         else:
             abort(401)
-    except mariadb.Error as e:
-        logger.log("Database error: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)

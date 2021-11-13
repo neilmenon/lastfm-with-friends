@@ -11,27 +11,19 @@ from . import auth_helper
 cfg = config.config
 
 def get_current_session(username=None, session_id=None, with_members=False):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     where_sql = "group_sessions.id = {}".format(session_id) if session_id else "username = '{}'".format(username)
-    cursor.execute("SELECT group_sessions.* FROM user_group_sessions LEFT JOIN group_sessions ON user_group_sessions.session_id = group_sessions.id WHERE {}".format(where_sql))
-    result = list(cursor)
+    result = sql_helper.execute_db("SELECT group_sessions.* FROM user_group_sessions LEFT JOIN group_sessions ON user_group_sessions.session_id = group_sessions.id WHERE {}".format(where_sql))
     if len(result):
         session = result[0]
         session['is_silent'] = True if session['is_silent'] else False
     else:
-        mdb.close()
         return None
     if with_members:
-        cursor.execute("SELECT user_group_sessions.username, users.profile_image FROM user_group_sessions LEFT JOIN users ON users.username = user_group_sessions.username WHERE session_id = {}".format(session['id']))
-        result = list(cursor)
+        result = sql_helper.execute_db("SELECT user_group_sessions.username, users.profile_image FROM user_group_sessions LEFT JOIN users ON users.username = user_group_sessions.username WHERE session_id = {}".format(session['id']))
         session['members'] = list(filter(lambda x: x['username'] == session['owner'], result)) + list(filter(lambda x: x['username'] != session['owner'], result))
-    mdb.close()
     return session
 
 def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_up_timestamp):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     # create group session
     final_owner = silent_followee if is_silent else initiator
     data = {
@@ -40,18 +32,15 @@ def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_
         'is_silent': int(is_silent),
         'created': str(datetime.datetime.utcnow())
     }
-    cursor.execute(sql_helper.insert_into("group_sessions", data))
-    mdb.commit()
+    sql_helper.execute_db(sql_helper.insert_into("group_sessions", data), commit=True)
     # insert owner into user_group_sessions table
-    cursor.execute("SELECT id from group_sessions WHERE owner = '{}'".format(final_owner))
-    result = list(cursor)
+    result = sql_helper.execute_db("SELECT id from group_sessions WHERE owner = '{}'".format(final_owner))
     data = {
         'username': final_owner,
         'session_id': result[0]['id'],
         'last_timestamp': str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
     }
-    cursor.execute(sql_helper.insert_into("user_group_sessions", data))
-    mdb.commit()
+    sql_helper.execute_db(sql_helper.insert_into("user_group_sessions", data), commit=True)
     # if is silent mode, insert the initiator into the user_group_sessions table
     if is_silent:
         data = {
@@ -59,13 +48,10 @@ def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_
             'session_id': result[0]['id'],
             'last_timestamp': str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())) if not catch_up_timestamp else catch_up_timestamp
         }
-        cursor.execute(sql_helper.insert_into("user_group_sessions", data))
-        mdb.commit()
+        sql_helper.execute_db(sql_helper.insert_into("user_group_sessions", data), commit=True)
 
     # set now playing count status to 1 to make sure it gets checked within two minutes, but not too soon in case the user creates the session and does not start the music immediately
-    cursor.execute("UPDATE now_playing SET check_count = 1 WHERE username = '{}' AND check_count IS NOT NULL".format(final_owner))
-    mdb.commit()
-    mdb.close()
+    sql_helper.execute_db("UPDATE now_playing SET check_count = 1 WHERE username = '{}' AND check_count IS NOT NULL".format(final_owner), commit=True)
 
     # update the user on create so that the prune task doesn't incorrectly end the session immediately.
     lastfm_scraper.update_user(final_owner, stall_if_existing=False)
@@ -73,42 +59,29 @@ def create_group_session(initiator, group_jc, is_silent, silent_followee, catch_
     return get_current_session(username=initiator, with_members=True)
 
 def end_session(session_id):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-
     # when session ends, run scrobbler one more time
     group_session_scrobbler(delay=False, session_id=session_id)
 
     # delete users from user_group_sessions table
-    cursor.execute("DELETE FROM user_group_sessions WHERE session_id = {}".format(session_id))
-    mdb.commit()
+    sql_helper.execute_db("DELETE FROM user_group_sessions WHERE session_id = {}".format(session_id), commit=True)
     
     # delete session
-    cursor.execute("DELETE FROM group_sessions WHERE id = {}".format(session_id))
-    mdb.commit()
-    mdb.close()
+    sql_helper.execute_db("DELETE FROM group_sessions WHERE id = {}".format(session_id), commit=True)
 
 def leave_session(username, session_id):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
 
     # give users pending scrobbles before they leave
     group_session_scrobbler(delay=False, session_id=session_id)
 
     # delete users from user_group_sessions table
-    cursor.execute("DELETE FROM user_group_sessions WHERE session_id = {} AND username = '{}'".format(session_id, username))
-    mdb.commit()
-    mdb.close()
+    sql_helper.execute_db("DELETE FROM user_group_sessions WHERE session_id = {} AND username = '{}'".format(session_id, username), commit=True)
 
 def join_session(username, session_id, catch_up_timestamp):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-
     if not catch_up_timestamp:
         session = get_current_session(session_id=session_id)
         # get owner's user_id
-        cursor.execute("SELECT user_id FROM users WHERE username = '{}'".format(session['owner']))
-        owner_id = list(cursor)[0]['user_id']
+        result = sql_helper.execute_db("SELECT user_id FROM users WHERE username = '{}'".format(session['owner']))
+        owner_id = result[0]['user_id']
 
         # update owner so we can properly set update timestamp for joiner
         lastfm_scraper.update_user(session['owner'], stall_if_existing=False)
@@ -123,33 +96,20 @@ def join_session(username, session_id, catch_up_timestamp):
         "session_id": session_id,
         'last_timestamp': final_timestamp
     }
-    cursor.execute(sql_helper.insert_into("user_group_sessions", data))
-    mdb.commit()
-    mdb.close()
+    sql_helper.execute_db(sql_helper.insert_into("user_group_sessions", data), commit=True)
     return get_current_session(session_id=session_id, with_members=True)
 
 def is_in_session(username, session_id):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SELECT * from user_group_sessions WHERE username = '{}' AND session_id = {}".format(username, session_id))
-    result = list(cursor)
-    mdb.close()
+    result = sql_helper.execute_db("SELECT * from user_group_sessions WHERE username = '{}' AND session_id = {}".format(username, session_id))
     return True if len(result) else False
 
 def make_non_silent(session_id):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    cursor.execute("UPDATE group_sessions SET is_silent = '0' WHERE id = {}".format(session_id))
-    mdb.commit()
-    mdb.close()
+    sql_helper.execute_db("UPDATE group_sessions SET is_silent = '0' WHERE id = {}".format(session_id), commit=True)
 
 def get_sessions(join_code, get_silent=False):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     silent_sql = " AND is_silent = '0'" if not get_silent else ""
-    cursor.execute("SELECT id FROM group_sessions WHERE group_jc = '{}'{}".format(join_code, silent_sql))
-    ids = [s['id'] for s in list(cursor)]
-    mdb.close()
+    result = sql_helper.execute_db("SELECT id FROM group_sessions WHERE group_jc = '{}'{}".format(join_code, silent_sql))
+    ids = [s['id'] for s in result]
     sessions = []
     for session_id in ids:
         sessions.append(get_current_session(session_id=session_id, with_members=True))
@@ -160,15 +120,11 @@ def group_session_scrobbler(delay=True, session_id=None):
     if delay:
         time.sleep(30)
 
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-    cursor.execute("SET time_zone='+00:00';")
     logger.log("===== GROUP SESSION SCROBBLER {}=====".format("(ID: {}) ".format(session_id) if session_id else ""))
     
     # get all active sessions
     session_sql = " WHERE id = {}".format(session_id) if session_id else ""
-    cursor.execute("SELECT * FROM group_sessions{}".format(session_sql))
-    sessions = list(cursor)
+    sessions = sql_helper.execute_db("SELECT * FROM group_sessions{}".format(session_sql))
     if not sessions:
         logger.log("\t No active sessions! All done.")
 
@@ -176,21 +132,19 @@ def group_session_scrobbler(delay=True, session_id=None):
     for session in sessions:
         logger.log("=====> Syncing scrobbles and now playing for session ID: {} / owner: {}".format(session['id'], session['owner']))
         # get owner's user_id
-        cursor.execute("SELECT user_id FROM users WHERE username = '{}'".format(session['owner']))
-        owner_id = list(cursor)[0]['user_id']
+        result = sql_helper.execute_db("SELECT user_id FROM users WHERE username = '{}'".format(session['owner']))
+        owner_id = result[0]['user_id']
 
         # first, update the owner, whose scrobbles with propagate to other members in the session
         lastfm_scraper.update_user(session['owner'], stall_if_existing=False)
 
         # get all children of the group session (aka not including owner)
-        cursor.execute("SELECT user_group_sessions.username, user_group_sessions.last_timestamp, s.session_key FROM user_group_sessions LEFT JOIN group_sessions ON user_group_sessions.session_id = group_sessions.id LEFT JOIN sessions as s ON s.session_key = ( SELECT session_key from sessions WHERE sessions.username = user_group_sessions.username LIMIT 1 ) WHERE session_id = {} AND user_group_sessions.username != group_sessions.owner".format(session['id']))
-        members = list(cursor)
+        members = sql_helper.execute_db("SELECT user_group_sessions.username, user_group_sessions.last_timestamp, s.session_key FROM user_group_sessions LEFT JOIN group_sessions ON user_group_sessions.session_id = group_sessions.id LEFT JOIN sessions as s ON s.session_key = ( SELECT session_key from sessions WHERE sessions.username = user_group_sessions.username LIMIT 1 ) WHERE session_id = {} AND user_group_sessions.username != group_sessions.owner".format(session['id']))
         
         # loop through the members
         unix_now = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
         # owner's nowplaying track, if any
-        cursor.execute("SELECT * FROM now_playing WHERE username = '{}' AND timestamp = 0".format(session['owner']))
-        result = list(cursor)
+        result = sql_helper.execute_db("SELECT * FROM now_playing WHERE username = '{}' AND timestamp = 0".format(session['owner']))
         np_entry = result[0] if len(result) else None
         for member in members:
             logger.log("Syncing {}...".format(member['username']))
@@ -246,43 +200,36 @@ def group_session_scrobbler(delay=True, session_id=None):
                             logger.log("\t\t Error scrobbling {} - {}: {}".format(data['artist'], data['track'], scrobble_req))
 
                     # (3) set update timestamp to timestamp of last scrobbled track + 1 second
-                    cursor.execute("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']))
-                    mdb.commit()
+                    sql_helper.execute_db("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']), commit=True)
                 elif len(play_history['records']) >= 60:
                     logger.log("\t [WARNING] A large amount of scrobbles were set to be scrobbled. These were declined.")
                     # (3) set update timestamp to timestamp of last scrobbled track + 1 second
-                    cursor.execute("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']))
-                    mdb.commit()
+                    sql_helper.execute_db("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']), commit=True)
                 else:
                     logger.log("\t No scrobbles to sync at this time.")
 
-    mdb.close()
 
 def prune_sessions():
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
 
     # prune sessions that have gone too long
     logger.log("Checking for any group sessions to kill...")
-    cursor.execute("SELECT id FROM group_sessions WHERE created >= now() + INTERVAL 12 HOUR")
-    for session in list(cursor):
+    result = sql_helper.execute_db("SELECT id FROM group_sessions WHERE created >= now() + INTERVAL 12 HOUR")
+    for session in result:
         logger.log("\t Ending session with ID: {} (max limit exceeded)".format(session['id']))
         end_session(session['id'])
 
     # prune sessions where owner hasn't scrobbled anything in a while
-    cursor.execute("SELECT id,owner,created FROM group_sessions")
-    sessions = list(cursor)
+    sessions = sql_helper.execute_db("SELECT id,owner,created FROM group_sessions")
     for session in sessions:
         # first check if session has existed for more than 30 minutes before trying to kill it
         session_created = session['created']
         now = datetime.datetime.utcnow()
         if (now - session_created) >= datetime.timedelta(minutes=30):
             # fetch most recent track by owner. is there anything played within the last 90 minutes?
-            cursor.execute("SELECT timestamp FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE users.username = '{}' ORDER BY timestamp DESC LIMIT 1".format(session['owner']))
-            timestamp = list(cursor)[0]['timestamp']
+            result = sql_helper.execute_db("SELECT timestamp FROM track_scrobbles LEFT JOIN users ON users.user_id = track_scrobbles.user_id WHERE users.username = '{}' ORDER BY timestamp DESC LIMIT 1".format(session['owner']))
+            timestamp = result[0]['timestamp']
             dt = datetime.datetime.utcfromtimestamp(int(timestamp))
             if (now - dt) >= datetime.timedelta(minutes=90):
                 logger.log("\t Ending session with ID: {} (no owner activity in {})".format(session['id'], now - dt))
                 end_session(session['id'])
 
-    mdb.close()
