@@ -14,6 +14,7 @@ import { SETTINGS_MODEL, USER_MODEL } from '../actions'
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { Router } from '@angular/router';
 import { config } from '../config';
+import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 
 @Component({
   selector: 'app-header',
@@ -123,5 +124,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
   exitDemo() {
     this.userService.clearLocalData()
     window.location.href = config.project_root
+  }
+
+  signOut() {
+    const dialogRef = this.dialog.open(ConfirmPopupComponent, {
+      data: { 
+        title: "Sign Out",
+        message: "Are you sure you want to sign out?",
+        primaryButton: "Confirm"
+      }
+    })
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.router.navigate(['/signout'])
+      }
+    })
   }
 }

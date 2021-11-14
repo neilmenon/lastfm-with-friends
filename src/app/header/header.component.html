@@ -48,7 +48,7 @@
             </button>
           </mat-menu>
           <button mat-menu-item [routerLink]="['/settings']">Settings</button>
-          <button mat-menu-item [routerLink]="['/signout']" *ngIf="!(isDemo | async)">Sign Out</button>
+          <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
           <button mat-menu-item (click)="exitDemo()" *ngIf="isDemo | async">Exit Demo</button>
         </mat-menu>
       </a>
@@ -99,7 +99,7 @@
               </button>
             </mat-menu>
             <button mat-menu-item [routerLink]="['/settings']">Settings</button>
-            <button mat-menu-item [routerLink]="['/signout']" *ngIf="!(isDemo | async)">Sign Out</button>
+            <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
             <button mat-menu-item (click)="exitDemo()" *ngIf="isDemo | async">Exit Demo</button>
           </mat-menu>
         </a>
