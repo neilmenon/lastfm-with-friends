@@ -74,7 +74,6 @@ jobs:
           script: \cp -a /root/projects/lastfm-with-friends/dist/lastfm-with-friends/. /usr/share/nginx/lastfm-with-friends/
           
       - name: Run buildjson.sh
-        if: always()
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
