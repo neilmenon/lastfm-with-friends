@@ -39,8 +39,8 @@ jobs:
       - name: npm install
         uses: appleboy/ssh-action@master
         if: |
-          "!contains(github.event.head_commit.message, '[BE-only]')" &&
-          "steps.filter.outputs.npm == 'true'"
+          !contains(github.event.head_commit.message, '[BE-only]') &&
+          steps.filter.outputs.npm == 'true'
         with:
           host: ${{ secrets.HOST }}
           username: root
