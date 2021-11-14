@@ -1,7 +1,6 @@
 import sys
 import json
 import requests
-import mariadb
 import datetime
 import time
 from bs4 import BeautifulSoup
@@ -39,8 +38,6 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
         elif not stall_if_existing and user['progress']: # we don't want to wait for existing processes if user update was fired a task other than the main update task!
             logger.log("\tKilling user update due to other potential process ({}%).".format(user['progress']), app)
             return
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     page = 1
     total_pages = 1
     get_recent_uts = True
@@ -72,12 +69,9 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                 if full_scrape or user['progress']:
                     logger.log("\tSomething went during the initial update or fixing failed update, storing earliest grabbed track date as last updated date.", app)
                     sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
-                    cursor.execute(sql)
-                    result = list(cursor)
+                    result = sql_helper.execute_db(sql)
                     user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp']))) 
-                    mdb.close()
                     return
-                mdb.close()
                 return
 
         # get the total pages
@@ -91,9 +85,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
             if user['scrobbles'] == 0: # if user hasn't scrobbled anything yet... set time to 2 weeks before last.fm registration, which is the earliest possible first scrobble
                 earliest_scrobble_time = datetime.datetime.utcfromtimestamp(int(user['registered'])) - datetime.timedelta(days=15)
                 user_helper.change_updated_date(username, start_time=earliest_scrobble_time)
-                mdb.close()
                 return {'tracks_fetched': -1, "last_update": str(earliest_scrobble_time)}
-            mdb.close()
             return {'tracks_fetched': -1, "last_update": last_update}
 
         for entry in lastfm["track"]:
@@ -115,111 +107,101 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
             timestamp = entry['date']['uts']
             image_url = entry['image'][3]['#text']
 
-            try:
-                # insert artist record
-                artist_record = {"name": artist, "url": artist_url}
-                sql = sql_helper.insert_into_where_not_exists("artists", artist_record, "name")
-                cursor.execute(sql)
-                mdb.commit()
+            # try:
+            # insert artist record
+            artist_record = {"name": artist, "url": artist_url}
+            sql = sql_helper.insert_into_where_not_exists("artists", artist_record, "name")
+            sql_helper.execute_db(sql, commit=True, pass_on_error=True)
 
-                # get the album id that was created
-                cursor.execute("SELECT id FROM artists WHERE name = '"+artist+"';")
-                result = list(cursor)
-                artist_id = result[0]["id"]
+            # get the album id that was created
+            result = sql_helper.execute_db("SELECT id FROM artists WHERE name = '"+artist+"';", pass_on_error=True)
+            artist_id = result[0]["id"]
 
-                # insert album record
-                album_record = {
-                    "artist_name": artist, 
-                    "name": album,
-                    "url": sql_helper.esc_db(album_url),
-                    "image_url": image_url
-                }
-                sql = sql_helper.insert_into_where_not_exists_2("albums", album_record, "artist_name", "name")
-                cursor.execute(sql)
-                mdb.commit()
+            # insert album record
+            album_record = {
+                "artist_name": artist, 
+                "name": album,
+                "url": sql_helper.esc_db(album_url),
+                "image_url": image_url
+            }
+            sql = sql_helper.insert_into_where_not_exists_2("albums", album_record, "artist_name", "name")
+            sql_helper.execute_db(sql, commit=True, pass_on_error=True)
 
-                # get the album id that was created
-                cursor.execute("SELECT id FROM albums WHERE artist_name = '"+artist+"' AND name = '"+album+"';")
-                result = list(cursor)
-                album_id = result[0]["id"]
+            # get the album id that was created
+            result = sql_helper.execute_db("SELECT id FROM albums WHERE artist_name = '"+artist+"' AND name = '"+album+"';", pass_on_error=True)
+            album_id = result[0]["id"]
 
-                # insert full track record
-                scrobble_record = {
-                    "artist_id": artist_id,
-                    "album_id": album_id,
-                    "user_id": user['user_id'],
-                    "track": track,
-                    "timestamp": timestamp,
-                }
-                sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
-                cursor.execute(sql)
-                mdb.commit()
-            except mariadb.Error as e:
-                if "albums_ibfk_1" in str(e) and artist != "Various Artists": 
-                    logger.log("\t\tRedirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, album_url), app)
-                    # artist name redirected to different page so not in artist table
-                    # add alternate name to artist_redirects table
+            # insert full track record
+            scrobble_record = {
+                "artist_id": artist_id,
+                "album_id": album_id,
+                "user_id": user['user_id'],
+                "track": track,
+                "timestamp": timestamp,
+            }
+            sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
+            sql_helper.execute_db(sql, commit=True, pass_on_error=True)
+            # except mariadb.Error as e:
+            #     if "albums_ibfk_1" in str(e) and artist != "Various Artists": 
+            #         logger.log("\t\tRedirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, album_url), app)
+            #         # artist name redirected to different page so not in artist table
+            #         # add alternate name to artist_redirects table
 
-                    redirected_url = entry['artist']['url']
-                    artist_page = requests.get(redirected_url).text
-                    soup = BeautifulSoup(artist_page, features="html.parser")
-                    if "noredirect" in redirected_url:
-                        s = soup.select('p.nag-bar-message > strong > a')[0].text.strip()
-                    else:
-                        s = soup.select('h1.header-new-title')[0].text.strip()
-                    if s:
-                        artist_name = artist
-                        redirected_name = s
-                        logger.log("\t\t\tFound Last.fm artist name: {}. Continuing with inserts...".format(redirected_name), app)
+            #         redirected_url = entry['artist']['url']
+            #         artist_page = requests.get(redirected_url).text
+            #         soup = BeautifulSoup(artist_page, features="html.parser")
+            #         if "noredirect" in redirected_url:
+            #             s = soup.select('p.nag-bar-message > strong > a')[0].text.strip()
+            #         else:
+            #             s = soup.select('h1.header-new-title')[0].text.strip()
+            #         if s:
+            #             artist_name = artist
+            #             redirected_name = s
+            #             logger.log("\t\t\tFound Last.fm artist name: {}. Continuing with inserts...".format(redirected_name), app)
                         
-                        try:
-                            # insert into artist_redirects table
-                            data = {"artist_name": artist_name, "redirected_name": redirected_name}
-                            sql = sql_helper.insert_into_where_not_exists("artist_redirects", data, "artist_name")
-                            cursor.execute(sql)
-                            mdb.commit()
+            #             try:
+            #                 # insert into artist_redirects table
+            #                 data = {"artist_name": artist_name, "redirected_name": redirected_name}
+            #                 sql = sql_helper.insert_into_where_not_exists("artist_redirects", data, "artist_name")
+            #                 sql_helper.execute_db(sql, commit=True)
 
-                            # now we can insert into the the albums table and album_scrobbles tables
-                            album_record["artist_name"] = redirected_name
-                            sql = sql_helper.insert_into_where_not_exists_2("albums", album_record, "artist_name", "name")
-                            cursor.execute(sql)
-                            mdb.commit()
+            #                 # now we can insert into the the albums table and album_scrobbles tables
+            #                 album_record["artist_name"] = redirected_name
+            #                 sql = sql_helper.insert_into_where_not_exists_2("albums", album_record, "artist_name", "name")
+            #                 sql_helper.execute_db(sql, commit=True)
 
-                            # get the album id that was created
-                            cursor.execute("SELECT id FROM albums WHERE artist_name = '"+artist+"' AND name = '"+album+"';")
-                            result = list(cursor)
-                            album_id = result[0]["id"]
+            #                 # get the album id that was created
+            #                 result = sql_helper.execute_db("SELECT id FROM albums WHERE artist_name = '"+artist+"' AND name = '"+album+"';")
+            #                 album_id = result[0]["id"]
 
-                            # insert full track record
-                            scrobble_record = {
-                                "artist_id": artist_id,
-                                "album_id": album_id,
-                                "user_id": user['user_id'],
-                                "track": track,
-                                "timestamp": timestamp
-                            }
-                            sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
-                            cursor.execute(sql)
-                            mdb.commit()
-                        except mariadb.Error as e:
-                            logger.log("\t\t\tFailed to insert.", app)
-                            break
-                elif artist == "Various Artists":
-                    continue
-                else:
-                    logger.log("A database error occurred while inserting a record: " + str(e), app)
-                    logger.log("\t\tQuery: " + sql, app)
-                continue
-            except Exception as e:
-                logger.log("An unknown error occured while inserting a record: " + str(e), app)
-                continue
+            #                 # insert full track record
+            #                 scrobble_record = {
+            #                     "artist_id": artist_id,
+            #                     "album_id": album_id,
+            #                     "user_id": user['user_id'],
+            #                     "track": track,
+            #                     "timestamp": timestamp
+            #                 }
+            #                 sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
+            #                 sql_helper.execute_db(sql, commit=True)
+            #             except mariadb.Error as e:
+            #                 logger.log("\t\t\tFailed to insert.", app)
+            #                 break
+            #     elif artist == "Various Artists":
+            #         continue
+            #     else:
+            #         logger.log("A database error occurred while inserting a record: " + str(e), app)
+            #         logger.log("\t\tQuery: " + sql, app)
+            #     continue
+            # except Exception as e:
+            #     logger.log("An unknown error occured while inserting a record: " + str(e), app)
+            #     continue
         page += 1
     if tracks_fetched > 0:
         updated_user = user_helper.get_user_account(username, update=True)
         if not full_scrape or not user['progress']: # if it's a normal routine update
             sql = "SELECT COUNT(*) as total FROM `track_scrobbles` WHERE user_id = {} ORDER BY `timestamp` DESC".format(user['user_id'])
-            cursor.execute(sql)
-            result = list(cursor)
+            result = sql_helper.execute_db(sql)
             if int(updated_user['scrobbles']) > result[0]['total']: # if Last.fm has more scrobbles than the database
                 # this could happen if user went back and submitted scrobbles before most recent updated timestamp in database
                 # delete scrobbles from past two weeks and fetch again in the same time period
@@ -227,8 +209,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     logger.log("\tMissing scrobbles for {} ({} lfm/{} db)! Deleting & re-fetching past two weeks...".format(username, updated_user['scrobbles'], result[0]['total']))
                     two_weeks_ago = most_recent_uts - 1209600
                     sql = "DELETE FROM `track_scrobbles` WHERE `user_id` = {} AND CAST(timestamp AS FLOAT) BETWEEN {} AND {}".format(user['user_id'], two_weeks_ago, str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())))
-                    cursor.execute(sql)
-                    mdb.commit()
+                    sql_helper.execute_db(sql, commit=True)
                     user_helper.change_update_progress(username, None, clear_progress=True)
                     user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(two_weeks_ago))
                     update_user(username, fix_count=True)
@@ -237,25 +218,20 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     update_user(username, full=True)
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
-        cursor.execute(sql)
-        result = list(cursor)
+        result = sql_helper.execute_db(sql)
         user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
     else:
         user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(most_recent_uts))
     user_helper.change_update_progress(username, None, clear_progress=True)
     logger.log("\tFetched {} track(s) for {}.".format(tracks_fetched, username), app)
-    mdb.close()
     return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}
 
 def scrape_artist_images(full=False):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     if full: # check for new image for ALL artists, regardless of whether they have an image or not
         sql = "SELECT * FROM `artists` WHERE `image_url`;"
     else:
         sql = "SELECT * FROM `artists` WHERE `image_url` IS null;"
-    cursor.execute(sql)
-    result = list(cursor)
+    result = sql_helper.execute_db(sql)
 
     for artist in result:
         img = requests.get(artist['url']).text
@@ -268,20 +244,15 @@ def scrape_artist_images(full=False):
             image_url = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
             logger.log("\tImage for " + artist['name'] + " not found.")
         sql = "UPDATE `artists` SET `image_url` = '{}' WHERE `id` = {}".format(image_url, artist['id'])
-        cursor.execute(sql)
-        mdb.commit()
-    mdb.close()
+        sql_helper.execute_db(sql, commit=True)
 
 def scrape_album_data(full=False):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
     no_artwork_url = "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
     if full: # scrape data for ALL albums, regardless of whether they have an image or not
         sql = "SELECT id,artist_name,name FROM `albums`;"
     else:
         sql = "SELECT id,artist_name,name FROM `albums` WHERE image_url = '{}'".format(no_artwork_url)
-    cursor.execute(sql)
-    result = list(cursor)
+    result = sql_helper.execute_db(sql)
     logger.log("=========== Initiating album data scrape {}for {} albums... ===========".format("FULL MODE " if full else "", len(result)))
     newly_fetched_artwork = 0
     for album in result:
@@ -299,7 +270,5 @@ def scrape_album_data(full=False):
             logger.log("\t Artwork found!")
             newly_fetched_artwork += 1
             sql = "UPDATE `albums` SET `image_url` = '{}' WHERE id = {}".format(artwork_url, album['id'])
-            cursor.execute(sql)
-            mdb.commit()
-    mdb.close()
+            sql_helper.execute_db(sql, commit=True)
     logger.log("Fetched new album art for {} out of {} ({}%) checked albums in the database.".format(newly_fetched_artwork, len(result), round((newly_fetched_artwork/(len(result)+1))*100, 2)))

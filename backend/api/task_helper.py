@@ -1,6 +1,5 @@
 import random
 import requests
-import mariadb
 import datetime
 from . import config
 from . import sql_helper
@@ -10,33 +9,25 @@ cfg = config.config
 
 def remove_unused_artists_albums():
     # use case: user removed scrobbles from app or edited scrobbles (Last.fm Pro users)
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
 
     deleted_artists = []
     deleted_albums = []
 
     # handle albums first due to foreign key relationship
     sql = "SELECT id,artist_name,name from albums WHERE NOT EXISTS (SELECT track_scrobbles.album_id FROM track_scrobbles WHERE track_scrobbles.album_id = albums.id)"
-    cursor.execute(sql)
-    deleted_albums = list(cursor)
+    deleted_albums = sql_helper.execute_db(sql)
     for album in deleted_albums:
         logger.log("Deleting unused album: {} - {} (ID: {})".format(album['artist_name'], album['name'], album['id']))
     sql = "DELETE FROM albums WHERE NOT EXISTS (SELECT track_scrobbles.album_id FROM track_scrobbles WHERE track_scrobbles.album_id = albums.id)"
-    cursor.execute(sql)
-    mdb.commit()
+    sql_helper.execute_db(sql, commit=True)
 
     # artists
     sql = "SELECT name,id from artists WHERE NOT EXISTS (SELECT track_scrobbles.artist_id FROM track_scrobbles WHERE track_scrobbles.artist_id = artists.id)"
-    cursor.execute(sql)
-    deleted_artists = list(cursor)
+    deleted_artists = sql_helper.execute_db(sql)
     for artist in deleted_artists:
         logger.log("Deleting unused artist: {} (ID: {})".format(artist['name'], artist['id']))
     sql = "DELETE FROM artists WHERE NOT EXISTS (SELECT track_scrobbles.artist_id FROM track_scrobbles WHERE track_scrobbles.artist_id = artists.id)"
-    cursor.execute(sql)
-    mdb.commit()
-
-    mdb.close()
+    sql_helper.execute_db(sql, commit=True)
 
     if not deleted_albums and not deleted_artists:
         logger.log("========== No unused artists or albums to delete! ==========")
@@ -44,47 +35,39 @@ def remove_unused_artists_albums():
         logger.log("========== Deleted {} artist(s) and {} album(s). ==========".format(len(deleted_artists), len(deleted_albums)))
 
 def app_stats(db_store):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
-
     stats = {}
     if db_store:
-        cursor.execute("SELECT COUNT(*) as artists FROM artists")
-        stats['artists'] = list(cursor)[0]['artists']
-        cursor.execute("SELECT COUNT(*) as albums FROM albums")
-        stats['albums'] = list(cursor)[0]['albums']
-        cursor.execute("SELECT COUNT(*) as tracks FROM (SELECT DISTINCT track FROM track_scrobbles GROUP BY track) as dt")
-        stats['tracks'] = list(cursor)[0]['tracks']
-        cursor.execute("SELECT COUNT(*) as scrobbles FROM track_scrobbles")
-        stats['scrobbles'] = list(cursor)[0]['scrobbles']
-        cursor.execute("SELECT COUNT(*) as users FROM users")
-        stats['users'] = list(cursor)[0]['users']
-        cursor.execute("SELECT COUNT(*) as groups FROM groups")
-        stats['groups'] = list(cursor)[0]['groups']
+        result = sql_helper.execute_db("SELECT COUNT(*) as artists FROM artists")
+        stats['artists'] = result[0]['artists']
+        result = sql_helper.execute_db("SELECT COUNT(*) as albums FROM albums")
+        stats['albums'] = result[0]['albums']
+        result = sql_helper.execute_db("SELECT COUNT(*) as tracks FROM (SELECT DISTINCT track FROM track_scrobbles GROUP BY track) as dt")
+        stats['tracks'] = result[0]['tracks']
+        result = sql_helper.execute_db("SELECT COUNT(*) as scrobbles FROM track_scrobbles")
+        stats['scrobbles'] = result[0]['scrobbles']
+        result = sql_helper.execute_db("SELECT COUNT(*) as users FROM users")
+        stats['users'] = result[0]['users']
+        result = sql_helper.execute_db("SELECT COUNT(*) as groups FROM groups")
+        stats['groups'] = result[0]['groups']
         stats['date'] = str(datetime.datetime.utcnow())
 
         sql = sql_helper.insert_into("stats", stats)
-        cursor.execute(sql)
-        mdb.commit()
+        sql_helper.execute_db(sql, commit=True)
     else:
         sql = "SELECT * FROM stats ORDER BY date DESC LIMIT 1"
-        cursor.execute(sql)
-        stats = list(cursor)[0]
+        result = sql_helper.execute_db(sql)
+        stats = result[0]
 
-    mdb.close()
     return stats
 
 def insert_demo_scrobbles(demo_users):
-    mdb = mariadb.connect(**(cfg['sql']))
-    cursor = mdb.cursor(dictionary=True)
 
     logger.log("====== INSERTING DEMO SCROBBLES ======")
     for user in demo_users:
         logger.log("Scrobbling for demo user {}.".format(user))
         
         # get session key of demo user
-        cursor.execute("SELECT session_key FROM sessions where username = '{}'".format(user))
-        result = list(cursor)
+        result = sql_helper.execute_db("SELECT session_key FROM sessions where username = '{}'".format(user))
         if result:
             session_key = result[0]['session_key']
         else:
@@ -94,8 +77,8 @@ def insert_demo_scrobbles(demo_users):
         # find some random tracks to scrobble
         random_num_tracks = random.randint(2, 10)
         sql = "SELECT artists.name AS artist_name, track_scrobbles.track, albums.name as album_name FROM `track_scrobbles` LEFT JOIN artists ON track_scrobbles.artist_id = artists.id LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE albums.name <> '' ORDER BY RAND() LIMIT {}".format(random_num_tracks)
-        cursor.execute(sql)
-        tracks_to_scrobble = list(cursor)
+        result = sql_helper.execute_db(sql)
+        tracks_to_scrobble = result
         logger.log("\t Scrobbling {} random tracks...".format(random_num_tracks))
 
         # scrobble the tracks
@@ -117,5 +100,4 @@ def insert_demo_scrobbles(demo_users):
             except Exception as e:
                 logger.log("\t\t Error scrobbling this track: {}".format(scrobble_req))
             
-    mdb.close()
     return True

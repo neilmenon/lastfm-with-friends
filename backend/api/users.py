@@ -1,7 +1,6 @@
 import sys
 from flask import *
 import json
-import mariadb
 import datetime
 from . import config
 from . import sql_helper
@@ -51,37 +50,24 @@ def signout():
 
 @user_api.route('/api/users', methods=['POST'])
 def create():
-    try:
-        mdb = mariadb.connect(**(cfg['sql']))
-        cursor = mdb.cursor(dictionary=True)
-        params = request.get_json()
-        if params:
-            try:
-                data = {
-                    "username": params['username'],
-                    "display_name": params['display_name'],
-                    "registered": params['registered'],
-                    "profile_image": params['profile_image'],
-                }
-            except KeyError as e:
-                response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
-                abort(response)
-        else:
-            response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+    params = request.get_json()
+    if params:
+        try:
+            data = {
+                "username": params['username'],
+                "display_name": params['display_name'],
+                "registered": params['registered'],
+                "profile_image": params['profile_image'],
+            }
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
             abort(response)
-        sql = sql_helper.insert_into_where_not_exists("users", data, "username")
-        result = cursor.execute(sql)
-        mdb.commit()
-        mdb.close()
-        if cursor.rowcount > 0:
-            return jsonify({"success": "Successfuly created user " + params['username'] +"."})
-        else:
-            response = make_response(jsonify(error="User "+params['username']+" already exists."), 409)
-            abort(response)
-    except mariadb.Error as e:
-        logger.log("Database error while creating user: " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
         abort(response)
+    sql = sql_helper.insert_into_where_not_exists("users", data, "username")
+    sql_helper.execute_db(sql, commit=True)
+    return jsonify({"success": "Successfuly created user " + params['username'] +"."})
 
 @user_api.route('/api/users/<string:username>', methods=['GET'])
 def get(username):
@@ -93,10 +79,6 @@ def get(username):
         else:
             response = make_response(jsonify(error="User " + str(username) + " not found."), 404)
             abort(response)
-    except mariadb.Error as e:
-        logger.log("Database error while getting user " + username + ": " + str(e))
-        response = make_response(jsonify(error="A database error occured. Please try again later."), 500)
-        abort(response)
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)

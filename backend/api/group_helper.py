@@ -1,4 +1,3 @@
-import mariadb
 import datetime
 from . import config
 from . import sql_helper

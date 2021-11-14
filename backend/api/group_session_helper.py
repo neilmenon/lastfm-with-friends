@@ -1,4 +1,3 @@
-import mariadb
 import datetime
 import requests
 import time

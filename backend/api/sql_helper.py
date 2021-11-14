@@ -60,7 +60,7 @@ def format_lastfm_string(url_string):
         safe += "+"
     return quote(url_string, safe=safe)
 
-def execute_db(sql, commit=False, tz=False, log=False):
+def execute_db(sql, commit=False, tz=False, log=False, pass_on_error=False):
    mdb = mariadb.connect(**(cfg['sql']))
    cursor = mdb.cursor(dictionary=True)
    if tz:
@@ -75,7 +75,10 @@ def execute_db(sql, commit=False, tz=False, log=False):
             mdb.commit()
    except mariadb.Error as e:
         mdb.close()
-        abort(make_response(jsonify(error="A database error occured: {}".format(e)), 500))
+        if pass_on_error:
+            logger.log("[PASS] A database error occured: {}".format(e))
+        else:
+            abort(make_response(jsonify(error="A database error occured: {}".format(e)), 500))
 
    mdb.close()
    return records
