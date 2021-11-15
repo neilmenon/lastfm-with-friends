@@ -75,6 +75,7 @@ jobs:
           
       - name: Run buildjson.sh
         uses: appleboy/ssh-action@master
+        if: "!contains(github.event.head_commit.message, '[BE-only]')"
         with:
           host: ${{ secrets.HOST }}
           username: root
