@@ -75,9 +75,9 @@ def execute_db(sql, commit=False, tz=False, log=False, pass_on_error=False):
             mdb.commit()
    except mariadb.Error as e:
         mdb.close()
-        if pass_on_error:
-            logger.log("[PASS] A database error occured: {}".format(e))
-        else:
+        logger.log("[PASS] A database error occured: {}".format(e))
+        logger.log("\tSQL: {}".format(sql))
+        if not pass_on_error:
             abort(make_response(jsonify(error="A database error occured: {}".format(e)), 500))
 
    mdb.close()
