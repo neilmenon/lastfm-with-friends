@@ -15,6 +15,7 @@ import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { Router } from '@angular/router';
 import { config } from '../config';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
+import { SwitchUserComponent } from '../switch-user/switch-user.component';
 
 @Component({
   selector: 'app-header',
@@ -33,6 +34,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   userUpdateInterval: any = 30000;
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset).pipe(map(result => result.matches), shareReplay());
   initUpdate: boolean = true
+  config: any = config
+  showClearLocalData: boolean = localStorage.getItem("lastfm_show_clear_local") == "Y"
+
   constructor(
     private breakpointObserver: BreakpointObserver, 
     private userService: UserService, 
@@ -139,5 +143,24 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.router.navigate(['/signout'])
       }
     })
+  }
+
+  switchUser() {
+    this.dialog.open(SwitchUserComponent)
+  }
+
+  switchBack() {
+    let prev_username: string = localStorage.getItem("prev_lastfm_username")
+    let prev_session: string = localStorage.getItem("prev_lastfm_session")
+    if (prev_username && prev_session) {
+      this.userService.clearLocalData()
+      localStorage.setItem("lastfm_username", prev_username)
+      localStorage.setItem("lastfm_session", prev_session)
+    } else {
+      this.userService.clearLocalData()
+    }
+    setTimeout(() => {
+      window.location.href = config.project_root
+    }, 200)
   }
 }

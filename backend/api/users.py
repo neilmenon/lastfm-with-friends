@@ -172,3 +172,21 @@ def get_demo():
             abort(404)
     else:
         abort(401)
+
+@user_api.route('/api/users-sessions', methods=['POST'])
+def users_all():
+    params = request.get_json()
+    if params:
+        try:
+            username = params['username']
+            session_key = params['session_key']
+        except KeyError as e:
+            abort(401)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    
+    if auth_helper.is_authenticated(username, session_key):
+        if username == cfg['admin_username']:
+            return jsonify(sql_helper.execute_db("SELECT users.username, sessions.session_key FROM users LEFT JOIN sessions ON users.username = sessions.username GROUP BY users.username"))
+    abort(401)

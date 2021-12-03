@@ -60,6 +60,7 @@ import { INITIAL_STATE, rootReducer } from './store';
 import { ConfirmPopupComponent } from './confirm-popup/confirm-popup.component';
 import { GroupSessionComponent } from './group-session/group-session.component';
 import { TimeSelectionComponent } from './time-selection/time-selection.component';
+import { SwitchUserComponent } from './switch-user/switch-user.component';
 
 @NgModule({
   declarations: [
@@ -84,6 +85,7 @@ import { TimeSelectionComponent } from './time-selection/time-selection.componen
     ConfirmPopupComponent,
     GroupSessionComponent,
     TimeSelectionComponent,
+    SwitchUserComponent,
   ],
   imports: [
     BrowserModule,

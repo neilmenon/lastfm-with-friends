@@ -48,8 +48,10 @@
             </button>
           </mat-menu>
           <button mat-menu-item [routerLink]="['/settings']">Settings</button>
-          <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
+          <button mat-menu-item (click)="switchUser()" *ngIf="config.admin_username == user.username">Switch User</button>
+          <button mat-menu-item (click)="switchBack()" *ngIf="showClearLocalData">Switch Back</button>
           <button mat-menu-item (click)="exitDemo()" *ngIf="isDemo | async">Exit Demo</button>
+          <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
         </mat-menu>
       </a>
       <!--<button
@@ -99,8 +101,10 @@
               </button>
             </mat-menu>
             <button mat-menu-item [routerLink]="['/settings']">Settings</button>
-            <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
+            <button mat-menu-item (click)="switchUser()" *ngIf="config.admin_username == user.username">Switch User</button>
+            <button mat-menu-item (click)="switchBack()" *ngIf="showClearLocalData">Switch Back</button>
             <button mat-menu-item (click)="exitDemo()" *ngIf="isDemo | async">Exit Demo</button>
+            <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
           </mat-menu>
         </a>
       </span>

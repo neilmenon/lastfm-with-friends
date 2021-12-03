@@ -38,6 +38,9 @@ export class UserService {
   clearLocalData() {
     localStorage.removeItem("lastfm_username")
     localStorage.removeItem("lastfm_session")
+    localStorage.removeItem("lastfm_show_clear_local")
+    localStorage.removeItem("prev_lastfm_username")
+    localStorage.removeItem("prev_lastfm_session")
   }
 
   signOut() {
@@ -381,6 +384,13 @@ export class UserService {
 
     return this.http.post("https://ws.audioscrobbler.com/2.0", (new URLSearchParams(payload)).toString(), {
       headers: new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+    })
+  }
+
+  getUserSessions() {
+    return this.http.post(config.api_root + '/users-sessions', {
+      'username': this.username,
+      'session_key': this.session_key
     })
   }
 }

@@ -1,0 +1,14 @@
+<div class="center" style="margin-bottom: -16px;">
+    <h3 mat-dialog-title>Switch User</h3>
+</div>
+<div mat-dialog-content class="center">
+    <p class="center-all">{{ users.length ? "Select a user to switch to." : "Loading users..." }}</p>
+    <form [formGroup]="userForm">
+        <mat-form-field color="accent" >
+            <mat-select formControlName="user">
+                <mat-option *ngFor="let u of users" [value]="u" [disabled]="!u.session_key">{{ u.username }}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </form>
+    <button color="accent" mat-raised-button [disabled]="!userForm.controls['user'].value" (click)="switchUser()">Switch User</button>
+</div>
