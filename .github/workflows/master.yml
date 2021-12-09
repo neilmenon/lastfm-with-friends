@@ -93,4 +93,4 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          script: service lastfm-with-friends restart
+          script: service lfmwf restart
