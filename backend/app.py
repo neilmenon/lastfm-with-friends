@@ -20,7 +20,7 @@ app.register_blueprint(group_session_api)
 CORS(app)
 
 @app.teardown_appcontext
-def teardown_db():
+def teardown_db(exception):
    db = g.pop('db', None)
    if db is not None:
       db.close()
