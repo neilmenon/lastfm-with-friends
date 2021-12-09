@@ -1,8 +1,9 @@
 from requests.utils import quote
 import mariadb
 from . import api_logger as logger
-from flask import abort, make_response, jsonify
+from flask import abort, make_response, jsonify, g
 from . import config
+
 cfg = config.config
 
 def insert_into(table, data):
@@ -60,25 +61,31 @@ def format_lastfm_string(url_string):
         safe += "+"
     return quote(url_string, safe=safe)
 
+def get_db():
+    if 'db' not in g:
+        g.db = mariadb.connect(**(cfg['sql']))
+
+    return g.db
+
+
 def execute_db(sql, commit=False, tz=False, log=False, pass_on_error=False):
-   mdb = mariadb.connect(**(cfg['sql']))
-   cursor = mdb.cursor(dictionary=True)
-   if tz:
-       cursor.execute("SET time_zone='+00:00';")
+    mdb = get_db()
+    cursor = mdb.cursor(dictionary=True)
+    if tz:
+        cursor.execute("SET time_zone='+00:00';")
 
-   try:
-       if log or cfg['sql_logging']:
-           logger.debug("Executing SQL: {}".format(sql))
-       cursor.execute(sql)
-       records = [] if commit else list(cursor)
-       if commit:
-            mdb.commit()
-   except mariadb.Error as e:
-        mdb.close()
-        logger.log("[PASS] A database error occured: {}".format(e))
-        logger.log("\tSQL: {}".format(sql))
-        if not pass_on_error:
-            abort(make_response(jsonify(error="A database error occured: {}".format(e)), 500))
+    try:
+        if log or cfg['sql_logging']:
+            logger.debug("Executing SQL: {}".format(sql))
+        cursor.execute(sql)
+        records = [] if commit else list(cursor)
+        if commit:
+                mdb.commit()
+    except mariadb.Error as e:
+            mdb.close()
+            logger.log("[PASS] A database error occured: {}".format(e))
+            logger.log("\tSQL: {}".format(sql))
+            if not pass_on_error:
+                abort(make_response(jsonify(error="A database error occured: {}".format(e)), 500))
 
-   mdb.close()
-   return records
+    return records

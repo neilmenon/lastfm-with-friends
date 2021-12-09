@@ -29,7 +29,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
         user_helper.change_updated_date(username, clear_date=True)
         if user['progress'] and stall_if_existing: # we don't always want to stall, for example, user updates triggered from group sessions tasks
             logger.log("\tDetected a potential in-progress scrape ({}%). Stalling a bit to see if it's progressing...".format(user['progress']), app)
-            time.sleep(60)
+            time.sleep(30)
             current_progress = user_helper.get_user(username)['progress']
             if current_progress != user['progress']: # other task exists and is chugging along
                 logger.log("\t\tAnother process exists and is progressing. Exiting...", app)
