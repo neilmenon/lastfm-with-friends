@@ -1,4 +1,9 @@
 0,30 * * * * /bin/bash /root/.scripts/globalupdate.sh > /dev/null 2>&1
 * * * * * /bin/bash /root/.scripts/nowplaying.sh > /dev/null 2>&1
+@weekly /bin/bash /root/.scripts/cleanup-artists-albums.sh > /dev/null 2>&1
 @weekly /bin/bash /root/.scripts/album.sh > /dev/null 2>&1
+@daily /bin/bash /root/.scripts/app-stats.sh > /dev/null 2>&1
+28 * * * * /bin/bash /root/.scripts/demoscrobbler.sh > /dev/null 2>&1
+* * * * * /bin/bash /root/.scripts/group-session-scrobbler.sh > /dev/null 2>&1
+*/5 * * * * /bin/bash /root/.scripts/prune-group-sessions.sh > /dev/null 2>&1
 @monthly echo "" > /var/log/uwsgi/flask.log

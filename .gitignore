@@ -14,6 +14,9 @@
 # backend config file
 /backend/api/config.py
 
+# backend uWSGI app.ini file
+/backend/app.ini
+
 # backend test python files
 /backend/api/test.py
 /backend/database/schema.txt

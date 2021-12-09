@@ -26,7 +26,7 @@
                 <span *ngIf="user.username == session.owner">
                     Your scrobbles are being tracked by {{ session.members.length - 1 | pluralize:'user' }}. Session started {{ moment(session.created).locale('en').fromNow() }}.
                 </span>
-                <span *ngIf="session.is_silent">This is a <u>silent</u> session. <span style="color: #e2e2e2;">{{ session.owner }}</span> will not see that you are following them.</span>
+                <span *ngIf="session.is_silent"><span style="color: #e2e2e2;">{{ session.owner }}</span> will not see that you are following them unless they start a session.</span>
             </div>
             <div style="padding-top: 0.5rem;">
                 <button color="accent" mat-raised-button (click)="leaveSession()" *ngIf="user.username != session.owner && !leaveEndLoading">Leave Session</button>
