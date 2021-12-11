@@ -10,7 +10,8 @@ from . import api_logger as logger
 
 cfg = config.config
 
-def find_artist(query, skip_sanitize=False):
+def find_artist(query, skip_sanitize=False, extended=False):
+    columns_to_fetch = "*" if extended else "id, name, url, image_url"
     fallback = False
     redirect = False
     # find artist in the database
@@ -18,11 +19,11 @@ def find_artist(query, skip_sanitize=False):
         sanitized_query = sql_helper.sanitize_query(query)
     else:
         sanitized_query = query
-    sql = "SELECT * from artists WHERE UPPER({}) = UPPER('{}')".format(sql_helper.sanitize_db_field("name"), sanitized_query)
+    sql = "SELECT {} from artists WHERE UPPER({}) = UPPER('{}')".format(columns_to_fetch, sql_helper.sanitize_db_field("name"), sanitized_query)
     result = sql_helper.execute_db(sql)
     if not result:
         # fallback to LIKE
-        sql = "SELECT * from artists WHERE {} LIKE '%{}%'".format(sql_helper.sanitize_db_field("name"), sanitized_query)
+        sql = "SELECT {} from artists WHERE {} LIKE '%{}%'".format(columns_to_fetch, sql_helper.sanitize_db_field("name"), sanitized_query)
         result = sql_helper.execute_db(sql)
         if not result:
             # check artist redirects
@@ -32,13 +33,18 @@ def find_artist(query, skip_sanitize=False):
                 return None
             redirect = True
             redirected_name = result[0]['redirected_name']
-            sql = "SELECT * from artists WHERE name = '{}'".format(sql_helper.esc_db(redirected_name))
+            sql = "SELECT {} from artists WHERE name = '{}'".format(columns_to_fetch, sql_helper.esc_db(redirected_name))
             result = sql_helper.execute_db(sql)
         fallback = True
     single_check = list(filter(lambda x: x['name'].upper() == query.upper(), result))
     artist = result[0] if len(single_check) != 1 else single_check[0]
     artist['fallback'] = fallback
     artist['redirect'] = redirect
+
+    # get genres if extended mode
+    if extended:
+        genres = sql_helper.execute_db("SELECT genres.name FROM genres LEFT JOIN artist_genres ON artist_genres.genre_id = genres.id WHERE artist_genres.artist_id = {}".format(artist['id']))
+        artist['genres'] = [g['name'] for g in genres]
     return artist
 
 def find_album_tracks(album_id):
@@ -53,7 +59,7 @@ def find_album_tracks(album_id):
 def wk_artist(query, users, start_range, end_range):
     if not query:
         return None
-    artist = find_artist(query)
+    artist = find_artist(query, extended=True)
     if not artist:
         return None
 

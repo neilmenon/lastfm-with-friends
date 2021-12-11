@@ -272,3 +272,47 @@ def scrape_album_data(full=False):
             sql = "UPDATE `albums` SET `image_url` = '{}' WHERE id = {}".format(artwork_url, album['id'])
             sql_helper.execute_db(sql, commit=True)
     logger.log("Fetched new album art for {} out of {} ({}%) checked albums in the database.".format(newly_fetched_artwork, len(result), round((newly_fetched_artwork/(len(result)+1))*100, 2)))
+
+def scrape_extra_artist_info(full=False):
+    # get artists who do not have listeners and playcount set
+    if not full:
+        sql = "SELECT id, name FROM artists WHERE listeners IS NULL AND playcount IS NULL"
+    else:
+        sql = "SELECT id, name FROM artists"
+    artists = sql_helper.execute_db(sql)
+    
+    for artist in artists:
+        logger.log("Fetching extra artist data for {} (ID: {})".format(artist['name'], artist['id']))
+        req_url = "https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={}&api_key={}&format=json&autocorrect=1".format(sql_helper.format_lastfm_string(artist['name']), cfg['api']['key'])
+        try:
+            req = requests.get(req_url).json()
+            artist_info = req['artist']
+        except Exception as e:
+            logger.log("\tAn error ocurred while trying get artist data. Skipping... {}".format(e))
+            logger.log("\tRequest URL: {}".format(req_url))
+            continue
+
+        listeners = artist_info['stats']['listeners']
+        playcount = artist_info['stats']['playcount']
+        genres = [g['name'].lower().replace("-", " ") for g in artist_info['tags']['tag']]
+
+        # update artist with listeners and playcount
+        sql_helper.execute_db("UPDATE artists SET listeners = {}, playcount = {} WHERE id = {}".format(listeners, playcount, artist['id']), commit=True)
+
+        # filter genres from blacklist (TODO)
+        blacklisted_genres = [artist['name'].lower(), 'seen live', 'female vocalists', 'american', 'male vocalists', 'usa', 'all', 'under 2000 listeners', 'vocal', 'gay']
+        filtered_genres = list(filter(lambda x: x not in blacklisted_genres, genres))
+
+        for g in filtered_genres:
+            # insert genre if it does not already exist
+            sql_helper.execute_db(sql_helper.insert_into_where_not_exists("genres", { "name": sql_helper.esc_db(g) }, "name"), commit=True)
+
+            # get ID of the genre
+            genre_id = sql_helper.execute_db("SELECT id FROM genres WHERE name = '{}'".format(sql_helper.esc_db(g)))[0]['id']
+
+            # add association between the artist and the genre
+            data = { "artist_id": artist['id'], "genre_id": genre_id }
+            sql_helper.execute_db(sql_helper.replace_into("artist_genres", data), commit=True)
+
+    return { 'artists_processed': len(artists) }
+

@@ -140,3 +140,21 @@ def prune_group_sessions():
         abort(401)
     response = group_session_helper.prune_sessions()
     return jsonify(response)
+
+@task_api.route('/api/tasks/artist-extra', methods=['POST'])
+def artist_extra():
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+            full = params['full']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    response = lastfm_scraper.scrape_extra_artist_info(full)
+    return jsonify(response)

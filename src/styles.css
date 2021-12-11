@@ -467,6 +467,16 @@ div.history-options-container > mat-paginator {
     color: unset;
 }
 
+.mat-chip-list-wrapper {
+    justify-content: center;
+}
+.mat-chip.mat-standard-chip.playcount-chip {
+    background-color: #7b8958;
+}
+.mat-chip.mat-standard-chip.listeners-chip {
+    background-color: #577a9c;
+}
+.wk-genres .mat-standard-chip { min-height: 21px!important; }
 
 /* SCROLLBARS */
 .wk-actions-dialog {

@@ -116,6 +116,21 @@
                     </tr>
                 </tbody>
             </table>
+            <div class="wk-genres">
+                <div style="padding-bottom: 0.5rem;">
+                    <mat-chip-list>
+                        <mat-chip class="listeners-chip" matTooltip="{{ wkArtistResults.artist.listeners | number }}" matTooltipPosition="above">
+                            Listeners: {{ wkArtistResults.artist.listeners | shortNumber }}
+                        </mat-chip>
+                        <mat-chip class="playcount-chip" matTooltip="{{ wkArtistResults.artist.playcount | number }}" matTooltipPosition="above">
+                            Scrobbles: {{ wkArtistResults.artist.playcount | shortNumber }}
+                        </mat-chip>
+                    </mat-chip-list>
+                </div>
+                <mat-chip-list>
+                    <mat-chip *ngFor="let genre of wkArtistResults.artist.genres">{{ genre }}</mat-chip>
+                </mat-chip-list>
+            </div>
         </div>
         <span *ngIf="wkArtistInit === undefined">
             No one knows this artist in {{ group.name }}.<br>

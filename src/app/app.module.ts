@@ -31,6 +31,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
 
 // Miscellaneous
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -61,6 +62,7 @@ import { ConfirmPopupComponent } from './confirm-popup/confirm-popup.component';
 import { GroupSessionComponent } from './group-session/group-session.component';
 import { TimeSelectionComponent } from './time-selection/time-selection.component';
 import { SwitchUserComponent } from './switch-user/switch-user.component';
+import { ShortNumberPipe } from './short-number.pipe';
 
 @NgModule({
   declarations: [
@@ -86,6 +88,7 @@ import { SwitchUserComponent } from './switch-user/switch-user.component';
     GroupSessionComponent,
     TimeSelectionComponent,
     SwitchUserComponent,
+    ShortNumberPipe,
   ],
   imports: [
     BrowserModule,
@@ -119,6 +122,7 @@ import { SwitchUserComponent } from './switch-user/switch-user.component';
     MatRadioModule,
     NgReduxModule,
     MatCheckboxModule,
+    MatChipsModule,
     RouterModule.forRoot([
       {path: '', component: HomeComponent},
       {path: 'lastfmauth', component: LastfmauthComponent},
@@ -130,7 +134,7 @@ import { SwitchUserComponent } from './switch-user/switch-user.component';
       {path: 'settings', component: UserSettingsComponent}
     ])
   ],
-  providers: [UserService, PluralizePipe],
+  providers: [UserService, PluralizePipe, ShortNumberPipe],
   bootstrap: [AppComponent]
 })
 export class AppModule {

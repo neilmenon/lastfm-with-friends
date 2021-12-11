@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, g
 from flask_cors import CORS
+import mariadb
 
 import api.config as config
 from api.users import user_api
@@ -7,6 +8,7 @@ from api.groups import group_api
 from api.commands import command_api
 from api.tasks import task_api
 from api.group_sessions import group_session_api
+import api.api_logger as logger
 
 cfg = config.config
 
@@ -23,7 +25,10 @@ CORS(app)
 def teardown_db(exception):
    db = g.pop('db', None)
    if db is not None:
-      db.close()
+      try:
+         db.close()
+      except mariadb.Error as e:
+         logger.log("[WARN] DB connection could not be closed successfully: {}".format(e))
 
 @app.route('/api', methods=['GET'])
 def index():

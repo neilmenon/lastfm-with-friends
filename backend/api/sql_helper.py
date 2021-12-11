@@ -67,7 +67,6 @@ def get_db():
 
     return g.db
 
-
 def execute_db(sql, commit=False, tz=False, log=False, pass_on_error=False):
     mdb = get_db()
     cursor = mdb.cursor(dictionary=True)

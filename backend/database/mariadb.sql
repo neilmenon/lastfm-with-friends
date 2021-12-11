@@ -35,6 +35,23 @@ CREATE TABLE `albums` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `artist_genres`
+--
+
+DROP TABLE IF EXISTS `artist_genres`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `artist_genres` (
+  `artist_id` bigint(20) NOT NULL,
+  `genre_id` int(11) NOT NULL,
+  PRIMARY KEY (`artist_id`,`genre_id`),
+  KEY `artist_genres_ibfk_2` (`genre_id`),
+  CONSTRAINT `artist_genres_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `artist_genres_ibfk_2` FOREIGN KEY (`genre_id`) REFERENCES `genres` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `artist_redirects`
 --
 
@@ -62,8 +79,24 @@ CREATE TABLE `artists` (
   `name` varchar(400) NOT NULL,
   `url` varchar(400) DEFAULT NULL,
   `image_url` varchar(400) DEFAULT NULL,
+  `listeners` int(11) DEFAULT NULL,
+  `playcount` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `genres`
+--
+
+DROP TABLE IF EXISTS `genres`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `genres` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(191) NOT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -256,4 +289,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-09-17  2:43:34
+-- Dump completed on 2021-12-11  0:57:11
