@@ -227,10 +227,10 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
     return {'tracks_fetched': tracks_fetched, "last_update": datetime.datetime.utcfromtimestamp(most_recent_uts)}
 
 def scrape_artist_images(full=False):
-    if full: # check for new image for ALL artists, regardless of whether they have an image or not
-        sql = "SELECT * FROM `artists` WHERE `image_url`;"
+    if full: # check for new image for ALL artists (except ones who are null to avoid multi processing)
+        sql = "SELECT * FROM `artists` WHERE `image_url` IS NOT NULL;"
     else:
-        sql = "SELECT * FROM `artists` WHERE `image_url` IS null;"
+        sql = "SELECT * FROM `artists` WHERE `image_url` IS NULL;"
     result = sql_helper.execute_db(sql)
 
     for artist in result:
