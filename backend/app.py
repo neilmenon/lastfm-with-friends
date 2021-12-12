@@ -28,7 +28,7 @@ def teardown_db(exception):
       try:
          db.close()
       except mariadb.Error as e:
-         logger.log("[WARN] DB connection could not be closed successfully: {}".format(e))
+         logger.warn("DB connection could not be closed successfully: {}".format(e))
 
 @app.route('/api', methods=['GET'])
 def index():

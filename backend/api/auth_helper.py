@@ -32,7 +32,7 @@ def is_authenticated(username, session_key):
         else: # session key not found in database, user is not authenticated
             return False
     except Exception as e:
-        logger.log("Error while checking if {} is authenticated: ".format(username) + str(e))
+        logger.error("Error while checking if {} is authenticated: ".format(username) + str(e))
         return False
 
 def remove_session(username, session_key):
@@ -41,7 +41,7 @@ def remove_session(username, session_key):
         sql_helper.execute_db(sql, True)
         return True
     except Exception as e:
-        logger.log("Error while removing session key for " + username + ": " + str(e))
+        logger.error("Error while removing session key for " + username + ": " + str(e))
         return False
 
 def get_and_store_session(token):
@@ -60,15 +60,15 @@ def get_and_store_session(token):
         lastfm_auth = requests.post("https://ws.audioscrobbler.com/2.0", data=signed_data).json()
         session_key = lastfm_auth['session']['key']
         username = lastfm_auth['session']['name']
-        logger.log("New login from Last.fm user " + username)
+        logger.info("New login from Last.fm user " + username)
     except AttributeError:
-        logger.log("Error while getting session from Last.fm: did not return JSON object")
+        logger.error("Error while getting session from Last.fm: did not return JSON object")
         return False
     except KeyError:
-        logger.log("Error while getting session from Last.fm: " + str(lastfm_auth))
+        logger.error("Error while getting session from Last.fm: " + str(lastfm_auth))
         return False
     except Exception as e:
-        logger.log("Error while getting session from Last.fm:" + str(e))
+        logger.error("Error while getting session from Last.fm:" + str(e))
         return False
     # check if user exists in database, if not create new user
     if not user_helper.get_user(username):
@@ -86,7 +86,7 @@ def get_and_store_session(token):
         sql_helper.execute_db(sql, commit=True)
         return {"username": username, "session_key": session_key}
     except Exception as e:
-        logger.log("Error while storing session for " + username + ": " + str(e))
+        logger.error("Error while storing session for " + username + ": " + str(e))
         return False
 
 def get_signed_object(data):

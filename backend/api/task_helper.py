@@ -17,7 +17,7 @@ def remove_unused_artists_albums():
     sql = "SELECT id,artist_name,name from albums WHERE NOT EXISTS (SELECT track_scrobbles.album_id FROM track_scrobbles WHERE track_scrobbles.album_id = albums.id)"
     deleted_albums = sql_helper.execute_db(sql)
     for album in deleted_albums:
-        logger.log("Deleting unused album: {} - {} (ID: {})".format(album['artist_name'], album['name'], album['id']))
+        logger.info("Deleting unused album: {} - {} (ID: {})".format(album['artist_name'], album['name'], album['id']))
     sql = "DELETE FROM albums WHERE NOT EXISTS (SELECT track_scrobbles.album_id FROM track_scrobbles WHERE track_scrobbles.album_id = albums.id)"
     sql_helper.execute_db(sql, commit=True)
 
@@ -25,14 +25,14 @@ def remove_unused_artists_albums():
     sql = "SELECT name,id from artists WHERE NOT EXISTS (SELECT track_scrobbles.artist_id FROM track_scrobbles WHERE track_scrobbles.artist_id = artists.id)"
     deleted_artists = sql_helper.execute_db(sql)
     for artist in deleted_artists:
-        logger.log("Deleting unused artist: {} (ID: {})".format(artist['name'], artist['id']))
+        logger.info("Deleting unused artist: {} (ID: {})".format(artist['name'], artist['id']))
     sql = "DELETE FROM artists WHERE NOT EXISTS (SELECT track_scrobbles.artist_id FROM track_scrobbles WHERE track_scrobbles.artist_id = artists.id)"
     sql_helper.execute_db(sql, commit=True)
 
     if not deleted_albums and not deleted_artists:
-        logger.log("========== No unused artists or albums to delete! ==========")
+        logger.info("========== No unused artists or albums to delete! ==========")
     else:
-        logger.log("========== Deleted {} artist(s) and {} album(s). ==========".format(len(deleted_artists), len(deleted_albums)))
+        logger.info("========== Deleted {} artist(s) and {} album(s). ==========".format(len(deleted_artists), len(deleted_albums)))
 
 def app_stats(db_store):
     stats = {}
@@ -62,16 +62,16 @@ def app_stats(db_store):
 
 def insert_demo_scrobbles(demo_users):
 
-    logger.log("====== INSERTING DEMO SCROBBLES ======")
+    logger.info("====== INSERTING DEMO SCROBBLES ======")
     for user in demo_users:
-        logger.log("Scrobbling for demo user {}.".format(user))
+        logger.info("Scrobbling for demo user {}.".format(user))
         
         # get session key of demo user
         result = sql_helper.execute_db("SELECT session_key FROM sessions where username = '{}'".format(user))
         if result:
             session_key = result[0]['session_key']
         else:
-            logger.log("\t SKIPPED. No session key found in the database for this demo user.")
+            logger.warn("\t SKIPPED scrobbling for {}. No session key found in the database for this demo user.".format(user))
             continue
         
         # find some random tracks to scrobble
@@ -79,7 +79,7 @@ def insert_demo_scrobbles(demo_users):
         sql = "SELECT artists.name AS artist_name, track_scrobbles.track, albums.name as album_name FROM `track_scrobbles` LEFT JOIN artists ON track_scrobbles.artist_id = artists.id LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE albums.name <> '' ORDER BY RAND() LIMIT {}".format(random_num_tracks)
         result = sql_helper.execute_db(sql)
         tracks_to_scrobble = result
-        logger.log("\t Scrobbling {} random tracks...".format(random_num_tracks))
+        logger.info("\t Scrobbling {} random tracks...".format(random_num_tracks))
 
         # scrobble the tracks
         for index, entry in enumerate(tracks_to_scrobble):
@@ -94,10 +94,10 @@ def insert_demo_scrobbles(demo_users):
             data['timestamp'] = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()) - random.randint(1, 1*60*60))
             signed_data = auth_helper.get_signed_object(data)
             try:
-                logger.log("\t [{}/{}] Scrobbling {} - {}".format(index+1, len(tracks_to_scrobble), data['artist'], data['track']))
+                logger.info("\t [{}/{}] Scrobbling {} - {}".format(index+1, len(tracks_to_scrobble), data['artist'], data['track']))
                 scrobble_req = requests.post("https://ws.audioscrobbler.com/2.0", data=signed_data).json()
                 t = scrobble_req['scrobbles']
             except Exception as e:
-                logger.log("\t\t Error scrobbling this track: {}".format(scrobble_req))
+                logger.error("\t\t Error scrobbling this track: {}".format(scrobble_req))
             
     return True

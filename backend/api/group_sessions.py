@@ -33,13 +33,13 @@ def create():
     current_session = group_session_helper.get_current_session(username, with_members=True)
     if current_session: # returns None if not in session
         if current_session['group_jc'] != group_jc: # trying to create session in different group!
-            logger.log("{} trying to create session in different group!".format(username))
+            logger.info("{} trying to create session in different group!".format(username))
             if current_session['owner'] == username: # if owner of session, end session
                 group_session_helper.end_session(current_session['id'])
             else: # if just member, then leave session
                 group_session_helper.leave_session(username, current_session['id'])
         elif current_session['is_silent'] and not is_silent: # if the session is silent (one user silently following another), make non-silent
-            logger.log("Silent session was found for session created by {}. Making non-silent...".format(username))
+            logger.info("Silent session was found for session created by {}. Making non-silent...".format(username))
             group_session_helper.make_non_silent(current_session['id'])
             current_session['is_silent'] = False
             return jsonify(current_session)
@@ -147,7 +147,7 @@ def join():
     current_session = group_session_helper.get_current_session(username, session_id)
     if current_session: # returns None if not in session
         if current_session['group_jc'] != group_jc: # trying to join session in different group!
-            logger.log("{} trying to join session in different group!".format(username))
+            logger.info("{} trying to join session in different group!".format(username))
             if current_session['owner'] == username: # if owner of session, end session
                 group_session_helper.end_session(current_session['id'])
             else: # if just member, then leave session

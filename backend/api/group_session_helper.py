@@ -119,17 +119,17 @@ def group_session_scrobbler(delay=True, session_id=None):
     if delay:
         time.sleep(30)
 
-    logger.log("===== GROUP SESSION SCROBBLER {}=====".format("(ID: {}) ".format(session_id) if session_id else ""))
+    logger.info("===== GROUP SESSION SCROBBLER {}=====".format("(ID: {}) ".format(session_id) if session_id else ""))
     
     # get all active sessions
     session_sql = " WHERE id = {}".format(session_id) if session_id else ""
     sessions = sql_helper.execute_db("SELECT * FROM group_sessions{}".format(session_sql))
     if not sessions:
-        logger.log("\t No active sessions! All done.")
+        logger.info("\t No active sessions! All done.")
 
     # loop through sessions
     for session in sessions:
-        logger.log("=====> Syncing scrobbles and now playing for session ID: {} / owner: {}".format(session['id'], session['owner']))
+        logger.info("=====> Syncing scrobbles and now playing for session ID: {} / owner: {}".format(session['id'], session['owner']))
         # get owner's user_id
         result = sql_helper.execute_db("SELECT user_id FROM users WHERE username = '{}'".format(session['owner']))
         owner_id = result[0]['user_id']
@@ -146,7 +146,7 @@ def group_session_scrobbler(delay=True, session_id=None):
         result = sql_helper.execute_db("SELECT * FROM now_playing WHERE username = '{}' AND timestamp = 0".format(session['owner']))
         np_entry = result[0] if len(result) else None
         for member in members:
-            logger.log("Syncing {}...".format(member['username']))
+            logger.info("Syncing {}...".format(member['username']))
             # (1) update nowplaying status
             if np_entry:
                 data = {}
@@ -161,7 +161,7 @@ def group_session_scrobbler(delay=True, session_id=None):
                     nowplaying_req = requests.post("https://ws.audioscrobbler.com/2.0", data=signed_data).json()
                     t = nowplaying_req['nowplaying']
                 except Exception as e:
-                    logger.log("\t Error setting now playing status: {}".format(nowplaying_req))
+                    logger.error("\t Error setting now playing status: {}".format(nowplaying_req))
 
                 # manually replace now playing status in database for quicker turnaround on frontend
                 # np_entry['username'] = member['username']
@@ -169,19 +169,19 @@ def group_session_scrobbler(delay=True, session_id=None):
                 # np_entry['artist'] = sql_helper.esc_db(np_entry['artist'])
                 # np_entry['track'] = sql_helper.esc_db(np_entry['track'])
                 # np_entry['album'] = sql_helper.esc_db(np_entry['album'])
-                # logger.log(sql_helper.replace_into("now_playing", np_entry))
+                # logger.info(sql_helper.replace_into("now_playing", np_entry))
                 # cursor.execute(sql_helper.replace_into("now_playing", np_entry))
                 # mdb.commit()
 
             # (2) catch up on scrobbles from owner
             play_history = command_helper.play_history("overall", None, [owner_id], str(datetime.datetime.utcfromtimestamp(int(member['last_timestamp']))), str(datetime.datetime.utcfromtimestamp(int(unix_now))))
             if not play_history:
-                logger.log("\t No scrobbles to sync at this time.")
+                logger.info("\t No scrobbles to sync at this time.")
                 continue
             else:
                 # loop through tracks and scrobble them
                 if len(play_history['records']) > 0 and len(play_history['records']) < 60:
-                    logger.log("\t Scrobbling {} track(s) for {}.".format(len(play_history['records']), member['username']))
+                    logger.info("\t Scrobbling {} track(s) for {}.".format(len(play_history['records']), member['username']))
                     for entry in play_history['records']:
                         data = {}
                         data['api_key'] = cfg['api']['key']
@@ -196,25 +196,25 @@ def group_session_scrobbler(delay=True, session_id=None):
                             scrobble_req = requests.post("https://ws.audioscrobbler.com/2.0", data=signed_data).json()
                             t = scrobble_req['scrobbles']
                         except Exception as e:
-                            logger.log("\t\t Error scrobbling {} - {}: {}".format(data['artist'], data['track'], scrobble_req))
+                            logger.error("\t\t Error scrobbling {} - {}: {}".format(data['artist'], data['track'], scrobble_req))
 
                     # (3) set update timestamp to timestamp of last scrobbled track + 1 second
                     sql_helper.execute_db("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']), commit=True)
                 elif len(play_history['records']) >= 60:
-                    logger.log("\t [WARNING] A large amount of scrobbles were set to be scrobbled. These were declined.")
+                    logger.warn("\t A large amount of scrobbles were set to be scrobbled. These were declined.")
                     # (3) set update timestamp to timestamp of last scrobbled track + 1 second
                     sql_helper.execute_db("UPDATE user_group_sessions SET last_timestamp = '{}' WHERE username = '{}'".format(int(play_history['records'][0]['timestamp']) + 1, member['username']), commit=True)
                 else:
-                    logger.log("\t No scrobbles to sync at this time.")
+                    logger.info("\t No scrobbles to sync at this time.")
 
 
 def prune_sessions():
 
     # prune sessions that have gone too long
-    logger.log("Checking for any group sessions to kill...")
+    logger.info("Checking for any group sessions to kill...")
     result = sql_helper.execute_db("SELECT id FROM group_sessions WHERE created >= now() + INTERVAL 12 HOUR")
     for session in result:
-        logger.log("\t Ending session with ID: {} (max limit exceeded)".format(session['id']))
+        logger.info("\t Ending session with ID: {} (max limit exceeded)".format(session['id']))
         end_session(session['id'])
 
     # prune sessions where owner hasn't scrobbled anything in a while
@@ -229,6 +229,6 @@ def prune_sessions():
             timestamp = result[0]['timestamp']
             dt = datetime.datetime.utcfromtimestamp(int(timestamp))
             if (now - dt) >= datetime.timedelta(minutes=90):
-                logger.log("\t Ending session with ID: {} (no owner activity in {})".format(session['id'], now - dt))
+                logger.info("\t Ending session with ID: {} (no owner activity in {})".format(session['id'], now - dt))
                 end_session(session['id'])
 

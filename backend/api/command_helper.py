@@ -147,11 +147,11 @@ def wk_track(query, users, start_range, end_range):
 
 def nowplaying(single_user=None):
     if not single_user:
-        logger.log("=== Running now playing task... ===")
+        logger.info("=== Running now playing task... ===")
         sql = "SELECT username FROM users;"
         users = sql_helper.execute_db(sql)
     else:
-        logger.log("[User-triggered now playing update] {}".format(single_user))
+        logger.info("[User-triggered now playing update] {}".format(single_user))
         users = [{'username': single_user}]
     now_playing_users = []
     played_users = []
@@ -181,7 +181,7 @@ def nowplaying(single_user=None):
                             new_count = round(math.log(hours) * math.log(hours) * math.log(hours))
                         
                         if new_count:
-                            logger.log("New now playing interval for {}: {}.".format(user['username'], new_count))
+                            logger.info("New now playing interval for {}: {}.".format(user['username'], new_count))
                             sql = "UPDATE now_playing SET check_count = {} WHERE username = '{}'".format(new_count, user['username'])
                             sql_helper.execute_db(sql, commit=True)
                             continue
@@ -195,7 +195,7 @@ def nowplaying(single_user=None):
                     continue
             else: # user does not have a nowplaying row in table, so check nowplaying status
                 pass
-        logger.log("Checking now playing status for {}.".format(user['username']))
+        logger.info("Checking now playing status for {}.".format(user['username']))
         req_url = 'http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={}&api_key={}&limit=1&format=json'.format(user['username'], cfg['api']['key'])
         try:
             req = requests.get(req_url).json()
@@ -203,10 +203,10 @@ def nowplaying(single_user=None):
         except IndexError:
             continue
         except (KeyError, requests.exceptions.RequestException) as e:
-            logger.log("Error getting most recently played track for {}: {}. Continuing...".format(user['username'], e))
+            logger.warn("Error getting most recently played track for {}: {}. Continuing...".format(user['username'], e))
             continue
         except Exception as e:
-            logger.log("[FATAL] Error getting most recently played track for {}: {}".format(user['username'], e))
+            logger.error("[FATAL] Error getting most recently played track for {}: {}".format(user['username'], e))
             return False
         
         tmp_user = user
@@ -357,10 +357,10 @@ def check_artist_redirect(artist_string):
         lastfm = requests.get(req_url).json()
         correction = lastfm['corrections']
     except (IndexError, KeyError, requests.exceptions.RequestException) as e:
-        logger.log("Error checking for artist redirect for {}: {}.".format(artist_string, e))
+        logger.error("Error checking for artist redirect for {}: {}.".format(artist_string, e))
         return None
     except Exception as e:
-        logger.log("Another error occured checking for artist redirect for {}: {}.".format(artist_string, e))
+        logger.error("Another error occured checking for artist redirect for {}: {}.".format(artist_string, e))
         return None
     
     try:

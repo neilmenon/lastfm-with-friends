@@ -62,7 +62,7 @@ def get_user_account(username, update=False):
         if update:
             return data
     except Exception as e:
-        logger.log("Error while creating or updating {}: {}".format(username, e))
+        logger.error("Error while creating or updating {}: {}".format(username, e))
 
 def change_updated_date(username, clear_date=False, start_time=None):
     if clear_date:
