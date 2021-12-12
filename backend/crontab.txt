@@ -7,7 +7,6 @@
 28 * * * * /bin/bash /root/.scripts/demoscrobbler.sh > /dev/null 2>&1
 * * * * * /bin/bash /root/.scripts/group-session-scrobbler.sh > /dev/null 2>&1
 */5 * * * * /bin/bash /root/.scripts/prune-group-sessions.sh > /dev/null 2>&1
-15 * * * * /bin/bash /root/.scripts/artist-extra.sh > /dev/null 2>&1
 @monthly /bin/bash /root/.scripts/artist-extra-full.sh > /dev/null 2>&1
 20 4 15 */2 * /bin/bash /root/.scripts/artist-images.sh > /dev/null 2>&1
 

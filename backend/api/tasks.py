@@ -28,6 +28,7 @@ def globalupdate():
     for u in user_helper.get_users():
         response = lastfm_scraper.update_user(u['username'])
     lastfm_scraper.scrape_artist_images()
+    lastfm_scraper.scrape_extra_artist_info()
     if response:
         return jsonify(response)
     else:
