@@ -181,7 +181,7 @@ hr {
 .command-result > table th,td {
     border: none;
 }
-#topGenreArtists.command-result > table th,td {
+#topGenreArtists.command-result > table th, #topGenreArtists.command-result > table td {
     padding: 0 0.5rem;
 }
 #topGenreArtists td {
