@@ -3,7 +3,7 @@
     Last.fm with Friends by <a href="https://neilmenon.com" target="_blank">Neil Menon</a><br>
     <div *ngIf="stats && build">
         Tracking <span>{{ stats.scrobbles | pluralize:'scrobble' }}</span> from <span>{{ stats.users | pluralize:'user' }}</span> in <span>{{ stats.groups | pluralize:'group' }}</span><br>
-        Indexing <span>{{ stats.tracks | pluralize:'track' }}</span> in <span>{{ stats.albums | pluralize:'album' }}</span> by <span>{{ stats.artists | pluralize:'artist' }}</span><br>
+        Indexing <span>{{ stats.tracks | pluralize:'track' }}</span> in <span>{{ stats.albums | pluralize:'album' }}</span> by <span>{{ stats.artists | pluralize:'artist' }}</span> from <span>{{ stats.genres | pluralize:'genre' }}</span><br>
         <span [matTooltip]="commit?.message" matTooltipPosition="above">
             Build: <a href="https://github.com/neilmenon/lastfm-with-friends/commit/{{ build.commit }}" target="_blank" style="color: darkseagreen;">{{ build.commit }}</a> &#8226; {{ moment.unix(build.unixTimestamp).locale("en-US").fromNow() }}
         </span>

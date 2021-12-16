@@ -63,6 +63,7 @@ export class StatsModel {
     scrobbles: number
     users: number
     groups: number
+    genres: number
 
     constructor() {
       this.artists = null
@@ -71,5 +72,6 @@ export class StatsModel {
       this.scrobbles = null
       this.users = null
       this.groups = null
+      this.genres = null
     }
 }

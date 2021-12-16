@@ -236,3 +236,16 @@ def get_signed_scrobbles():
     except KeyError as e:
         response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
         abort(response)
+
+@command_api.route('/api/commands/genre-top-artists', methods=['POST'])
+def genre_top_artists():
+    try:
+        params = request.get_json()
+        genre_id = params['genre_id']
+        if auth_helper.is_authenticated(params['username'], params['session_key']):
+            return jsonify(command_helper.genre_top_artists(genre_id))
+        else:
+            abort(401)
+    except KeyError as e:
+        response = make_response(jsonify(error="Missing required parameter '" + str(e.args[0]) + "'."), 400)
+        abort(response)

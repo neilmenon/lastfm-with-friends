@@ -63,6 +63,7 @@ import { GroupSessionComponent } from './group-session/group-session.component';
 import { TimeSelectionComponent } from './time-selection/time-selection.component';
 import { SwitchUserComponent } from './switch-user/switch-user.component';
 import { ShortNumberPipe } from './short-number.pipe';
+import { GenreTopArtistsComponent } from './genre-top-artists/genre-top-artists.component';
 
 @NgModule({
   declarations: [
@@ -89,6 +90,7 @@ import { ShortNumberPipe } from './short-number.pipe';
     TimeSelectionComponent,
     SwitchUserComponent,
     ShortNumberPipe,
+    GenreTopArtistsComponent,
   ],
   imports: [
     BrowserModule,

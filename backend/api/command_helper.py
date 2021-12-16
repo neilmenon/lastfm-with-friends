@@ -43,8 +43,7 @@ def find_artist(query, skip_sanitize=False, extended=False):
 
     # get genres if extended mode
     if extended:
-        genres = sql_helper.execute_db("SELECT genres.name FROM genres LEFT JOIN artist_genres ON artist_genres.genre_id = genres.id WHERE artist_genres.artist_id = {}".format(artist['id']))
-        artist['genres'] = [g['name'] for g in genres]
+        artist['genres'] = sql_helper.execute_db("SELECT genres.* FROM genres LEFT JOIN artist_genres ON artist_genres.genre_id = genres.id WHERE artist_genres.artist_id = {}".format(artist['id']))
     return artist
 
 def find_album_tracks(album_id):
@@ -570,3 +569,6 @@ def quick_wk_charts(users, artist_id, album_id, track, start_range, end_range):
             tmp = { 'id': u, 'rank': filtered_list[0]['rank'] }
             records.append(tmp)
     return records
+
+def genre_top_artists(genre_id):
+    return sql_helper.execute_db("SELECT artists.* FROM artists LEFT JOIN artist_genres ON artists.id = artist_genres.artist_id WHERE artist_genres.genre_id = {} ORDER BY artists.playcount DESC LIMIT 250".format(genre_id))

@@ -393,4 +393,12 @@ export class UserService {
       'session_key': this.session_key
     })
   }
+
+  getGenreTopArtists(genreId: number) {
+    return this.http.post(config.api_root + '/commands/genre-top-artists', {
+      'username': this.username,
+      'session_key': this.session_key,
+      'genre_id': genreId
+    })
+  }
 }

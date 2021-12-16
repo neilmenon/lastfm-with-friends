@@ -1,0 +1,37 @@
+<div class="center" style="margin-bottom: -16px;">
+    <h3 mat-dialog-title>{{ data.genre.name }} — Top Artists</h3>
+</div>
+<div class="center" style="color: #bfbfbf; padding: 0.5rem 0;">
+    Showing (up to) the top 250 artists by scrobbles on Last.fm.<br>Only what is indexed on the app will show in this grid.
+</div>
+<div mat-dialog-content class="history-result">
+    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="!resultsObject" style="padding-bottom: 10px;"></mat-spinner>
+    <div class="command-result" *ngIf="resultsObject" id="topGenreArtists">
+        <table class="results-table" *ngIf="resultsObject.length > 0">
+            <thead>
+                <tr class="sticky-table-header">
+                    <th style="padding: 0px 3px 0px 3px;">#</th>
+                    <th></th>
+                    <th>Artist</th>
+                    <th matTooltip="Total number of listeners on Last.fm" matTooltipPosition="above">Listeners</th>
+                    <th matTooltip="Total number of scrobbles on Last.fm" matTooltipPosition="above">Scrobbles</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let entry of resultsObject; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td><a href="{{ entry.url }}" target="_blank"><img src="{{ entry.image_url }}" class="genre-artist-image"></a></td>
+                    <td>{{ entry.name }}</td>
+                    <td>{{ entry.listeners | number }}</td>
+                    <td>{{ entry.playcount | number }}</td>
+                    <td class="wk-actions" style="font-size: 18px;">
+                        <a (click)="wkTrigger(entry)" matTooltip="Who Knows — Artist" matTooltipPosition="above" class="lastfm-icon clickable">
+                            <mat-icon [inline]="true">help_center</mat-icon>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

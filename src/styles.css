@@ -78,7 +78,7 @@ hr {
     background-color: #716340;
 }
 .clickable {
-    cursor: pointer;
+    cursor: pointer!important;
 }
 .spacer {
     flex: 1 1 auto;
@@ -180,6 +180,13 @@ hr {
 }
 .command-result > table th,td {
     border: none;
+}
+#topGenreArtists.command-result > table th,td {
+    padding: 0 0.5rem;
+}
+#topGenreArtists td {
+    margin: auto; 
+    text-align: center;
 }
 .command-result > table > tbody > tr:nth-child(odd), .history-result > table > tbody > tr:nth-child(odd) {
     background: rgb(44, 44, 44);

@@ -22,6 +22,8 @@ import { UserGroupModel, UserModel } from '../models/userGroupModel';
 import { select } from '@angular-redux/store';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { HttpScrobbleModel } from '../models/httpScrobbleModel';
+import { GenreTopArtistsRecordModel } from '../models/commandsModel';
+import { GenreTopArtistsComponent } from '../genre-top-artists/genre-top-artists.component';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -895,6 +897,20 @@ export class GroupDashboardComponent implements OnInit {
           this.messageService.open("There was an error getting the signed object from the backend. Please try again.")
         })
       }
+    })
+  }
+
+  genreTopArtists(genre: { id: number, name: string }) {
+    let dialogRef = this.dialog.open(GenreTopArtistsComponent, { data: { genre } })
+    let wkSub = dialogRef.componentInstance.wkFromDialog.subscribe((entry: GenreTopArtistsRecordModel) => {
+      this.wkArtistSelectedIndex = this.leaderboardSliderMappings.length - 1
+      this.wkArtistIsCustomDateRange = false
+      this.wkArtistCustomStartDate = null
+      this.wkArtistCustomEndDate = null
+      this.nowPlayingToWk(entry, null)
+    })
+    dialogRef.afterClosed().subscribe(() => {
+      wkSub.unsubscribe()
     })
   }
 

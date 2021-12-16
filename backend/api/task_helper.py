@@ -49,6 +49,8 @@ def app_stats(db_store):
         stats['users'] = result[0]['users']
         result = sql_helper.execute_db("SELECT COUNT(*) as groups FROM groups")
         stats['groups'] = result[0]['groups']
+        result = sql_helper.execute_db("SELECT COUNT(*) as genres FROM genres")
+        stats['genres'] = result[0]['genres']
         stats['date'] = str(datetime.datetime.utcnow())
 
         sql = sql_helper.insert_into("stats", stats)

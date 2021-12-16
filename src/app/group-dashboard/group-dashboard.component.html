@@ -117,18 +117,22 @@
                 </tbody>
             </table>
             <div class="wk-genres">
-                <div style="padding-bottom: 0.5rem;">
+                <div style="padding-bottom: 0.5rem;" *ngIf="wkArtistResults.artist.listeners || wkArtistResults.artist.playcount">
                     <mat-chip-list>
-                        <mat-chip class="listeners-chip" matTooltip="{{ wkArtistResults.artist.listeners | number }}" matTooltipPosition="above">
+                        <mat-chip class="listeners-chip" matTooltip="{{ wkArtistResults.artist.listeners | number }}" matTooltipPosition="above" *ngIf="wkArtistResults.artist.listeners">
                             Listeners: {{ wkArtistResults.artist.listeners | shortNumber }}
                         </mat-chip>
-                        <mat-chip class="playcount-chip" matTooltip="{{ wkArtistResults.artist.playcount | number }}" matTooltipPosition="above">
+                        <mat-chip class="playcount-chip" matTooltip="{{ wkArtistResults.artist.playcount | number }}" matTooltipPosition="above" *ngIf="wkArtistResults.artist.playcount">
                             Scrobbles: {{ wkArtistResults.artist.playcount | shortNumber }}
                         </mat-chip>
                     </mat-chip-list>
                 </div>
                 <mat-chip-list>
-                    <mat-chip *ngFor="let genre of wkArtistResults.artist.genres">{{ genre }}</mat-chip>
+                    <mat-chip 
+                        *ngFor="let genre of wkArtistResults.artist.genres" 
+                        (click)="genreTopArtists(genre)" class="clickable"
+                        matTooltip="View Top Artists for {{ genre.name }}" matTooltipPosition="above"
+                    >{{ genre.name }}</mat-chip>
                 </mat-chip-list>
             </div>
         </div>

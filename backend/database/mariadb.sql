@@ -196,6 +196,7 @@ CREATE TABLE `stats` (
   `scrobbles` bigint(20) NOT NULL,
   `users` int(11) NOT NULL,
   `groups` int(11) NOT NULL,
+  `genres` int(11) DEFAULT NULL,
   UNIQUE KEY `date` (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -289,4 +290,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-11  0:57:11
+-- Dump completed on 2021-12-16 16:04:39
