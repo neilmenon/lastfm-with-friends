@@ -72,7 +72,9 @@ def create():
 @user_api.route('/api/users/<string:username>', methods=['GET'])
 def get(username):
     try:
-        params = request.args
+        session_key = request.args.get('session_key')
+        if not auth_helper.is_authenticated(username, session_key):
+            abort(401)
         result = user_helper.get_user(username, get_session=True)
         if result:
             return jsonify(result)

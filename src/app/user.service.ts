@@ -58,8 +58,9 @@ export class UserService {
       return this.user;
     } else {
       let u = localStorage.getItem("lastfm_username")
+      let session_key = localStorage.getItem("lastfm_session")
       if (u) {
-        this.user = this.http.get(config.api_root + '/users/' + u).pipe(share());
+        this.user = this.http.get(config.api_root + '/users/' + u + "?session_key=" + session_key).pipe(share());
         return this.user;
       }
       return null
