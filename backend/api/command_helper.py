@@ -146,7 +146,6 @@ def wk_track(query, users, start_range, end_range):
 
 def nowplaying(single_user=None):
     if not single_user:
-        logger.info("=== Running now playing task... ===")
         sql = "SELECT username FROM users;"
         users = sql_helper.execute_db(sql)
     else:

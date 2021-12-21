@@ -23,9 +23,8 @@ app.register_blueprint(task_api)
 app.register_blueprint(group_session_api)
 CORS(app)
 
-@app.before_first_request
 def reset_running_tasks():
-   logger.info("[before_first_request] Resetting any old running tasks...")
+   logger.info("[reset_running_tasks] Resetting any old running tasks...")
    mdb = mariadb.connect(**(cfg['sql']))
    cursor = mdb.cursor(dictionary=True)
    cursor.execute("UPDATE tasks SET last_finished = '{}' WHERE last_finished IS NULL".format(str(datetime.datetime.utcnow())))
@@ -70,4 +69,4 @@ if __name__ == "__main__":
    if cfg['server']:
       app.run(host='0.0.0.0')
    else:
-    app.run()
+      app.run()
