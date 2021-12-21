@@ -27,7 +27,7 @@ def reset_running_tasks():
    logger.info("[reset_running_tasks] Resetting any old running tasks...")
    mdb = mariadb.connect(**(cfg['sql']))
    cursor = mdb.cursor(dictionary=True)
-   cursor.execute("UPDATE tasks SET last_finished = '{}' WHERE last_finished IS NULL".format(str(datetime.datetime.utcnow())))
+   cursor.execute("UPDATE tasks SET last_finished = '{}' WHERE last_finished IS NULL".format(str(datetime.datetime.utcfromtimestamp(1))))
    mdb.commit()
    mdb.close()
 
@@ -63,6 +63,9 @@ def start_task():
 @app.route('/api', methods=['GET'])
 def index():
    return jsonify({'data': 'success'})
+
+# do this outside the Flask app, we do not want uWSGI running this task every time a worker is spawned.
+reset_running_tasks()
 
 if __name__ == "__main__":
    # localhost or server?
