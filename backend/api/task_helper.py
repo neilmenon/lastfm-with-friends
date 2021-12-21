@@ -103,3 +103,27 @@ def insert_demo_scrobbles(demo_users):
                 logger.error("\t\t Error scrobbling this track: {}".format(scrobble_req))
             
     return True
+
+def task_handler(task_name, task_operation):
+    task = sql_helper.execute_db("SELECT * FROM tasks WHERE name = '{}'".format(task_name))
+    if not len(task): # entry for this task does not exist in DB, create row
+        sql_helper.execute_db("INSERT INTO tasks (name) VALUES ('{}')".format(task_name), commit=True)
+        task = sql_helper.execute_db("SELECT * FROM tasks WHERE name = '{}'".format(task_name))[0]
+    else:
+        task = task[0]
+
+    if task_operation == "start":
+        if not task['last_finished']: # task is currently running somewhere else!
+            logger.warn("[task_handler] [{}] [skips: {}] This task is currently running somewhere else. Skipping current run.".format(task_name, task['skips']))
+            # increment skips counter on task
+            sql_helper.execute_db("UPDATE tasks SET skips = {} WHERE name = '{}'".format(task['skips'] + 1, task_name), commit=True)
+            return False
+        else: # task is not currently running, clear last_finished and proceed
+            sql_helper.execute_db("UPDATE tasks SET last_finished = NULL WHERE name = '{}'".format(task_name), commit=True)
+            return True
+    elif task_operation == "end":
+        # set last_finished to current timestamp, clear skips (TODO)
+        sql_helper.execute_db("UPDATE tasks SET last_finished = '{}' WHERE name = '{}'".format(str(datetime.datetime.utcnow()), task_name), commit=True)
+        return True
+    else:
+        logger.error("[task_handler] [{}] [skips: {}] Invalid task operation '{}'. This task will not run.".format(task_name, task['skips'], task_operation))
