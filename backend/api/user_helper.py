@@ -113,3 +113,12 @@ def get_demo_user():
     if result:
         return result[0]
     return
+
+def fire_and_forget_user_update(username, session_key, user_id, url):
+    data = {
+        "username": username,
+        "session_key": session_key,
+        "full_scrape": True,
+        "user_id": user_id
+    }
+    requests.post(url, json=data)

@@ -2,7 +2,7 @@ import datetime
 import requests
 import hashlib
 import time
-from flask import current_app
+from flask import request
 from threading import Thread
 from . import config
 from . import sql_helper
@@ -73,9 +73,6 @@ def get_and_store_session(token):
     # check if user exists in database, if not create new user
     if not user_helper.get_user(username):
         user_helper.get_user_account(username)
-        # new user needs an initial data fetch
-        thread = Thread(target=lastfm_scraper.update_user, args=(username,True,current_app._get_current_object()))
-        thread.start()
     # store session key in sessions table
     try:
         table_data = {}
@@ -84,6 +81,12 @@ def get_and_store_session(token):
         table_data['last_used'] = str(datetime.datetime.utcnow())
         sql = sql_helper.insert_into_where_not_exists("sessions", table_data, "session_key")
         sql_helper.execute_db(sql, commit=True)
+
+        # new user needs an initial data fetch!
+        new_user = user_helper.get_user(username, False)
+        thread = Thread(target=user_helper.fire_and_forget_user_update, args=(username, session_key, new_user['user_id'], request.base_url.replace("authenticate", "update")))
+        thread.start()
+
         return {"username": username, "session_key": session_key}
     except Exception as e:
         logger.error("Error while storing session for " + username + ": " + str(e))

@@ -90,6 +90,7 @@ export class HomeComponent implements OnInit, OnDestroy {
             }
           }
           this.user.group_session = JSON.parse(JSON.stringify(obj?.group_session))
+          this.user.last_update = obj?.last_update
         }
       })
       this.subscription.add(sub2)

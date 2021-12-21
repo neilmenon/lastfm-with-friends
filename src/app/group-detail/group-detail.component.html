@@ -35,11 +35,11 @@
                     <button color="accent" mat-raised-button (click)="leaveGroup()" [class.disable-click]="isDemo | async">Leave Group</button>
                 </div>
                 <div *ngIf="group.owner == user.username && !deleteConfirmed">
-                    <button color="primary" mat-raised-button (click)="deleteGroup()">Delete Group</button>
+                    <button color="primary" mat-raised-button (click)="deleteGroup()" [class.disable-click]="isDemo | async">Delete Group</button>
                 </div>
             </div>
         </div>
-        <div *ngIf="group.owner == user.username">
+        <div *ngIf="group.owner == user.username" [class.disable-click]="isDemo | async">
             <hr style="width: 75%;">
             <app-edit-group [user]="user" [group]="group" (onGroupChange)="reflectChanges($event)"></app-edit-group>
         </div>
