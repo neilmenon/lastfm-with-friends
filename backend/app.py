@@ -49,13 +49,13 @@ def teardown_app(exception):
 @app.before_request
 def start_task():
    task_to_start = None
-   if "nowplayingdb" in request.endpoint:
+   if "nowplayingdb" in request.url:
       task_to_start = "nowplaying"
-   elif "globalupdate" in request.endpoint:
+   elif "globalupdate" in request.url:
       task_to_start = "globalupdate"
-   elif "group-session-scrobbler" in request.endpoint:
+   elif "group-session-scrobbler" in request.url:
       task_to_start = "group-session-scrobbler"
-   elif "prune-group-sessions" in request.endpoint:
+   elif "prune-group-sessions" in request.url:
       task_to_start = "prune-group-sessions"
    
    # start task
