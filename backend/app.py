@@ -51,6 +51,12 @@ def start_task():
    task_to_start = None
    if "nowplayingdb" in request.endpoint:
       task_to_start = "nowplaying"
+   elif "globalupdate" in request.endpoint:
+      task_to_start = "globalupdate"
+   elif "group-session-scrobbler" in request.endpoint:
+      task_to_start = "group-session-scrobbler"
+   elif "prune-group-sessions" in request.endpoint:
+      task_to_start = "prune-group-sessions"
    
    # start task
    if task_to_start is not None:

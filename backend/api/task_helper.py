@@ -127,3 +127,4 @@ def task_handler(task_name, task_operation):
         return True
     else:
         logger.error("[task_handler] [{}] [skips: {}] Invalid task operation '{}'. This task will not run.".format(task_name, task['skips'], task_operation))
+        return False
