@@ -485,6 +485,10 @@ div.history-options-container > mat-paginator {
 }
 .wk-genres .mat-standard-chip { min-height: 21px!important; }
 
+.mat-stepper-horizontal, .mat-stepper-vertical {
+    background-color: transparent!important;
+}
+
 /* SCROLLBARS */
 .wk-actions-dialog {
     font-size: 18px;

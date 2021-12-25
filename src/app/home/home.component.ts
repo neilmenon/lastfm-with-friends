@@ -15,6 +15,7 @@ import { config } from '../config';
 import { MatDialog, MatDialogRef, MatDialogState } from '@angular/material/dialog';
 import { GroupSessionComponent } from '../group-session/group-session.component';
 import { PluralizePipe } from '../pluralize.pipe';
+import { GettingStartedComponent } from '../getting-started/getting-started.component';
 
 @Component({
   selector: 'app-home',
@@ -183,5 +184,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     const last = input.pop()
     const result = input.join(', ') + ' and ' + last
     return result
+  }
+
+  gettingStarted() {
+    this.dialog.open(GettingStartedComponent)
   }
 }

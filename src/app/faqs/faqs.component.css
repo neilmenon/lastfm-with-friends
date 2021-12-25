@@ -1,0 +1,4 @@
+.faq-entry > span:first-child { font-weight: bold; }
+.faq-entry > span { display: block; }
+.faq-entry:not(:last-child) { margin-bottom: 1rem; }
+#faqs { font-size: 16px; }

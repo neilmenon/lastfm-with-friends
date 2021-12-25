@@ -32,6 +32,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatStepperModule } from '@angular/material/stepper';
+
 
 // Miscellaneous
 import { NgxChartsModule } from '@swimlane/ngx-charts';
@@ -64,6 +66,9 @@ import { TimeSelectionComponent } from './time-selection/time-selection.componen
 import { SwitchUserComponent } from './switch-user/switch-user.component';
 import { ShortNumberPipe } from './short-number.pipe';
 import { GenreTopArtistsComponent } from './genre-top-artists/genre-top-artists.component';
+import { SignedInResolverService } from './signed-in-resolver.service';
+import { GettingStartedComponent } from './getting-started/getting-started.component';
+import { FaqsComponent } from './faqs/faqs.component';
 
 @NgModule({
   declarations: [
@@ -91,6 +96,8 @@ import { GenreTopArtistsComponent } from './genre-top-artists/genre-top-artists.
     SwitchUserComponent,
     ShortNumberPipe,
     GenreTopArtistsComponent,
+    GettingStartedComponent,
+    FaqsComponent,
   ],
   imports: [
     BrowserModule,
@@ -125,18 +132,24 @@ import { GenreTopArtistsComponent } from './genre-top-artists/genre-top-artists.
     NgReduxModule,
     MatCheckboxModule,
     MatChipsModule,
+    MatStepperModule,
     RouterModule.forRoot([
-      {path: '', component: HomeComponent},
-      {path: 'lastfmauth', component: LastfmauthComponent},
-      {path: 'signout', component: SignoutComponent},
-      {path: 'groups/create', component: CreateGroupComponent},
-      {path: 'groups/join', component: JoinGroupComponent},
-      {path: 'groups/:joinCode', component: GroupDetailComponent},
-      {path: 'groups/:joinCode/edit', component: EditGroupComponent},
-      {path: 'settings', component: UserSettingsComponent}
+      { path: '', component: HomeComponent },
+      { path: 'lastfmauth', component: LastfmauthComponent },
+      { path: 'signout', component: SignoutComponent, resolve: { result: SignedInResolverService } },
+      { path: 'groups/create', component: CreateGroupComponent, resolve: { result: SignedInResolverService } },
+      { path: 'groups/join', component: JoinGroupComponent, resolve: { result: SignedInResolverService } },
+      { path: 'groups/:joinCode', component: GroupDetailComponent, resolve: { result: SignedInResolverService } },
+      { path: 'groups/:joinCode/edit', component: EditGroupComponent, resolve: { result: SignedInResolverService } },
+      { path: 'settings', component: UserSettingsComponent, resolve: { result: SignedInResolverService } },
+      { path: '**', redirectTo: '' }
     ])
   ],
-  providers: [UserService, PluralizePipe, ShortNumberPipe],
+  providers: [
+    UserService,
+    PluralizePipe,
+    ShortNumberPipe
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

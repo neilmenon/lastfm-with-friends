@@ -3,3 +3,14 @@
         display: none;
     }
 }
+@media screen and (min-width: 446px) {
+    #homeButtons > button:not(:last-child) {
+        margin-right: 1rem;
+    }
+}
+@media screen and (max-width: 445px) {
+    #homeButtons > button {
+        display: block;
+        margin: 0.5rem auto;
+    }
+}

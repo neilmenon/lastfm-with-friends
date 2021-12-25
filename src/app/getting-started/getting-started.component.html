@@ -1,0 +1,28 @@
+<div class="center" style="margin-bottom: -16px;">
+    <h2 mat-dialog-title>Getting Started with Last.fm with Friends</h2>
+</div>
+<div mat-dialog-content>
+    <mat-vertical-stepper [linear]="false" #stepper>
+        <ng-template matStepperIcon="edit" let-index="index">{{index + 1}}</ng-template>
+        <ng-template matStepperIcon="done" let-index="index">{{index + 1}}</ng-template>
+        <mat-step>
+            <ng-template matStepLabel>Introduction / FAQs</ng-template>
+            <app-faqs [gettingStarted]="true"></app-faqs>
+        </mat-step>
+        <mat-step>
+            <ng-template matStepLabel>Connect Your Music Service to Last.fm</ng-template>
+            <div class="center-all">
+                <span>Next, make sure Last.fm is tracking your music properly. After connecting your music service, verify Last.fm is adding scrobbles to your profile.</span><br><br>
+                <button color="accent" mat-raised-button (click)="window.open('https://www.last.fm/settings/applications', '_blank')" style="margin-right: 1rem;">Connect to Spotify</button>
+                <button color="primary" mat-raised-button (click)="window.open('https://www.last.fm/about/trackmymusic', '_blank')">Other Services</button>
+            </div>
+        </mat-step>
+        <mat-step>
+            <ng-template matStepLabel>Sign In with Last.fm</ng-template>
+            <div class="center-all">
+                <span>You're ready to start. Sign in the Last.fm with Friends via Last.fm. Enjoy the app!</span><br><br>
+                <button color="primary" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
+            </div>
+        </mat-step>
+    </mat-vertical-stepper>         
+</div>
