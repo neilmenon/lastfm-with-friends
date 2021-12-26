@@ -46,6 +46,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           
+      - name: Create config.ts file for Angular
+        run: |
+          'export const config = { "api_key": "${{ secrets.ANGULAR_API_KEY }}", "api_secret": "${{ secrets.ANGULAR_API_SECRET }}", "project_root": "${{ secrets.ANGULAR_PROJECT_ROOT }}", "api_root": "${{ secrets.ANGULAR_API_ROOT }}", "demo_user": "${{ secrets.ANGULAR_DEMO_USER }}", "admin_username": "${{ secrets.ANGULAR_ADMIN_USERNAME }}" }' > ./src/app/config.ts
+          
       - name: npm install and ng build
         if: "!contains(github.event.head_commit.message, '[BE-only]')"
         run: |
