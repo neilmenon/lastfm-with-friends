@@ -370,7 +370,7 @@ export class UserService {
   }
 
   getRecentTracks(username: string) {
-    return this.http.get(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${username}&api_key=${config.api_key}&format=json`)
+    return this.http.get(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${username}&api_key=${config.api_key}&format=json&limit=150`)
   }
 
   getHttpScrobblePayload(tracks: Array<HttpScrobbleModel>) {

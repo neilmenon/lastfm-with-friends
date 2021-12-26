@@ -72,7 +72,10 @@ def get_and_store_session(token):
         return False
     # check if user exists in database, if not create new user
     if not user_helper.get_user(username):
+        just_registered = True
         user_helper.get_user_account(username)
+    else:
+        just_registered = False
     # store session key in sessions table
     try:
         table_data = {}
@@ -82,10 +85,11 @@ def get_and_store_session(token):
         sql = sql_helper.insert_into_where_not_exists("sessions", table_data, "session_key")
         sql_helper.execute_db(sql, commit=True)
 
-        # new user needs an initial data fetch!
-        new_user = user_helper.get_user(username, False)
-        thread = Thread(target=user_helper.fire_and_forget_user_update, args=(username, session_key, new_user['user_id'], request.base_url.replace("authenticate", "update")))
-        thread.start()
+        if just_registered:
+            # new user needs an initial data fetch!
+            new_user = user_helper.get_user(username, False)
+            thread = Thread(target=user_helper.fire_and_forget_user_update, args=(username, session_key, new_user['user_id'], request.base_url.replace("authenticate", "update")))
+            thread.start()
 
         return {"username": username, "session_key": session_key}
     except Exception as e:
