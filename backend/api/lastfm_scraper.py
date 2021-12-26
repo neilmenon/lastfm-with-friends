@@ -42,6 +42,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
     total_pages = 1
     get_recent_uts = True
     most_recent_uts = None
+    previous_track = None
     while page <= total_pages:
         if not full_scrape and not user['progress']:
             req_url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user="+username+"&api_key="+cfg['api']['key']+"&from="+updated_unix+"&to="+current_unix+"&page="+str(page)+"&limit=1000&extended=1&format=json"
@@ -139,8 +140,18 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                 "track": track,
                 "timestamp": timestamp,
             }
+            
+            # workaround for issue where Last.fm allows an exact duplicate scrobble record to exist in their database
+            # while the app's database does not for multiple reasons, resulting in a data discrepancy
+            # the below nudges the timestamp by 1 second to ensure that the record makes it into the database
+            # and the total Last.fm <> app DB scrobble remains intact (to prevent triggering full scrapes infinitely)
+            if previous_track == scrobble_record:
+                logger.warn("[RESOLVED] Exact scrobble record duplicate fetched from Last.fm: {}".format(str(scrobble_record)))
+                scrobble_record["timestamp"] = str(int(scrobble_record["timestamp"]) + 1)
+
             sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
             sql_helper.execute_db(sql, commit=True, pass_on_error=True)
+            previous_track = scrobble_record
             # except mariadb.Error as e:
             #     if "albums_ibfk_1" in str(e) and artist != "Various Artists": 
             #         logger.info("\t\tRedirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, album_url), app)
@@ -215,6 +226,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     update_user(username, fix_count=True)
                 else:
                     logger.warn("\tFix attempt did not resolve missing scrobbles for {}. Triggering full scrape...".format(username))
+                    user_helper.change_update_progress(username, None, clear_progress=True)
                     update_user(username, full=True)
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
