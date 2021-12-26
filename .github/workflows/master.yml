@@ -16,63 +16,54 @@ jobs:
   build:
     name: Pull, Build & Deploy
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.17.3]
 
     steps:
       - uses: actions/checkout@v2.4.0
 
-      - uses: dorny/paths-filter@v2.10.2
-        id: filter
-        with:
-          filters: |
-            npm:
-              - modified: 'package-lock.json'
-              - modified: 'package.json'
+#       - uses: dorny/paths-filter@v2.10.2
+#         id: filter
+#         with:
+#           filters: |
+#             npm:
+#               - modified: 'package-lock.json'
+#               - modified: 'package.json'
 
-      - name: Pull new changes
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: root
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          script: cd /root/projects/lastfm-with-friends && git pull
-            
-      - name: npm install
-        uses: appleboy/ssh-action@master
-        if: |
-          !contains(github.event.head_commit.message, '[BE-only]') &&
-          steps.filter.outputs.npm == 'true'
-        with:
-          host: ${{ secrets.HOST }}
-          username: root
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          script: cd /root/projects/lastfm-with-friends && npm i
-            
-      - name: ng build --prod
-        uses: appleboy/ssh-action@master
+      - name: Cache node modules
         if: "!contains(github.event.head_commit.message, '[BE-only]')"
+        uses: actions/cache@v2.1.7
         with:
-          host: ${{ secrets.HOST }}
-          username: root
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          command_timeout: 30m
-          script: cd /root/projects/lastfm-with-friends && ng build --prod
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
             
-      - name: Copy files to web root
-        uses: appleboy/ssh-action@master
+      - name: Setup Node.js v${{ matrix.node-version }} environment
         if: "!contains(github.event.head_commit.message, '[BE-only]')"
+        uses: actions/setup-node@v2.5.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          
+      - name: npm install and ng build
+        if: "!contains(github.event.head_commit.message, '[BE-only]')"
+        run: |
+          npm i
+          npm run build:prod
+          
+      - name: Copy files to server web root
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: root
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          script: \cp -a /root/projects/lastfm-with-friends/dist/lastfm-with-friends/. /usr/share/nginx/lastfm-with-friends/
+          source: "./dist/lastfm-with-friends/*"
+          target: "/usr/share/nginx/lastfm-with-friends/"
+          overwrite: true
+          strip_components: 2
           
       - name: Run buildjson.sh
         uses: appleboy/ssh-action@master
@@ -84,6 +75,52 @@ jobs:
           port: ${{ secrets.PORT }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: cd /root/projects/lastfm-with-friends && . /root/.scripts/buildjson.sh > /usr/share/nginx/lastfm-with-friends/assets/build.json
+
+      - name: Pull new changes on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: root
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          script: cd /root/projects/lastfm-with-friends && git pull
+          
+#       - name: npm install
+#         uses: appleboy/ssh-action@master
+#         if: |
+#           !contains(github.event.head_commit.message, '[BE-only]') &&
+#           steps.filter.outputs.npm == 'true'
+#         with:
+#           host: ${{ secrets.HOST }}
+#           username: root
+#           key: ${{ secrets.KEY }}
+#           port: ${{ secrets.PORT }}
+#           passphrase: ${{ secrets.PASSPHRASE }}
+#           script: cd /root/projects/lastfm-with-friends && npm i
+            
+#       - name: ng build --prod
+#         uses: appleboy/ssh-action@master
+#         if: "!contains(github.event.head_commit.message, '[BE-only]')"
+#         with:
+#           host: ${{ secrets.HOST }}
+#           username: root
+#           key: ${{ secrets.KEY }}
+#           port: ${{ secrets.PORT }}
+#           passphrase: ${{ secrets.PASSPHRASE }}
+#           command_timeout: 30m
+#           script: cd /root/projects/lastfm-with-friends && ng build --prod
+            
+#       - name: Copy files to web root
+#         uses: appleboy/ssh-action@master
+#         if: "!contains(github.event.head_commit.message, '[BE-only]')"
+#         with:
+#           host: ${{ secrets.HOST }}
+#           username: root
+#           key: ${{ secrets.KEY }}
+#           port: ${{ secrets.PORT }}
+#           passphrase: ${{ secrets.PASSPHRASE }}
+#           script: \cp -a /root/projects/lastfm-with-friends/dist/lastfm-with-friends/. /usr/share/nginx/lastfm-with-friends/
           
       - name: Restart Flask server
         uses: appleboy/ssh-action@master
