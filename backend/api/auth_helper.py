@@ -1,15 +1,12 @@
 import datetime
 import requests
 import hashlib
-import time
 from flask import request
 from threading import Thread
 from . import config
 from . import sql_helper
 from . import user_helper
 from . import api_logger as logger
-from . import lastfm_scraper
-import urllib
 
 cfg = config.config
 
