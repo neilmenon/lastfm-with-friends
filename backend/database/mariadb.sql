@@ -24,9 +24,9 @@ DROP TABLE IF EXISTS `albums`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `albums` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `artist_name` varchar(191) NOT NULL,
-  `name` varchar(400) NOT NULL,
-  `url` varchar(400) NOT NULL,
+  `artist_name` varchar(400) NOT NULL,
+  `name` varchar(500) NOT NULL,
+  `url` varchar(2000) NOT NULL,
   `image_url` varchar(191) NOT NULL,
   PRIMARY KEY (`id`,`artist_name`,`name`),
   KEY `artist_name` (`artist_name`),
@@ -59,8 +59,8 @@ DROP TABLE IF EXISTS `artist_redirects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `artist_redirects` (
-  `artist_name` varchar(191) NOT NULL,
-  `redirected_name` varchar(191) NOT NULL,
+  `artist_name` varchar(400) NOT NULL,
+  `redirected_name` varchar(400) NOT NULL,
   PRIMARY KEY (`artist_name`,`redirected_name`),
   KEY `redirected_name` (`redirected_name`),
   CONSTRAINT `artist_redirects_ibfk_1` FOREIGN KEY (`redirected_name`) REFERENCES `artists` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -77,8 +77,8 @@ DROP TABLE IF EXISTS `artists`;
 CREATE TABLE `artists` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(400) NOT NULL,
-  `url` varchar(400) DEFAULT NULL,
-  `image_url` varchar(400) DEFAULT NULL,
+  `url` varchar(2000) DEFAULT NULL,
+  `image_url` varchar(191) DEFAULT NULL,
   `listeners` int(11) DEFAULT NULL,
   `playcount` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -131,7 +131,7 @@ DROP TABLE IF EXISTS `groups`;
 CREATE TABLE `groups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(400) NOT NULL,
-  `description` varchar(400) NOT NULL,
+  `description` varchar(200) NOT NULL,
   `created` datetime NOT NULL,
   `owner` varchar(191) NOT NULL,
   `join_code` varchar(191) NOT NULL,
@@ -153,10 +153,10 @@ CREATE TABLE `now_playing` (
   `username` varchar(191) NOT NULL,
   `check_count` int(11) DEFAULT NULL,
   `artist` varchar(400) NOT NULL,
-  `track` varchar(400) NOT NULL,
-  `album` varchar(400) NOT NULL,
+  `track` varchar(1000) NOT NULL,
+  `album` varchar(500) NOT NULL,
   `timestamp` int(11) NOT NULL,
-  `url` varchar(191) NOT NULL,
+  `url` varchar(2000) NOT NULL,
   `image_url` varchar(191) NOT NULL,
   PRIMARY KEY (`username`),
   CONSTRAINT `now_playing_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`)
@@ -284,7 +284,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
-  `display_name` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
+  `display_name` varchar(400) CHARACTER SET utf8mb4 NOT NULL,
   `registered` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `profile_image` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `scrobbles` bigint(20) NOT NULL,

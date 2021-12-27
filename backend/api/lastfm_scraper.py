@@ -313,7 +313,7 @@ def scrape_extra_artist_info(full=False):
 
         # filter genres from blacklist (TODO)
         blacklisted_genres = [artist['name'].lower(), 'seen live', 'female vocalists', 'american', 'male vocalists', 'usa', 'all', 'under 2000 listeners', 'vocal', 'gay']
-        filtered_genres = list(filter(lambda x: x not in blacklisted_genres, genres))
+        filtered_genres = list(filter(lambda x: x not in blacklisted_genres and len(x) < 50, genres))
 
         for g in filtered_genres:
             # insert genre if it does not already exist
