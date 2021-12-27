@@ -122,8 +122,8 @@ def task_handler(task_name, task_operation):
             sql_helper.execute_db("UPDATE tasks SET last_finished = NULL WHERE name = '{}'".format(task_name), commit=True)
             return True
     elif task_operation == "end":
-        # set last_finished to current timestamp, clear skips (TODO)
-        sql_helper.execute_db("UPDATE tasks SET last_finished = '{}' WHERE name = '{}'".format(str(datetime.datetime.utcnow()), task_name), commit=True)
+        # set last_finished to current timestamp, clear skips
+        sql_helper.execute_db("UPDATE tasks SET last_finished = '{}', skips = 0 WHERE name = '{}'".format(str(datetime.datetime.utcnow()), task_name), commit=True)
         return True
     else:
         logger.error("[task_handler] [{}] [skips: {}] Invalid task operation '{}'. This task will not run.".format(task_name, task['skips'], task_operation))

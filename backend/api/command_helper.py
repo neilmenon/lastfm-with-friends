@@ -226,7 +226,7 @@ def nowplaying(single_user=None):
             now_playing_users.append(tmp_user)
 
         sql = sql_helper.replace_into("now_playing", tmp_user)
-        sql_helper.execute_db(sql, commit=True)
+        sql_helper.execute_db(sql, commit=True, pass_on_error=True)
     return True
 
 def get_nowplaying(join_code):
