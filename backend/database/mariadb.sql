@@ -28,7 +28,7 @@ CREATE TABLE `albums` (
   `name` varchar(500) NOT NULL,
   `url` varchar(2000) NOT NULL,
   `image_url` varchar(191) NOT NULL,
-  PRIMARY KEY (`id`,`artist_name`,`name`),
+  PRIMARY KEY (`id`,`artist_name`(25),`name`(50)) USING BTREE,
   KEY `artist_name` (`artist_name`),
   CONSTRAINT `albums_ibfk_1` FOREIGN KEY (`artist_name`) REFERENCES `artists` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -61,7 +61,7 @@ DROP TABLE IF EXISTS `artist_redirects`;
 CREATE TABLE `artist_redirects` (
   `artist_name` varchar(400) NOT NULL,
   `redirected_name` varchar(400) NOT NULL,
-  PRIMARY KEY (`artist_name`,`redirected_name`),
+  PRIMARY KEY (`artist_name`(25),`redirected_name`(25)) USING BTREE,
   KEY `redirected_name` (`redirected_name`),
   CONSTRAINT `artist_redirects_ibfk_1` FOREIGN KEY (`redirected_name`) REFERENCES `artists` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -82,7 +82,8 @@ CREATE TABLE `artists` (
   `listeners` int(11) DEFAULT NULL,
   `playcount` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
+  UNIQUE KEY `name` (`name`),
+  KEY `name_2` (`name`(25))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -96,7 +97,8 @@ DROP TABLE IF EXISTS `genres`;
 CREATE TABLE `genres` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(191) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`(25)) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -229,7 +231,7 @@ CREATE TABLE `track_scrobbles` (
   `user_id` int(11) NOT NULL,
   `track` varchar(400) NOT NULL,
   `timestamp` varchar(191) NOT NULL,
-  PRIMARY KEY (`artist_id`,`album_id`,`user_id`,`track`,`timestamp`),
+  PRIMARY KEY (`artist_id`,`album_id`,`user_id`,`track`(50),`timestamp`(11)) USING BTREE,
   KEY `album_id` (`album_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `track_scrobbles_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -284,7 +286,7 @@ DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
-  `display_name` varchar(400) CHARACTER SET utf8mb4 NOT NULL,
+  `display_name` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `registered` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
   `profile_image` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `scrobbles` bigint(20) NOT NULL,
@@ -305,4 +307,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-21 14:49:23
+-- Dump completed on 2021-12-27 23:23:57
