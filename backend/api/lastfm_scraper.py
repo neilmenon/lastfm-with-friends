@@ -274,8 +274,13 @@ def scrape_album_data(full=False):
             req = requests.get(req_url).json()
             album_info = req['album']
         except Exception as e:
-            logger.error("\tAn error ocurred while trying get album data. Skipping... {}".format(e))
-            logger.error("\tRequest URL: {}".format(req_url))
+            try:
+                if album_info['error'] == 6:
+                    logger.warn("\tAlbum was not found via Last.fm API. Skipping...")
+                    logger.warn("\tRequest URL: {}".format(req_url))
+            except KeyError:
+                logger.error("\tAn error ocurred while trying get album data. Skipping... {}".format(e))
+                logger.error("\tRequest URL: {}".format(req_url))
             continue
         artwork_url = album_info['image'][3]['#text'].strip()
         if artwork_url:
