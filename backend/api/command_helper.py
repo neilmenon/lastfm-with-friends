@@ -207,7 +207,7 @@ def nowplaying(single_user=None):
             logger.error("[FATAL] Error getting most recently played track for {}: {}".format(user['username'], e))
             return False
         
-        tmp_user = user
+        tmp_user = { 'username': user['username'] }
         tmp_user['artist'] = sql_helper.esc_db(track['artist']['#text'])
         tmp_user['track'] = sql_helper.esc_db(track['name'])
         tmp_user['album'] = sql_helper.esc_db(track['album']['#text'])
