@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, ViewChild, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild, EventEmitter, Output, ElementRef } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MessageService } from '../message.service';
@@ -17,7 +17,7 @@ export class ScrobbleHistoryComponent implements OnInit {
 
   // MatPaginator Inputs
   length = 500;
-  pageSize = 50;
+  pageSize = 100;
   pageIndex = 0;
   pageSizeOptions: number[] = [50, 100, 250, 500];
 
@@ -52,7 +52,7 @@ export class ScrobbleHistoryComponent implements OnInit {
   }
 
   paginationChange(pageData, selectedUser, reset=false) {
-    this.resultsObject = null
+    // this.resultsObject = null
     if (pageData === undefined) {
       pageData = {
         'pageSize': this.pageSize,
@@ -90,9 +90,10 @@ export class ScrobbleHistoryComponent implements OnInit {
         this.length = 0
         this.resultsObject = undefined
       } else {
-        this.length = data['total']
+        this.length = this.data.wkMode == "overall" ? data['total'] : this.data.wkObject?.total_scrobbles
       }
       this.paginationTriggered = false;
+      // this.historyContainer.nativeElement.scrollTop(0)
     }).catch(error => {
       this.messageService.open("Error getting play history. Please try again.")
       console.log(error)

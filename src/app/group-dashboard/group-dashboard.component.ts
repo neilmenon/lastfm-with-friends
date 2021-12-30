@@ -580,7 +580,8 @@ export class GroupDashboardComponent implements OnInit {
       wkObject = {
         'artist': {'id': tmp['artist_id'], 'name': tmp['artist']}, 
         'track': {},
-        'album': {}
+        'album': {},
+        'total_scrobbles': tmp?.scrobbles
       }
       if (wkMode == "track") {
         wkObject['track']['name'] = tmp['track']

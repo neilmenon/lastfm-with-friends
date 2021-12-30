@@ -46,10 +46,10 @@
         </mat-form-field>
     </div> 
     <div class="spacer"></div>
-    <mat-paginator #paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" (page)="pageEvent = $event; paginationChange($event, selectedUser)" color="accent"></mat-paginator>
+    <mat-paginator #paginator [length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" [pageIndex]="pageIndex" (page)="pageEvent = $event; paginationChange($event, selectedUser); historyContainer.scrollTop = 0" color="accent"></mat-paginator>
 </div>
-<div mat-dialog-content class="history-result">
-    <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="(resultsObject === null) || paginationTriggered" style="padding-bottom: 10px;"></mat-spinner>
+<div mat-dialog-content class="history-result" [class.disable-click]="(resultsObject === null) || paginationTriggered" #historyContainer>
+    <!-- <mat-spinner diameter="25" color="accent" class="center-all" *ngIf="(resultsObject === null) || paginationTriggered" style="padding-bottom: 10px;"></mat-spinner> -->
     <table *ngIf="resultsObject">
         <thead class="sticky-table-header">
             <tr>

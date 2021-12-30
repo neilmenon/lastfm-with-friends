@@ -265,7 +265,10 @@ def play_history(wk_mode, artist_id, users, start_range, end_range, track=None, 
     records = sql_helper.execute_db(sql, tz=True)
     if not records:
         return None
-    total = sql_helper.execute_db("SELECT SUM(scrobbles) as total FROM users WHERE user_id IN ({})".format(users_list))[0]['total']
+    if wk_mode == "overall": # FE only needs total for overall mode
+        total = int(sql_helper.execute_db("SELECT SUM(scrobbles) as total FROM users WHERE user_id IN ({})".format(users_list))[0]['total'])
+    else:
+        total = None
     for r in records:
         r['track_url'] = r['artist_url'] + "/" + sql_helper.format_lastfm_string(r['album']) + "/" + sql_helper.format_lastfm_string(r['track'])
     data = {
