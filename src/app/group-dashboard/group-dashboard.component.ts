@@ -196,7 +196,7 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistValueSubject.pipe(debounceTime(1000)).subscribe(value => {
         if (this.wkArtistResults) {
           if (value == this.leaderboardSliderMappings.length-1) { // All time
-            this.wkArtistSubmit({'query': this.wkArtistResults.artist.name}, this.group.members)
+            this.wkArtistSubmit({'query': this.wkArtistResults.artist.name}, this.group.members, null, null, true)
           } else {
             let endRange = moment.utc()
             let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
@@ -208,7 +208,7 @@ export class GroupDashboardComponent implements OnInit {
       this.wkAlbumValueSubject.pipe(debounceTime(1000)).subscribe(value => {
         if (this.wkAlbumResults) {
           if (value == this.leaderboardSliderMappings.length-1) { // All time
-            this.wkAlbumSubmit({'query': this.wkAlbumResults.artist.name + " - " + this.wkAlbumResults.album.name}, this.group.members)
+            this.wkAlbumSubmit({'query': this.wkAlbumResults.artist.name + " - " + this.wkAlbumResults.album.name}, this.group.members, null, null, true)
           } else {
             let endRange = moment.utc()
             let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
@@ -220,7 +220,7 @@ export class GroupDashboardComponent implements OnInit {
       this.wkTrackValueSubject.pipe(debounceTime(1000)).subscribe(value => {
         if (this.wkTrackResults) {
           if (value == this.leaderboardSliderMappings.length-1) { // All time
-            this.wkTrackSubmit({'query': this.wkTrackResults.artist.name + " - " + this.wkTrackResults.track.name}, this.group.members)
+            this.wkTrackSubmit({'query': this.wkTrackResults.artist.name + " - " + this.wkTrackResults.track.name}, this.group.members, null, null, true)
           } else {
             let endRange = moment.utc()
             let startRange = moment.utc().subtract(this.leaderboardSliderMappings[value]['days'], 'd')
@@ -280,7 +280,18 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistDom.nativeElement.style.background = ''
     }
     this.userService.wkArtist(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
-      // check if this entry is in the top for each user
+      if (!fromSliderChange) {
+        this.wkArtistDateLoading = true
+        this.wkArtistResults = data
+        this.wkArtistDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkArtistResults['artist']['image_url']+')'
+        this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
+        this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+        this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
+      }
+      if (this.detectorService.isMobile()) {
+        this.wkArtistInput.closePanel()
+        this.wkArtistInputRaw.nativeElement.blur();  
+      }
       let wkUsers: Array<number> = data?.users.map(u => u.id)
       this.userService.wkCharts(wkUsers, data.artist.id, null, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
         this.wkArtistDateLoading = false;
@@ -293,16 +304,8 @@ export class GroupDashboardComponent implements OnInit {
             })
           }
         }
-        this.wkArtistResults = data
-        if (!fromSliderChange) {
-          this.wkArtistDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkArtistResults['artist']['image_url']+')'
-          this.wkArtistDom.nativeElement.style.backgroundPosition = 'center'
-          this.wkArtistDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-          this.wkArtistDom.nativeElement.style.backgroundSize = 'cover'
-        }
-        if (this.detectorService.isMobile()) {
-          this.wkArtistInput.closePanel()
-          this.wkArtistInputRaw.nativeElement.blur();  
+        if (fromSliderChange) {
+          this.wkArtistResults = data
         }
         if (data['artist']['fallback'] && !data['artist']['redirect']) {
           this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
@@ -353,6 +356,18 @@ export class GroupDashboardComponent implements OnInit {
       }
       this.userService.wkAlbum(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
         // check if this entry is in the top for each user
+        if (!fromSliderChange) {
+          this.wkAlbumDateLoading = true
+          this.wkAlbumResults = data
+          this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
+          this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
+          this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+          this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
+        }
+        if (this.detectorService.isMobile()) {
+          this.wkAlbumInput.closePanel()
+          this.wkAlbumInputRaw.nativeElement.blur();
+        }
         let wkUsers: Array<number> = data?.users.map(u => u.id)
         this.userService.wkCharts(wkUsers, data.artist.id, data.album.id, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
           this.wkAlbumDateLoading = false;
@@ -365,16 +380,8 @@ export class GroupDashboardComponent implements OnInit {
               })
             }
           }
-          this.wkAlbumResults = data
-          if (!fromSliderChange) {
-            this.wkAlbumDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkAlbumResults['album']['image_url']+')'
-            this.wkAlbumDom.nativeElement.style.backgroundPosition = 'center'
-            this.wkAlbumDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-            this.wkAlbumDom.nativeElement.style.backgroundSize = 'cover'
-          }
-          if (this.detectorService.isMobile()) {
-            this.wkAlbumInput.closePanel()
-            this.wkAlbumInputRaw.nativeElement.blur();
+          if (fromSliderChange) {
+            this.wkAlbumResults = data
           }
         })
       }).catch(error => {
@@ -409,6 +416,18 @@ export class GroupDashboardComponent implements OnInit {
       }
       this.userService.wkTrack(formData['query'], users.map(u => u.id), startRange ? startRange.format() : null, endRange ? endRange.format() : null).toPromise().then((data: any) => {
         // check if this entry is in the top for each user
+        if (!fromSliderChange) {
+          this.wkTrackDateLoading = true
+          this.wkTrackResults = data
+          this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
+          this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
+          this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
+          this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
+        }
+        if (this.detectorService.isMobile()) {
+          this.wkTrackInput.closePanel()
+          this.wkTrackInputRaw.nativeElement.blur();
+        }
         let wkUsers: Array<number> = data?.users.map(u => u.id)
         this.userService.wkCharts(wkUsers, data.artist.id, null, data.track.name, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
           this.wkTrackDateLoading = false;
@@ -421,16 +440,8 @@ export class GroupDashboardComponent implements OnInit {
               })
             }
           }
-          this.wkTrackResults = data
-          if (!fromSliderChange) {
-            this.wkTrackDom.nativeElement.style.backgroundImage = 'linear-gradient(rgba(43, 43, 43, 0.767), rgba(43, 43, 43, 0.829)), url('+this.wkTrackResults['track']['image_url']+')'
-            this.wkTrackDom.nativeElement.style.backgroundPosition = 'center'
-            this.wkTrackDom.nativeElement.style.backgroundRepeat = 'no-repeat'
-            this.wkTrackDom.nativeElement.style.backgroundSize = 'cover'
-          }
-          if (this.detectorService.isMobile()) {
-            this.wkTrackInput.closePanel()
-            this.wkTrackInputRaw.nativeElement.blur();
+          if (fromSliderChange) {
+            this.wkTrackResults = data
           }
         })
       }).catch(error => {

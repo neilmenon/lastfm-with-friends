@@ -74,6 +74,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       }).catch(error => {
         if (error['status'] == 404 && this.initUpdate) {
           this.userService.clearLocalData()
+        } else if (error['status'] == 401) {
+          this.userService.clearLocalData()
         }
         this.user = null;
         this.messageService.open("Error getting data from the backend. Please refresh.");

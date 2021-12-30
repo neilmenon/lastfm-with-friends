@@ -1,8 +1,8 @@
--- MariaDB dump 10.19  Distrib 10.6.4-MariaDB, for osx10.16 (x86_64)
+-- MariaDB dump 10.19  Distrib 10.5.13-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: lastfm_with_friends
 -- ------------------------------------------------------
--- Server version	10.6.4-MariaDB
+-- Server version	10.5.13-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -81,9 +81,10 @@ CREATE TABLE `artists` (
   `image_url` varchar(191) DEFAULT NULL,
   `listeners` int(11) DEFAULT NULL,
   `playcount` int(11) DEFAULT NULL,
+  `name_sanitized` varchar(400) GENERATED ALWAYS AS (ucase(replace(replace(replace(`name`,'"',''),'\'',''),'•',' '))) VIRTUAL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
-  KEY `name_2` (`name`(25))
+  KEY `name_sanitized` (`name_sanitized`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -98,7 +99,7 @@ CREATE TABLE `genres` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(191) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`(25)) USING BTREE
+  UNIQUE KEY `name` (`name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -133,7 +134,7 @@ DROP TABLE IF EXISTS `groups`;
 CREATE TABLE `groups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(400) NOT NULL,
-  `description` varchar(200) NOT NULL,
+  `description` varchar(400) NOT NULL,
   `created` datetime NOT NULL,
   `owner` varchar(191) NOT NULL,
   `join_code` varchar(191) NOT NULL,
@@ -230,10 +231,15 @@ CREATE TABLE `track_scrobbles` (
   `album_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `track` varchar(400) NOT NULL,
-  `timestamp` varchar(191) NOT NULL,
+  `timestamp` varchar(12) NOT NULL,
+  `track_sanitized` varchar(400) GENERATED ALWAYS AS (ucase(replace(replace(replace(`track`,'"',''),'\'',''),'•',' '))) VIRTUAL,
   PRIMARY KEY (`artist_id`,`album_id`,`user_id`,`track`(50),`timestamp`(11)) USING BTREE,
   KEY `album_id` (`album_id`),
   KEY `user_id` (`user_id`),
+  KEY `idx_timestamp` (`user_id`,`timestamp`) USING BTREE,
+  KEY `album_id_track` (`album_id`,`track`),
+  KEY `wk_track` (`artist_id`,`track_sanitized`) USING BTREE,
+  KEY `timestamp` (`timestamp`),
   CONSTRAINT `track_scrobbles_ibfk_1` FOREIGN KEY (`artist_id`) REFERENCES `artists` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `track_scrobbles_ibfk_2` FOREIGN KEY (`album_id`) REFERENCES `albums` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `track_scrobbles_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -307,4 +313,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-27 23:23:57
+-- Dump completed on 2021-12-29 17:36:34

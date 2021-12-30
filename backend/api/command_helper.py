@@ -11,7 +11,7 @@ from . import api_logger as logger
 cfg = config.config
 
 def find_artist(query, skip_sanitize=False, extended=False):
-    columns_to_fetch = "*" if extended else "id, name, url, image_url"
+    columns_to_fetch = "id, name, url, image_url, listeners, playcount" if extended else "id, name, url, image_url"
     fallback = False
     redirect = False
     # find artist in the database
@@ -19,11 +19,11 @@ def find_artist(query, skip_sanitize=False, extended=False):
         sanitized_query = sql_helper.sanitize_query(query)
     else:
         sanitized_query = query
-    sql = "SELECT {} from artists WHERE UPPER({}) = UPPER('{}')".format(columns_to_fetch, sql_helper.sanitize_db_field("name"), sanitized_query)
+    sql = "SELECT {} from artists WHERE name_sanitized = '{}'".format(columns_to_fetch, sanitized_query.upper())
     result = sql_helper.execute_db(sql)
     if not result:
         # fallback to LIKE
-        sql = "SELECT {} from artists WHERE {} LIKE '%{}%'".format(columns_to_fetch, sql_helper.sanitize_db_field("name"), sanitized_query)
+        sql = "SELECT {} from artists WHERE name_sanitized LIKE '%{}%'".format(columns_to_fetch, sanitized_query)
         result = sql_helper.execute_db(sql)
         if not result:
             # check artist redirects
@@ -124,10 +124,10 @@ def wk_track(query, users, start_range, end_range):
         return None
 
     # find track in the database
-    sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND UPPER({}) = UPPER('{}')".format(artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(track_query))
+    sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND track_sanitized = '{}'".format(artist['id'], sql_helper.esc_db(track_query.upper()))
     result = sql_helper.execute_db(sql, tz=True)
     if not result:
-        sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND {} LIKE '%{}%'".format(artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(track_query))
+        sql = "SELECT DISTINCT track as name, albums.image_url, albums.name as album_name from track_scrobbles LEFT JOIN albums ON track_scrobbles.album_id = albums.id WHERE artist_id = {} AND track_sanitized LIKE '%{}%'".format(artist['id'], sql_helper.esc_db(track_query))
         result = sql_helper.execute_db(sql, tz=True)
         if not result:
             return None
@@ -265,7 +265,7 @@ def play_history(wk_mode, artist_id, users, start_range, end_range, track=None, 
     records = sql_helper.execute_db(sql, tz=True)
     if not records:
         return None
-    total = sql_helper.execute_db("SELECT COUNT(*) as total FROM track_scrobbles")[0]['total']
+    total = sql_helper.execute_db("SELECT SUM(scrobbles) as total FROM users WHERE user_id IN ({})".format(users_list))[0]['total']
     for r in records:
         r['track_url'] = r['artist_url'] + "/" + sql_helper.format_lastfm_string(r['album']) + "/" + sql_helper.format_lastfm_string(r['track'])
     data = {
@@ -320,7 +320,7 @@ def wk_autocomplete(wk_mode, query):
     partial_result = False
 
     if wk_mode == "artist":
-        sql = "SELECT name from artists WHERE {} LIKE '%{}%' LIMIT 10".format(sql_helper.sanitize_db_field("name"), sanitized_query)
+        sql = "SELECT name from artists WHERE name_sanitized LIKE '%{}%' LIMIT 10".format(sanitized_query)
         artists = sql_helper.execute_db(sql)
         suggestions = [r["name"] for r in artists]
     else: # album or track
@@ -343,7 +343,7 @@ def wk_autocomplete(wk_mode, query):
                     suggestions = [valid_artist['name'] + " - " + a['name'] for a in albums]
                 else: # track
                     if release_query:
-                        sql = "SELECT DISTINCT track as name FROM track_scrobbles WHERE artist_id = {} AND {} LIKE '%{}%' LIMIT 10".format(valid_artist['id'], sql_helper.sanitize_db_field("track"), sql_helper.esc_db(release_query))
+                        sql = "SELECT DISTINCT track as name FROM track_scrobbles WHERE artist_id = {} AND track_sanitized LIKE '%{}%' LIMIT 10".format(valid_artist['id'], sql_helper.esc_db(release_query))
                     else:
                         sql = "SELECT track as name, COUNT(*) as scrobbles FROM track_scrobbles WHERE artist_id = {} GROUP BY track ORDER BY scrobbles DESC LIMIT 10".format(valid_artist['id'])
                     tracks = sql_helper.execute_db(sql)
@@ -351,7 +351,7 @@ def wk_autocomplete(wk_mode, query):
             else:
                 suggestions = []
         else:
-            sql = "SELECT name from artists WHERE {} LIKE '%{}%' LIMIT 10".format(sql_helper.sanitize_db_field("name"), sanitized_query)
+            sql = "SELECT name from artists WHERE name_sanitized LIKE '%{}%' LIMIT 10".format(sanitized_query)
             artists = sql_helper.execute_db(sql)
             suggestions = [r["name"] + " - " for r in artists]
             partial_result = True
@@ -406,9 +406,9 @@ def charts(chart_mode, chart_type, users, start_range, end_range):
     for user in users:
         if chart_type == "track":
             if not start_range or not end_range:
-                sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.name as album, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} GROUP BY artists.id, track_scrobbles.track ORDER BY scrobbles DESC LIMIT {}".format(user, entry_limit)
+                sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.name as album, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} GROUP BY track_scrobbles.artist_id, track_scrobbles.track ORDER BY scrobbles DESC LIMIT {}".format(user, entry_limit)
             else:
-                sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.name as album, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY artists.id, track_scrobbles.track ORDER BY scrobbles DESC LIMIT {}".format(user, start_range, end_range, entry_limit)
+                sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.name as album, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.artist_id, track_scrobbles.track ORDER BY scrobbles DESC LIMIT {}".format(user, start_range, end_range, entry_limit)
         elif chart_type == "album":
             if not start_range or not end_range:
                 sql = "SELECT artists.name as artist, artists.id as artist_id, artists.url as artist_url, artists.image_url as artist_image, albums.name as album, albums.id as album_id, albums.url as url, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} GROUP BY track_scrobbles.album_id ORDER BY scrobbles DESC LIMIT {}".format(user, entry_limit)
