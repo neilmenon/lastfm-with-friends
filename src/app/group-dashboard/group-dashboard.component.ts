@@ -574,14 +574,14 @@ export class GroupDashboardComponent implements OnInit {
       wkArtist.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
   }
 
-  scrobbleHistory(wkMode, wkObject, users, startRange:moment.Moment=null, endRange:moment.Moment=null, chartUser=null) {
+  scrobbleHistory(wkMode, wkObj, users, startRange:moment.Moment=null, endRange:moment.Moment=null, chartUser=null) {
+    let tmp = JSON.parse(JSON.stringify(wkObj))
+    let wkObject = JSON.parse(JSON.stringify(wkObj))
     if (chartUser) {
-      let tmp = wkObject
       wkObject = {
-        'artist': {'id': tmp['artist_id'], 'name': tmp['artist']}, 
+        'artist': {'id': tmp?.artist_id, 'name': tmp?.artist}, 
         'track': {},
-        'album': {},
-        'total_scrobbles': tmp?.scrobbles
+        'album': {}
       }
       if (wkMode == "track") {
         wkObject['track']['name'] = tmp['track']
@@ -590,6 +590,8 @@ export class GroupDashboardComponent implements OnInit {
         wkObject['album']['name'] = tmp['album']
       }
     }
+    if (wkObject)
+      wkObject['total_scrobbles'] = tmp['total_scrobbles'] ? tmp['total_scrobbles'] : (tmp['total'] ? tmp['total'] : tmp['scrobbles'])
     let dialogRef = this.dialog.open(ScrobbleHistoryComponent, {
       data: {
         group: this.group,

@@ -48,6 +48,7 @@ export class ScrobbleHistoryComponent implements OnInit {
     }
     this.historyStartDate = this.data.startRange
     this.historyEndDate = this.data.endRange
+    this.length = this.data.wkObject?.total_scrobbles ? this.data.wkObject?.total_scrobbles : this.length
     this.getHistoryPage(this.data.chartUser && this.data.chartUser != 'all' ? [this.data.chartUser] : this.data.group.members.map(u => u.id), this.sortBy, this.sortOrder, this.pageSize, 0, this.historyStartDate ? this.historyStartDate.format() : null, this.historyEndDate ? this.historyEndDate.format() : null)
   }
 
@@ -90,10 +91,9 @@ export class ScrobbleHistoryComponent implements OnInit {
         this.length = 0
         this.resultsObject = undefined
       } else {
-        this.length = this.data.wkMode == "overall" ? data['total'] : this.data.wkObject?.total_scrobbles
+        this.length = this.data.wkObject?.total_scrobbles ? this.data.wkObject?.total_scrobbles : data['total']
       }
       this.paginationTriggered = false;
-      // this.historyContainer.nativeElement.scrollTop(0)
     }).catch(error => {
       this.messageService.open("Error getting play history. Please try again.")
       console.log(error)

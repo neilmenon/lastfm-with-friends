@@ -307,8 +307,10 @@ def wk_top(wk_mode, users, artist_id, start_range, end_range, album_id=None, tra
 def scrobble_leaderboard(users, start_range, end_range):
     users_list = ", ".join(str(u) for u in users)
 
-    if not start_range or not end_range:
-        sql = "SELECT users.username, users.profile_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN users on users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC".format(users_list)
+    if not start_range or not end_range: # overall
+        # sql = "SELECT users.username, users.profile_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN users on users.user_id = track_scrobbles.user_id WHERE track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC".format(users_list)
+        # use total counts from users table for faster lookup
+        sql = "SELECT username, profile_image, scrobbles FROM users WHERE user_id IN ({}) ORDER BY scrobbles DESC".format(users_list)
     else:
         sql = "SELECT users.username, users.profile_image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN users on users.user_id = track_scrobbles.user_id WHERE from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.user_id IN ({}) GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC;".format(start_range, end_range, users_list)
     leaderboard = sql_helper.execute_db(sql, tz=True)
