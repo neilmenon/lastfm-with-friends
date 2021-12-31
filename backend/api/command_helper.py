@@ -147,10 +147,10 @@ def wk_track(query, users, start_range, end_range):
 def nowplaying(single_user=None):
     if not single_user:
         sql = "SELECT user_id, username FROM users;"
-        users = sql_helper.execute_db(sql)
     else:
+        sql = "SELECT user_id, username FROM users WHERE username = '{}'".format(single_user)
         logger.info("[User-triggered now playing update] {}".format(single_user))
-        users = [{'username': single_user}]
+    users = sql_helper.execute_db(sql)
     now_playing_users = []
     played_users = []
     for user in users:
