@@ -177,3 +177,21 @@ def artist_images():
         abort(401)
     lastfm_scraper.scrape_artist_images(full)
     return jsonify(True)
+
+@task_api.route('/api/tasks/personal-stats', methods=['POST'])
+def personal_stats():
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    # for username in user_helper.get_users():
+    #     task_helper.personal_stats(username)
+    return jsonify(task_helper.personal_stats("neilmenon", task_helper.get_popular_genre_filter_list(15)))

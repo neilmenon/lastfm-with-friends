@@ -128,3 +128,62 @@ def task_handler(task_name, task_operation):
     else:
         logger.error("[task_handler] [{}] [skips: {}] Invalid task operation '{}'. This task will not run.".format(task_name, task['skips'], task_operation))
         return False
+
+# gets series of personal stats for a given user (used on app homepage)
+def personal_stats(username, genre_filter_list):
+    logger.info("Generating personal stats for {}".format(username))
+    # get user details
+    u = sql_helper.execute_db("SELECT user_id, username, scrobbles FROM users WHERE username = '{}'".format(username))[0]
+
+    min_scrobbles = 250
+
+    if u['scrobbles'] < min_scrobbles: # not enough data
+        logger.info("\tNot enough scrobble data to generate stats. Skipping... (scrobbles: {})".format(u['scrobbles']))
+        return
+    
+    stats = {}
+
+    # define datetime time periods
+    now = datetime.datetime.utcnow()
+    calc_days_ago = None
+    calc_time_days = None
+    
+    # determine how precise we want to stats to be based on how much the user scrobbles
+    # need at least 300 scrobbles for stats to be revelant enough to run calculations
+    # find first time period that satisfies this
+    time_periods = [7, 14, 30, 60, 90, 180, 365, 9999] # 9999 is 'all time'
+    for t in time_periods:
+        calc_days_ago = now - datetime.timedelta(days=t)
+        calc_time_days = t
+        scrobbles = sql_helper.execute_db("SELECT COUNT(*) as scrobbles FROM `track_scrobbles` WHERE from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.user_id = {} GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC".format(calc_days_ago, now, u['user_id']))[0]['scrobbles']
+        if scrobbles >= min_scrobbles:
+            logger.info("\tGenerating stats with time period of {} days (scrobbles: {})".format(t, scrobbles))
+            break
+    
+    # can't get enough of
+    sql = "SELECT artists.name as artist, artists.url as artist_url, artists.image_url as artist_image, track_scrobbles.track, albums.name as album, albums.image_url as image, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id LEFT JOIN albums ON albums.id = track_scrobbles.album_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.artist_id, track_scrobbles.track ORDER BY scrobbles DESC LIMIT 10".format(u['user_id'], calc_days_ago, now)
+    tracks = list(filter(lambda x: x['scrobbles'] >= 5, sql_helper.execute_db(sql)))
+
+    if len(tracks):
+        track = random.choice(tracks)
+    else:
+        track = None
+
+    stats['cant_get_enough'] = track
+
+    # top genre
+    sql = "SELECT genres.name, COUNT(*) as genre_count, SUM(scrobbles) as sum_scrobbles FROM genres LEFT JOIN artist_genres ON genres.id = artist_genres.genre_id INNER JOIN (SELECT track_scrobbles.artist_id, COUNT(*) as scrobbles FROM `track_scrobbles` WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.artist_id ORDER BY scrobbles DESC) as top ON artist_genres.artist_id = top.artist_id WHERE genres.id NOT IN ({}) GROUP BY genres.name ORDER BY sum_scrobbles DESC LIMIT 1".format(u['user_id'], calc_days_ago, now, genre_filter_list)
+    top_genre = sql_helper.execute_db(sql)[0]
+    
+    stats['top_genre'] = top_genre
+
+    # most active hour
+    sql = "SELECT EXTRACT(HOUR FROM from_unixtime(track_scrobbles.timestamp)) as hour, COUNT(*) as total FROM track_scrobbles WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY hour ORDER BY total DESC LIMIT 1".format(u['user_id'], calc_days_ago, now)
+    most_active_hour = sql_helper.execute_db(sql)[0]['hour']
+
+    stats['most_active_hour'] = most_active_hour
+
+    return stats
+
+def get_popular_genre_filter_list(limit):
+    return ",".join([str(g['id']) for g in sql_helper.execute_db("SELECT genres.id FROM artist_genres LEFT JOIN genres ON genres.id = artist_genres.genre_id GROUP BY genres.id ORDER BY COUNT(*) DESC LIMIT {}".format(limit))])
