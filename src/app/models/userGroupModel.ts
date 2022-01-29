@@ -12,6 +12,7 @@ export class UserModel {
     user_id: number
     username: string
     group_session: GroupSessionModel
+    stats: PersonalStatsModel
 }
 
 export class UserGroupModel {
@@ -60,4 +61,15 @@ export class GroupSessionModel {
 export class GroupSessionMemberModel {
     username: string
     profile_image: string
+}
+
+export class PersonalStatsModel {
+    cant_get_enough: { album: string, artist: string, artist_image: string, artist_url: string, image: string, scrobbles: number, track: string }
+    date_generated: string
+    most_active_hour: number
+    scrobble_compare: { current: number, percent: number, previous: number }
+    time_period_days: number
+    top_genre: { genre_count: number, name: string, sum_scrobbles: 109 }
+    top_rising: Array<{ artist: string, artist_id: number, percent: number, prev_scrobbles: number, scrobbles: number }>
+    username: string
 }

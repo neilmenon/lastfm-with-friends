@@ -1,3 +1,4 @@
+import json
 from requests.utils import quote
 import mariadb
 from . import api_logger as logger
@@ -87,3 +88,10 @@ def execute_db(sql, commit=False, tz=False, log=False, pass_on_error=False):
                 abort(make_response(jsonify(error="A database error occured: {}".format(e)), 500))
 
     return records
+
+def stringify_keys_in_dict(d: dict):
+    for k in d.keys():
+        if type(d[k]) is dict or type(d[k]) is list:
+            d[k] = json.dumps(d[k])
+
+    return d

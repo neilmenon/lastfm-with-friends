@@ -69,6 +69,8 @@ import { GenreTopArtistsComponent } from './genre-top-artists/genre-top-artists.
 import { SignedInResolverService } from './signed-in-resolver.service';
 import { GettingStartedComponent } from './getting-started/getting-started.component';
 import { FaqsComponent } from './faqs/faqs.component';
+import { PersonalStatsComponent } from './personal-stats/personal-stats.component';
+import { AbsolutePipe } from './absolute.pipe';
 
 @NgModule({
   declarations: [
@@ -98,6 +100,8 @@ import { FaqsComponent } from './faqs/faqs.component';
     GenreTopArtistsComponent,
     GettingStartedComponent,
     FaqsComponent,
+    PersonalStatsComponent,
+    AbsolutePipe,
   ],
   imports: [
     BrowserModule,

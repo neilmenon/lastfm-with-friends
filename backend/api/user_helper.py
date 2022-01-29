@@ -1,4 +1,5 @@
 import datetime
+import json
 import requests
 import hashlib
 from . import config
@@ -8,7 +9,7 @@ from . import group_session_helper
 
 cfg = config.config
 
-def get_user(username, extended=True, get_session=False):
+def get_user(username, extended=True, get_session=False, get_stats=False):
     result = sql_helper.execute_db("SELECT * FROM users WHERE username = '" + str(username) + "';")
     if not result:
         return False
@@ -29,6 +30,8 @@ def get_user(username, extended=True, get_session=False):
     if get_session:
         current_session = group_session_helper.get_current_session(username=username, with_members=True)
         user_data['group_session'] = None if not current_session else current_session
+    if get_stats:
+        user_data['stats'] = get_personal_stats(username)
     return user_data
 
 def get_users():
@@ -122,3 +125,13 @@ def fire_and_forget_user_update(username, session_key, user_id, url):
         "user_id": user_id
     }
     requests.post(url, json=data)
+
+def get_personal_stats(username):
+    stats = sql_helper.execute_db("SELECT * FROM personal_stats WHERE username = '{}'".format(username))
+    if not len(stats):
+        return None
+    else:
+        stats: dict = stats[0]
+        for k in stats.keys():
+            stats[k] = json.loads(stats[k]) if stats[k] and k in ["cant_get_enough", "scrobble_compare", "top_genre", "top_rising"] else stats[k]
+        return stats

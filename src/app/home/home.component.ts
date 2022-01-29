@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, Inject, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageService } from '../message.service'
 import { UserService } from '../user.service'
@@ -12,7 +12,7 @@ import { AppState } from '../store';
 import { Observable, Subscription } from 'rxjs';
 import { IS_DEMO_MODE, USER_MODEL } from '../actions';
 import { config } from '../config';
-import { MatDialog, MatDialogRef, MatDialogState } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MatDialogState, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { GroupSessionComponent } from '../group-session/group-session.component';
 import { PluralizePipe } from '../pluralize.pipe';
 import { GettingStartedComponent } from '../getting-started/getting-started.component';
@@ -188,5 +188,20 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   gettingStarted() {
     this.dialog.open(GettingStartedComponent)
+  }
+
+  openPersonalStatsInfo() {
+    let text: string = `Personal stat reports are generated daily. The time period used to calculate the stats varies per user, based on how much you.<br><br>This report was generated with a time period of <strong><u>${this.user.stats?.time_period_days} days</u></strong> until <em>now</em> (which means the stats will change slightly each day).`
+    this.dialog.open(GenericTextComponent, { data: { text: text, title: "About Personal Stat Report" } })
+  }
+}
+
+@Component({
+  selector: 'generic-text-component',
+  template: '<h3 mat-dialog-title class="center">{{ data.title }}</h3> <div [innerHTML]="data.text" class="center"></div>'
+})
+export class GenericTextComponent {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: {text: string, title: string}) {
+
   }
 }

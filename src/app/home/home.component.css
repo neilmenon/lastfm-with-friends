@@ -14,3 +14,10 @@
         margin: 0.5rem auto;
     }
 }
+.home-info-icon {
+    position: absolute;
+    right: 6px;
+    font-size: 17px;
+    top: 6px;
+    color: #bfbfbf;
+}

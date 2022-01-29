@@ -1,0 +1,37 @@
+<div id="stats-container" class="center" *ngIf="stats; else noStats">
+    <div class="stat">
+        <div>can't get enough of</div>
+        <div>{{ stats.cant_get_enough?.track ? stats.cant_get_enough?.track : 'N/A' }}</div>
+        <div *ngIf="stats.cant_get_enough">by {{ stats.cant_get_enough.artist }} • {{ stats.cant_get_enough.scrobbles | number }} scrobbles</div>
+        <div *ngIf="!stats.cant_get_enough">you are a balanced listener</div>
+    </div>
+    <div class="stat">
+        <div>your scrobble trend</div>
+        <div>
+            <span [ngClass]="stats.scrobble_compare.percent > 0 ? 'up' : 'down'">
+                <mat-icon>{{ stats.scrobble_compare.percent > 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+            </span>
+            {{ stats.scrobble_compare.percent | absolute }}%
+        </div>
+        <div>{{ stats.scrobble_compare.current | number }} scrobbles (vs. {{ stats.scrobble_compare.previous | number }} previous)</div>
+    </div>
+    <div class="stat">
+        <div>top rising artist</div>
+        <div>{{ stats.top_rising[0].artist }}</div>
+        <div>
+            <span><i class="fas fa-arrow-circle-up"></i></span>
+            {{ stats.top_rising[0].percent }}% (from {{ stats.top_rising[0].prev_scrobbles | number }} to {{ stats.top_rising[0].scrobbles | number}} scrobbles)
+        </div>
+    </div>
+    <div class="stat">
+        <div>most active hour</div>
+        <div>{{ moment().utc().set({ hour: stats.most_active_hour, minute: 0 }).local().format("h:mm A") }}</div>
+        <div>{{ activeHourText }}</div>
+    </div>
+    <div class="stat">
+        <div>top genre</div>
+        <div>{{ stats.top_genre.name }}</div>
+        <div>{{ stats.top_genre.genre_count | pluralize:'artist' }} • {{ stats.top_genre.sum_scrobbles | pluralize:'scrobble' }}</div>
+    </div>
+</div>
+<ng-template #noStats><span class="center-all" style="color: #bfbfbf;">Personal stats report not generated yet for your profile! Please check back soon.</span></ng-template>

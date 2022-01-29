@@ -1,4 +1,5 @@
 from flask import *
+
 from . import config
 from . import auth_helper
 from . import user_helper
@@ -7,6 +8,7 @@ from . import lastfm_scraper
 from . import command_helper
 from . import task_helper
 from . import group_session_helper
+from . import sql_helper
 cfg = config.config
 
 task_api = Blueprint('tasks', __name__)
@@ -192,6 +194,8 @@ def personal_stats():
         abort(response)
     if secret_key != cfg['api']['secret']:
         abort(401)
-    # for username in user_helper.get_users():
-    #     task_helper.personal_stats(username)
-    return jsonify(task_helper.personal_stats("neilmenon", task_helper.get_popular_genre_filter_list(15)))
+    genres = task_helper.get_popular_genre_filter_list(15)
+    personal_stats = [task_helper.personal_stats(user['username'], genres) for user in user_helper.get_users()]
+    for data in personal_stats:
+        sql_helper.execute_db(sql_helper.replace_into("personal_stats", sql_helper.stringify_keys_in_dict(data.copy())), commit=True, pass_on_error=True)
+    return jsonify(personal_stats)

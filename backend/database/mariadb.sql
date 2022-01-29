@@ -1,8 +1,8 @@
--- MariaDB dump 10.19  Distrib 10.5.13-MariaDB, for Linux (x86_64)
+-- MariaDB dump 10.19  Distrib 10.6.4-MariaDB, for osx10.17 (arm64)
 --
 -- Host: localhost    Database: lastfm_with_friends
 -- ------------------------------------------------------
--- Server version	10.5.13-MariaDB
+-- Server version	10.6.4-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -167,6 +167,27 @@ CREATE TABLE `now_playing` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `personal_stats`
+--
+
+DROP TABLE IF EXISTS `personal_stats`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `personal_stats` (
+  `username` varchar(191) NOT NULL,
+  `cant_get_enough` varchar(2000) DEFAULT NULL,
+  `most_active_hour` int(11) NOT NULL,
+  `scrobble_compare` varchar(2000) NOT NULL,
+  `top_genre` varchar(2000) NOT NULL,
+  `top_rising` varchar(2000) NOT NULL,
+  `time_period_days` int(1) NOT NULL,
+  `date_generated` datetime NOT NULL,
+  PRIMARY KEY (`username`),
+  CONSTRAINT `personal_stats_ibfk_1` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `sessions`
 --
 
@@ -313,4 +334,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-12-29 17:36:34
+-- Dump completed on 2022-01-29  2:43:41
