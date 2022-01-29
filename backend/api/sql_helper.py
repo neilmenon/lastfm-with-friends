@@ -84,6 +84,7 @@ def execute_db(sql, commit=False, tz=False, log=False, pass_on_error=False):
     except mariadb.Error as e:
             logger.error("{} A database error occured: {}".format("[PASS]" if pass_on_error else "[FATAL]", e))
             logger.error("\tSQL: {}".format(sql))
+            records = []
             if not pass_on_error:
                 abort(make_response(jsonify(error="A database error occured: {}".format(e)), 500))
 
