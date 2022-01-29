@@ -197,5 +197,6 @@ def personal_stats():
     genres = task_helper.get_popular_genre_filter_list(15)
     personal_stats = [task_helper.personal_stats(user['username'], genres) for user in user_helper.get_users()]
     for data in personal_stats:
-        sql_helper.execute_db(sql_helper.replace_into("personal_stats", sql_helper.stringify_keys_in_dict(data.copy())), commit=True, pass_on_error=True)
+        if data:
+            sql_helper.execute_db(sql_helper.replace_into("personal_stats", sql_helper.stringify_keys_in_dict(data.copy())), commit=True, pass_on_error=True)
     return jsonify(personal_stats)

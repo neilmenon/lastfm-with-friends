@@ -157,7 +157,11 @@ def personal_stats(username, genre_filter_list):
     for t in time_periods:
         calc_days_ago = now - datetime.timedelta(days=t)
         calc_time_days = t
-        scrobbles = sql_helper.execute_db("SELECT COUNT(*) as scrobbles FROM `track_scrobbles` WHERE from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.user_id = {} GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC".format(calc_days_ago, now, u['user_id']))[0]['scrobbles']
+        scrobbles = sql_helper.execute_db("SELECT COUNT(*) as scrobbles FROM `track_scrobbles` WHERE from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.user_id = {} GROUP BY track_scrobbles.user_id ORDER BY scrobbles DESC".format(calc_days_ago, now, u['user_id']))
+        if len(scrobbles):
+            scrobbles = scrobbles[0]['scrobbles']
+        else:
+            continue
         if scrobbles >= min_scrobbles:
             logger.info("\tGenerating stats with time period of {} days (scrobbles: {})".format(t, scrobbles))
             break
