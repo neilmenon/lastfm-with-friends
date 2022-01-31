@@ -44,8 +44,9 @@
                     <td class="table-border" [class.center]="data.wkMode == 'album'"><a href="{{ entry.album_url }}" target="_blank" class="clear-color">{{ entry.album }}</a></td>
                 </ng-template>
                 <td class="table-border center">{{ entry.scrobbles }}</td>
-                <td class="table-border center wk-actions-dialog">
-                    <a (click)="wkTrigger(entry)" [matTooltip]="trackMode ? 'Who Knows — Artist/Album/Track' : 'Who Knows — Artist/Album'" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">help_center</mat-icon></a>
+                <td class="table-border center wk-actions-dialog" style="font-size: 16px;">
+                    <a (click)="wkTrigger(entry)" [matTooltip]="trackMode ? 'Who Knows — Artist/Album/Track' : 'Who Knows — Artist/Album'" matTooltipPosition="above" class="lastfm-icon clickable" [style.padding-right]="trackMode ? '6px' : ''"><i class="fas fa-question"></i></a>
+                    <a (click)="scrobbleTrigger(entry)" *ngIf="trackMode" matTooltip="Manually Scrobble Track" matTooltipPosition="above" class="lastfm-icon clickable"><i class="fas fa-upload"></i></a>
                 </td>
             </tr>
         </tbody>

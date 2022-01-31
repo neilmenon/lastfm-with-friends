@@ -688,9 +688,14 @@ export class GroupDashboardComponent implements OnInit {
       this.wkArtistCustomEndDate = entry['endDate']
       this.nowPlayingToWk(entry, null, entry['startDate'], entry['endDate'], false)
     })
+    let scrobbleSub = dialogRef.componentInstance.scrobbleFromDialog.subscribe((entry) => {
+      this.scrobbleTrack(entry)
+    })
     dialogRef.afterClosed().subscribe(() => {
       wkSub.unsubscribe()
+      scrobbleSub.unsubscribe()
     })
+
   }
 
   scrobbleLeaderboard(indexValue, users, startRange=null, endRange=null, custom:boolean=false) {
@@ -885,16 +890,16 @@ export class GroupDashboardComponent implements OnInit {
     })
   }
 
-  scrobbleTrack() {
+  scrobbleTrack(track: { artist: { name: string }, track: { name: string, album_name: string } }) {
     let entry: HttpScrobbleModel = new HttpScrobbleModel()
-    entry.artist = this.wkTrackResults['artist']['name']
-    entry.track = this.wkTrackResults['track']['name']
-    entry.album = this.wkTrackResults['track']['album_name']
+    entry.artist = track.artist.name
+    entry.track = track.track.name
+    entry.album = track.track.name
     const dialogRef = this.dialog.open(ConfirmPopupComponent, {
       data: { 
         title: `Scrobble ${entry.artist} - ${entry.track}`,
         message: "Are you sure you want to manually scrobble this track?",
-        primaryButton: "Submit Scrobble"
+        primaryButton: "Submit Scrobble (↵)"
       }
     })
     dialogRef.afterClosed().subscribe(result => {

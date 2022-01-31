@@ -101,6 +101,6 @@ def stringify_keys_in_dict(d: dict):
 def escape_keys_in_dict(d: dict):
     for k in d.keys():
         if type(d[k]) is str:
-            d[k] = esc_db(d[k])
+            d[k] = d[k].replace("'", "\'")
 
     return d

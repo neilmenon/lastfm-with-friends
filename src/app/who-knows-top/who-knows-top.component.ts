@@ -21,6 +21,7 @@ export class WhoKnowsTopComponent implements OnInit {
   selectedUser: any;
 
   @Output() wkFromDialog: EventEmitter<any> = new EventEmitter(true)
+  @Output() scrobbleFromDialog: EventEmitter<any> = new EventEmitter(true)
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, private userService: UserService, public messageService: MessageService, public dialogRef: MatDialogRef<WhoKnowsTopComponent>) { }
 
   ngOnInit(): void {
@@ -58,4 +59,11 @@ export class WhoKnowsTopComponent implements OnInit {
     this.dialogRef.close()
   }
 
+  scrobbleTrigger(entry) {
+    let track: { artist: { name: string }, track: { name: string, album_name: string } } = {
+      artist: { name: this.data.wkObject.artist.name },
+      track: { name: entry.track, album_name: entry.album }
+    }
+    this.scrobbleFromDialog.emit(track)
+  }
 }

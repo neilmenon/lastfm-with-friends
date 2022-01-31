@@ -245,8 +245,9 @@
                 <span *ngIf="wkTrackIsCustomDateRange">{{ wkTrackCustomStartDate.format('MM/DD/YY') }} - {{ wkTrackCustomEndDate.format('MM/DD/YY') }}</span>
             </div>
             <div class="refresh">
-                <mat-spinner *ngIf="wkTrackDateLoading" style="right: 73px;" diameter="19" color="accent"></mat-spinner>
+                <mat-spinner *ngIf="wkTrackDateLoading" style="right: 96px;" diameter="19" color="accent"></mat-spinner>
             </div>
+            <a class="refresh clickable" style="right: 64px; font-size: 17px;" [class.disable-click]="isDemo | async" (click)="scrobbleTrack(wkTrackResults)" matTooltip="Manually Scrobble Track" matTooltipPosition="above" *ngIf="wkTrackResults && wkTrackResults.users.length > 0"><i class="fas fa-upload"></i></a>
             <a class="refresh clickable" style="right: 36px; font-size: 23px;" *ngIf="wkTrackResults && wkTrackResults.users.length > 0" (click)="listeningTrends('wk', 'track', wkTrackResults, wkTrackIsCustomDateRange ? wkTrackCustomStartDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc().subtract(leaderboardSliderMappings[wkTrackSelectedIndex].days, 'd')), wkTrackIsCustomDateRange ? wkTrackCustomEndDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc()))" matTooltip="Listening Trends — Group" matTooltipPosition="above"><mat-icon [inline]="true">timeline</mat-icon></a>
             <a class="refresh clickable" style="right: 13px; font-size: 22px;" *ngIf="wkTrackResults && wkTrackResults.users.length > 0" (click)="scrobbleHistory('track', wkTrackResults, group.members, wkTrackIsCustomDateRange ? wkTrackCustomStartDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc().subtract(leaderboardSliderMappings[wkTrackSelectedIndex].days, 'd')), wkTrackIsCustomDateRange ? wkTrackCustomEndDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc()))" matTooltip="Group Scrobble History — Track" matTooltipPosition="above"><mat-icon [inline]="true">history</mat-icon></a>
             <a class="refresh clickable" *ngIf="wkTrackResults" matTooltip="Custom Date Range" matTooltipPosition="above" (click)="customDateRange('Who Knows This Track')"><mat-icon [inline]="true">date_range</mat-icon></a>
@@ -312,7 +313,6 @@
                         <td>{{ entry.percent | number: '1.2-2' }}</td>
                         <td class="wk-actions">
                             <a (click)="whoKnowsTop('track', wkTrackResults, entry, wkTrackIsCustomDateRange ? wkTrackCustomStartDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc().subtract(leaderboardSliderMappings[wkTrackSelectedIndex].days, 'd')), wkTrackIsCustomDateRange ? wkTrackCustomEndDate : (wkTrackSelectedIndex == leaderboardSliderMappings.length - 1 ? null : moment.utc()))" matTooltip="Top Scrobbles — Artist" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">leaderboard</mat-icon></a>
-                            <a [class.disable-click]="isDemo | async" (click)="scrobbleTrack()" *ngIf="user.username == entry.username" matTooltip="Manually Scrobble Track" matTooltipPosition="above" class="lastfm-icon clickable"><mat-icon [inline]="true">file_upload</mat-icon></a>
                         </td>                     
                     </tr>
                 </tbody>
