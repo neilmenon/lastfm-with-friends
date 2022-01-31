@@ -55,7 +55,7 @@ export class PersonalStatsComponent implements OnInit {
       case 18:
       case 19:
       case 20:
-        return this.randomChoice(["evening EPs", "the sunset scrobbler", "sundown with [artist]"]).replace("[artist]", randomArtist)
+        return this.randomChoice(["the sundown scrobbler", "sunset with [artist]"]).replace("[artist]", randomArtist)
 
       case 21:
       case 22:

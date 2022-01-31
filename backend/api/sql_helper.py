@@ -90,9 +90,17 @@ def execute_db(sql, commit=False, tz=False, log=False, pass_on_error=False):
 
     return records
 
+# built for personal stats 
 def stringify_keys_in_dict(d: dict):
     for k in d.keys():
         if type(d[k]) is dict or type(d[k]) is list:
             d[k] = json.dumps(d[k])
+
+    return d
+
+def escape_keys_in_dict(d: dict):
+    for k in d.keys():
+        if type(d[k]) is str:
+            d[k] = esc_db(d[k])
 
     return d

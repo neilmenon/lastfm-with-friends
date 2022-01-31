@@ -172,14 +172,13 @@ def personal_stats(username, genre_filter_list):
     tracks = list(filter(lambda x: x['scrobbles'] >= 5, sql_helper.execute_db(sql)))
 
     if len(tracks):
-        stats['cant_get_enough'] = random.choice(tracks[:3])
-
+        len_tracks = 3 if len(tracks) >= 3 else len(tracks)
+        stats['cant_get_enough'] = sql_helper.escape_keys_in_dict(random.choice(tracks[:len_tracks]))
 
     # top genre
     sql = "SELECT genres.name, COUNT(*) as genre_count, CAST(SUM(scrobbles) as int) as sum_scrobbles FROM genres LEFT JOIN artist_genres ON genres.id = artist_genres.genre_id INNER JOIN (SELECT track_scrobbles.artist_id, COUNT(*) as scrobbles FROM `track_scrobbles` WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY track_scrobbles.artist_id ORDER BY scrobbles DESC) as top ON artist_genres.artist_id = top.artist_id WHERE genres.id NOT IN ({}) GROUP BY genres.name ORDER BY sum_scrobbles DESC LIMIT 1".format(u['user_id'], calc_days_ago, now, genre_filter_list)
     top_genre = sql_helper.execute_db(sql)[0]
-    
-    stats['top_genre'] = top_genre
+    stats['top_genre'] = sql_helper.escape_keys_in_dict(top_genre)
 
     # most active hour
     sql = "SELECT EXTRACT(HOUR FROM from_unixtime(track_scrobbles.timestamp)) as hour, COUNT(*) as total FROM track_scrobbles WHERE user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' GROUP BY hour ORDER BY total DESC LIMIT 1".format(u['user_id'], calc_days_ago, now)
@@ -232,7 +231,7 @@ def personal_stats(username, genre_filter_list):
         a['percent'] = round(((a['scrobbles'] - previous_record['scrobbles'])/previous_record['scrobbles']) * 100, 1)
         unsorted_top_rising.append(a)
 
-    stats['top_rising'] = sorted(unsorted_top_rising, key = lambda i: i['percent'], reverse=True)
+    stats['top_rising'] = [sql_helper.escape_keys_in_dict(t) for t in sorted(unsorted_top_rising, key = lambda i: i['percent'], reverse=True)]
     stats['date_generated'] = datetime.datetime.utcnow()
 
     return stats
