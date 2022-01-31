@@ -94,7 +94,7 @@ def execute_db(sql, commit=False, tz=False, log=False, pass_on_error=False):
 def stringify_keys_in_dict(d: dict):
     for k in d.keys():
         if type(d[k]) is dict or type(d[k]) is list:
-            d[k] = json.dumps(d[k]).replace("'", "\\'")
+            d[k] = json.dumps(d[k], ensure_ascii=False).replace("'", "\\'")
 
     return d
 
