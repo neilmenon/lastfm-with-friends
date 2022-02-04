@@ -211,27 +211,28 @@ def personal_stats(username, genre_filter_list):
     else:
         top_artists_ids_list = ",".join([str(a['artist_id']) for a in top_artists])
 
-    # get scrobble count from the start until now for the above artists
-    sql = "SELECT artists.name as artist, artists.id as artist_id, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND artists.id IN ({}) GROUP BY track_scrobbles.artist_id HAVING scrobbles ORDER BY scrobbles DESC LIMIT 15".format(u['user_id'], beginning_of_time, now, top_artists_ids_list)
-    current_count = sql_helper.execute_db(sql)
+        # get scrobble count from the start until now for the above artists
+        sql = "SELECT artists.name as artist, artists.id as artist_id, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND artists.id IN ({}) GROUP BY track_scrobbles.artist_id HAVING scrobbles ORDER BY scrobbles DESC LIMIT 15".format(u['user_id'], beginning_of_time, now, top_artists_ids_list)
+        current_count = sql_helper.execute_db(sql)
 
-    # get scrobble count from the start until X days ago
-    sql = "SELECT artists.name as artist, artists.id as artist_id, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND artists.id IN ({}) GROUP BY track_scrobbles.artist_id ORDER BY scrobbles DESC".format(u['user_id'], beginning_of_time, calc_days_ago, top_artists_ids_list)
-    previous_count = sql_helper.execute_db(sql)
+        # get scrobble count from the start until X days ago
+        sql = "SELECT artists.name as artist, artists.id as artist_id, COUNT(*) as scrobbles FROM `track_scrobbles` LEFT JOIN artists ON artists.id = track_scrobbles.artist_id WHERE track_scrobbles.user_id = {} AND from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND artists.id IN ({}) GROUP BY track_scrobbles.artist_id ORDER BY scrobbles DESC".format(u['user_id'], beginning_of_time, calc_days_ago, top_artists_ids_list)
+        previous_count = sql_helper.execute_db(sql)
 
-    unsorted_top_rising = []
-    for a in current_count:
-        previous_record = list(filter(lambda x: x['artist_id'] == a['artist_id'], previous_count))
-        if not len(previous_record):
-            continue
-        else:
-            previous_record = previous_record[0]
+        unsorted_top_rising = []
+        for a in current_count:
+            previous_record = list(filter(lambda x: x['artist_id'] == a['artist_id'], previous_count))
+            if not len(previous_record):
+                continue
+            else:
+                previous_record = previous_record[0]
 
-        a['prev_scrobbles'] = previous_record['scrobbles']
-        a['percent'] = round(((a['scrobbles'] - previous_record['scrobbles'])/previous_record['scrobbles']) * 100, 1)
-        unsorted_top_rising.append(a)
+            a['prev_scrobbles'] = previous_record['scrobbles']
+            a['percent'] = round(((a['scrobbles'] - previous_record['scrobbles'])/previous_record['scrobbles']) * 100, 1)
+            unsorted_top_rising.append(a)
 
-    stats['top_rising'] = [sql_helper.escape_keys_in_dict(t) for t in sorted(unsorted_top_rising, key = lambda i: i['percent'], reverse=True)]
+        stats['top_rising'] = [sql_helper.escape_keys_in_dict(t) for t in sorted(unsorted_top_rising, key = lambda i: i['percent'], reverse=True)]
+    
     stats['date_generated'] = datetime.datetime.utcnow()
 
     return stats

@@ -195,7 +195,13 @@ def personal_stats():
     if secret_key != cfg['api']['secret']:
         abort(401)
     genres = task_helper.get_popular_genre_filter_list(15)
-    personal_stats = [task_helper.personal_stats(user['username'], genres) for user in user_helper.get_users()]
+    personal_stats = []
+    for user in user_helper.get_users():
+        try:
+            personal_stats.append(task_helper.personal_stats(user['username'], genres))
+        except Exception as e:
+            logger.error("\tAn error occured while trying to generate stat report for {}: {}".format(user['username'], e))
+
     for data in personal_stats:
         if data:
             sql_helper.execute_db(sql_helper.replace_into("personal_stats", sql_helper.stringify_keys_in_dict(data.copy())), commit=True, pass_on_error=True)
