@@ -5,6 +5,7 @@ import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dial
 import { MatSelectChange } from '@angular/material/select';
 import * as moment from 'moment';
 import { Subscription } from 'rxjs';
+import { AboutGroupSessionsComponent } from '../about-group-sessions/about-group-sessions.component';
 import { USER_MODEL } from '../actions';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { MessageService } from '../message.service';
@@ -291,5 +292,9 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
     const last = input.pop()
     const result = input.join(', ') + ' and ' + last
     return result
+  }
+
+  aboutGroupSessions() {
+    this.dialog.open(AboutGroupSessionsComponent)
   }
 }

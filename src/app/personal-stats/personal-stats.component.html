@@ -34,4 +34,6 @@
         <div>{{ stats.top_genre.genre_count | pluralize:'artist' }} • {{ stats.top_genre.sum_scrobbles | pluralize:'scrobble' }}</div>
     </div>
 </div>
-<ng-template #noStats><span class="center-all" style="color: #bfbfbf;">Personal stats report not generated yet for your profile! Please check back soon.</span></ng-template>
+<ng-template #noStats><span class="center-all" style="color: #bfbfbf;">
+    Personal stats report not generated yet for your profile! If you just joined the app, please allow for 24 hours to see your personalized report here.
+</span></ng-template>

@@ -1,27 +1,43 @@
-# lastfm-with-friends
+# Last.fm with Friends
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.0.4.
+Last.fm with Friends extends existing Last.fm features to give music stats for a group of friends. The app runs at [beta.neilmenon.com](https://beta.neilmenon.com/).
 
-## Development server
+## How It Works
+Last.fm with Friends is powered by the [Last.fm API](https://www.last.fm/api). Once you connect your Last.fm account, the app scrapes and stores your scrobbles (Last.fm lingo for music plays) in a database. Then, you can create a group and invite your friends to join the group using a join code. The app gives you and your friends cool stats and visualizations based on what everyone has listened to!
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Demo
+You can demo the app at [beta.neilmenon.com](https://beta.neilmenon.com/) to see all of the features.
 
-## Code scaffolding
+## List of Featues
+Last.fm with Friends includes many handy tools to view a group's listening habits. I've listed some them below.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+**Important!** Most features on the app are time-adjustable! That means you can adjust the time period of which the stats are calculated to any range (e.g. what is group's top artist in the past 30 days, etc).
+- **Who Knows This Artist/Album/Track** - see who knows a particular artist/album/track and how many scrobbles they have.
+- **Group Sessions** - Missing scrobbles when listening with friends? Create and join listening sessions to automatically get scrobbles from another user. Already been listening with a friend in the group? Select the first track you heard and the app will get you up to speed.
+- **Listening Trends - Group** - see all the group members' scrobbles mapped on a chart to see how it changes over time. Available on every artist, album and track.
+- **Listening Trends - User** - see *your* tracks or albums for an artist mapped on a chart to see how your favorite track or album by that artist has changed over time.
+- **Individual & Group Charts** - see which artist/album/track scores the highest in the group as well as view your individual charts.
+- **Group Scrobble History** - just like your Last.fm profile, except it includes everyone's scrobbles. Also available on the artist/album/track level.
+- **Listening Activity** - quickly view what everyone in the group is listening to.
+- **Scrobble Leaderboard** - see who's leading the group in scrobbles.
+- **Top Scrobbles** - quickly view your top tracks or albums for an artist.
+- **Manually Scrobble Tracks** - quick and handy feature submit a scrobble to Last.fm directly from the app! For most extensive manual scrobbling, check out [Open Scrobbler](https://openscrobbler.com/).
+- **Personal Stats Report** - get a brief, unique report everyday about your music habits at the top of your home page.
+- **Top Genres** - see the group's top genres. *Coming soon!*
+- **Group Mainstream Factor** - how mainstream is the group's music? *Coming soon!*
 
-## Build
+## Technical
+Last.fm with Friends was built with the following technologies:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+- Angular
+- Flask / Python
+- MariaDB
+- uWSGI behind NGINX
 
-## Running unit tests
+The app is currently self-hosted on a CentOS server and is powered by an internal API to scrape from Last.fm and perform actions. Each scrobble is stored individually in a table to increase efficiency and ease-of-access for stats. Users are authenticated via a Last.fm-generated session token which the app stores when the user connects their Last.fm account. Scrobbles are fetched for each user periodically.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Issues / Suggestions
+If you encounter any issues while using the app, or want to make a suggestion for a new feature, please use the [Issues](https://github.com/neilmenon/lastfm-with-friends/issues) tab. This is a solo project by a music nerd, so feedback is most certainly welcome!
 
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+## Enjoying Last.fm with Friends?
+Perhaps you could [lend a hand with the hosting costs for the app](https://www.buymeacoffee.com/neilmenon). Thank you!

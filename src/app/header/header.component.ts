@@ -16,6 +16,9 @@ import { Router } from '@angular/router';
 import { config } from '../config';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { SwitchUserComponent } from '../switch-user/switch-user.component';
+import { FaqsComponent } from '../faqs/faqs.component';
+import { CreditsComponent } from '../credits/credits.component';
+import { GenericTextComponent } from '../home/home.component';
 
 @Component({
   selector: 'app-header',
@@ -164,5 +167,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       window.location.href = config.project_root
     }, 200)
+  }
+
+  openFaqs() {
+    this.dialog.open(FaqsComponent)
+  }
+
+  openCredits() {
+    this.dialog.open(CreditsComponent)
+  }
+
+  openMobileInstructions() {
+    let text: string = `Although there is no mobile app available for iOS or Android at this time, the app was designed for mobile. Using the "add to home screen" feature on your phone will give a near-native mobile experience! For instructions on how to do that for Apple / Android devices, you can reference <a href="https://natomasunified.org/kb/add-website-to-mobile-device-home-screen/" target="_blank">this article</a>.`
+    this.dialog.open(GenericTextComponent, { data: { text: text, title: "Last.fm with Friends for Mobile" } })
   }
 }

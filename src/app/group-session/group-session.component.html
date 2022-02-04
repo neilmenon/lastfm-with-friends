@@ -2,13 +2,16 @@
     <h3 mat-dialog-title >Group Listening Session for {{ data.group.name }}</h3>
 </div>
 <div mat-dialog-content class="center">
+    <a class="clickable clear-color" style="color: #bfbfbf; padding-top: 0.25rem" (click)="aboutGroupSessions()">
+        <i class="fas fa-info-circle"></i> About Group Sessions
+    </a>
     <div *ngIf="session && session?.group_jc != data.group.join_code && session?.is_silent == false">
         You are already in a session in a different group. Leave or end that session to start a session with this group.
     </div>
     <!-- Session Details | End/Leave Session -->
     <div *ngIf="session?.group_jc == data.group.join_code">
         <div *ngIf="session.is_silent == false || (session.is_silent == true && user.username != session.owner)">
-            <div style="color: #bfbfbf; font-size: 16px; margin-bottom: 0.5rem;">Active Users</div>
+            <div style="color: #bfbfbf; font-size: 16px; margin-bottom: 0.5rem; margin-top: 0.25rem;">Active Users</div>
             <div class="container session-members" style="flex-wrap: wrap;">
                 <div *ngFor="let u of session.members" class="member-card">
                     <img src="{{ u.profile_image }}" width="50px" style="border-radius: 50%;border: 2px solid;"><br>

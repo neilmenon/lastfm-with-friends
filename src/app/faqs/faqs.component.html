@@ -21,4 +21,10 @@
         <span>I'm sold! What's next?</span>
         <span>Getting started with Last.fm with Friends is super simple. First you'll <a href="https://www.last.fm/join" target="_blank">need a Last.fm account</a>. Then, click on the next step to get started!</span>
     </div>
+    <div *ngIf="!gettingStarted">
+        <div class="faq-entry">
+            <span>Does Last.fm with Friends fetch my new scrobbles automatically?</span>
+            <span>Yes! Your scrobbles are automatically fetched periodically.</span>
+        </div>
+    </div>
 </div>

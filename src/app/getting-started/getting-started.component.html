@@ -13,14 +13,16 @@
             <ng-template matStepLabel>Connect Your Music Service to Last.fm</ng-template>
             <div class="center-all">
                 <span>Next, make sure Last.fm is tracking your music properly. After connecting your music service, verify Last.fm is adding scrobbles to your profile.</span><br><br>
-                <button color="accent" mat-raised-button (click)="window.open('https://www.last.fm/settings/applications', '_blank')" style="margin-right: 1rem;">Connect to Spotify</button>
-                <button color="primary" mat-raised-button (click)="window.open('https://www.last.fm/about/trackmymusic', '_blank')">Other Services</button>
+                <div class="connect-buttons">
+                    <button color="accent" mat-raised-button (click)="window.open('https://www.last.fm/settings/applications', '_blank')">Connect to Spotify</button>
+                    <button color="primary" mat-raised-button (click)="window.open('https://www.last.fm/about/trackmymusic', '_blank')">Other Services</button>
+                </div>
             </div>
         </mat-step>
         <mat-step>
             <ng-template matStepLabel>Sign In with Last.fm</ng-template>
             <div class="center-all">
-                <span>You're ready to start. Sign in the Last.fm with Friends via Last.fm. Enjoy the app!</span><br><br>
+                <span>You're ready to start. Sign in to Last.fm with Friends via Last.fm.<br>Once you're signed in, you'll be able to start a new group or enter the join code of an existing group. Enjoy the app!</span><br><br>
                 <button color="primary" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
             </div>
         </mat-step>

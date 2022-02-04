@@ -36,7 +36,7 @@
                     <mat-option [value]="randomTimePeriod.days">{{ randomTimePeriod.label }}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <h3 class="box-title">Listening Trends</h3>
+            <!-- <h3 class="box-title">Listening Trends</h3>
             <p>Default mode for displaying scrobbles on the Listening Trends graph.</p>
             <mat-form-field appearance="legacy" color="accent">
                 <mat-label>Listening Trends Mode</mat-label>
@@ -44,7 +44,7 @@
                     <mat-option value="leaderboard-cu">Cumulative</mat-option>
                     <mat-option value="leaderboard-noncu">Non-Cumulative</mat-option>
                 </mat-select>
-            </mat-form-field>
+            </mat-form-field> -->
         </form>
         <p>
             <a class="clickable" (click)="restoreDefaultSettings()">Reset to Default</a>
@@ -53,8 +53,8 @@
         <div class="settings-option">
             <h3 class="box-title">Full Scrape</h3>
             <p>
-                Flushes all of your scrobbles from our database and fetches them anew from Last.fm. 
-                This process can take time and should only be used if there is a data discrepancy between Last.fm and the app (for example, edited or deleted scrobbles).
+                Flushes all of your scrobbles from our database and fetches them anew from Last.fm.<br>
+                <strong>Warning!</strong> This process can take time, especially if you have a lot of scrobbles. Your app scrobble count is regularly compared to your Last.fm account and re-scraped/corrected automatically, so this action should only be used if there is a data discrepancy between Last.fm and the app (for example, if you edit scrobbles on Last.fm).
             </p>
             <button color="accent" mat-raised-button type="submit" *ngIf="!confirmFullScrape && !fullScrapeInProgress" (click)="fullScrape()" [class.disable-click]="isDemo | async">Trigger Full Scrape</button>
             <button color="warn" mat-raised-button type="submit" *ngIf="confirmFullScrape && !fullScrapeInProgress" (click)="fullScrape()">Confirm</button>

@@ -87,7 +87,7 @@ hr {
     color: #e2e2e2;
 }
 .clear-color:hover {
-    color: darkseagreen;
+    color: darkseagreen!important;
 }
 .refresh, .np-scrobble-history {
     position: absolute;
@@ -410,6 +410,7 @@ div.history-options-container > mat-paginator {
 
 .mat-dialog-container {
     background-image: url(/assets/img/background.svg);
+    max-height: 100vh!important;
 }
 .mat-paginator {
     background: transparent;

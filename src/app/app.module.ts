@@ -71,6 +71,8 @@ import { GettingStartedComponent } from './getting-started/getting-started.compo
 import { FaqsComponent } from './faqs/faqs.component';
 import { PersonalStatsComponent } from './personal-stats/personal-stats.component';
 import { AbsolutePipe } from './absolute.pipe';
+import { AboutGroupSessionsComponent } from './about-group-sessions/about-group-sessions.component';
+import { CreditsComponent } from './credits/credits.component';
 
 @NgModule({
   declarations: [
@@ -102,6 +104,8 @@ import { AbsolutePipe } from './absolute.pipe';
     FaqsComponent,
     PersonalStatsComponent,
     AbsolutePipe,
+    AboutGroupSessionsComponent,
+    CreditsComponent,
   ],
   imports: [
     BrowserModule,
