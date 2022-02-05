@@ -16,9 +16,11 @@ cfg = config.config
 # (i.e. the request will not wait until a user update finishes to return)
 # this function is ALWAYS called inside a thread instance, where we need to manually
 # specify the Flask application context (this function must be called via a new thread!)
-def update_user_from_thread(username, full=False, app=None, fix_count=False, stall_if_existing=True):
+def update_user_from_thread(username, full=False, app=None, fix_count=False, stall_if_existing=True, wipe=None):
     if app:
         with app.app_context():
+            if wipe:
+                user_helper.wipe_scrobbles(wipe) # wipe is user_id
             update_user(username, full, app, fix_count, stall_if_existing)
     else:
         update_user(username, full, app, fix_count, stall_if_existing)

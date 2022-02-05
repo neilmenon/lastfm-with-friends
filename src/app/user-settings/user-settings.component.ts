@@ -104,7 +104,7 @@ export class UserSettingsComponent implements OnInit {
     if (this.confirmFullScrape) {
       this.fullScrapeInProgress = true
       this.userService.updateUser(this.user, true).toPromise().then((data: any) => {
-        this.messageService.open("Full scrape successfully triggered for " + this.user.username + ".")
+        this.messageService.open("Full scrape successfully triggered for " + this.user.username + ". Please do not hit the button again after seeing this message.")
         this.fullScrapeInProgress = false;
         this.confirmFullScrape = false;
       }).catch(error => {
