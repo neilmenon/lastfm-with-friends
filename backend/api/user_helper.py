@@ -1,5 +1,6 @@
 import datetime
 import json
+import time
 import requests
 import hashlib
 from . import config
@@ -88,9 +89,18 @@ def get_updated_date(username):
     result = sql_helper.execute_db("SELECT last_update FROM users WHERE `users`.`username` = '"+ username + "';")
     return result[0]['last_update']
 
-def wipe_scrobbles(user_id):
-    sql = "DELETE FROM track_scrobbles WHERE user_id = {};".format(user_id)
-    sql_helper.execute_db(sql, commit=True)
+def wipe_scrobbles(username, user_id):
+    # we have to do this in a chunked approach otherwise it will time out
+    # first, get total count of scrobbles to delete
+    scrobbles = sql_helper.execute_db("SELECT COUNT(*) as scrobbles FROM track_scrobbles WHERE user_id = {}".format(user_id))[0]['scrobbles']
+    rows_to_delete = scrobbles
+    while rows_to_delete > 0:
+        logger.info("Wiping scrobbles for {} in chunks ({} left)".format(username, rows_to_delete))
+        sql_helper.execute_db("DELETE FROM track_scrobbles WHERE user_id = {} LIMIT 5000".format(user_id), commit=True)
+        time.sleep(0.25)
+        rows_to_delete = rows_to_delete - 5000
+    scrobbles = sql_helper.execute_db("SELECT COUNT(*) as scrobbles FROM track_scrobbles WHERE user_id = {}".format(user_id))[0]['scrobbles']
+    logger.debug("New scrobble count from DB for {}: {} (expected: 0)".format(username, scrobbles))
 
 def delete_user(user_id, username):
     result = sql_helper.execute_db("SELECT * FROM user_groups WHERE username = '{}';".format(username))

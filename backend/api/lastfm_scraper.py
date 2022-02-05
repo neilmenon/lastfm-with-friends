@@ -20,7 +20,7 @@ def update_user_from_thread(username, full=False, app=None, fix_count=False, sta
     if app:
         with app.app_context():
             if wipe:
-                user_helper.wipe_scrobbles(wipe) # wipe is user_id
+                user_helper.wipe_scrobbles(username, wipe) # wipe is user_id
             update_user(username, full, app, fix_count, stall_if_existing)
     else:
         update_user(username, full, app, fix_count, stall_if_existing)
