@@ -20,17 +20,25 @@ def update_user_from_thread(username, full=False, app=None, fix_count=False, sta
     if app:
         with app.app_context():
             if wipe:
+                user_helper.change_update_progress(username, -420)
                 user_helper.wipe_scrobbles(username, wipe) # wipe is user_id
+                user_helper.change_update_progress(username, 3, clear_progress=True)
             update_user(username, full, app, fix_count, stall_if_existing)
     else:
         update_user(username, full, app, fix_count, stall_if_existing)
 
 def update_user(username, full=False, app=None, fix_count=False, stall_if_existing=True):
     logger.info("User update triggered for: " + username, app)
-    user = user_helper.get_user(username, extended=False)
+    user: dict = user_helper.get_user(username, extended=False)
     last_update = user_helper.get_updated_date(username)
     full_scrape = not last_update or full
     failed_update = False
+    # if progress value is -420, system is wiping the old scrobbles in preparation for a full scrape
+    # exit here
+    if user['progress']:
+        if int(user["progress"]) == -420:
+            logger.warn("\tDetected another process is wiping scrobbles in order to do a full scrape. Exiting here...", app)
+            return
     if not full_scrape:
         updated_unix = str(int(last_update.replace(tzinfo=datetime.timezone.utc).timestamp()))
         current_unix = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))

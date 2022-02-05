@@ -133,11 +133,13 @@ def delete():
     if not auth_helper.is_authenticated(username, session_key):
         abort(401)
     try:
-        result = user_helper.delete_user(user_id, username)
+        result = sql_helper.execute_db("SELECT * FROM user_groups WHERE username = '{}';".format(username))
+        if len(result): # user needs to have manually left all groups first
+            abort(409)
     except Exception:
         abort(500)
-    if not result:
-        abort(409)
+    thread = Thread(target=user_helper.delete_user, args=(user_id, username, current_app._get_current_object()))
+    thread.start()
     return jsonify({"data": "success"})
 
 @user_api.route('/api/users/<string:username>/settings', methods=['POST'])

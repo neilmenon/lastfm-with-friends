@@ -15,13 +15,14 @@
             </span>
             <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMM Do, YYYY') }}</span>
             <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles ({{ [0,100].includes(user.progress) ? user.progress : user.progress.toFixed(2) }}%)</span>
-            <span class="navbar-menu-updating" *ngIf="user.last_update && user.progress">Failed at {{ [0,100].includes(user.progress) ? user.progress : user.progress.toFixed(2) }}%, finish w/ Update</span>
+            <span class="navbar-menu-updating" *ngIf="user.last_update && user.progress && user.progress > -420">Failed at {{ [0,100].includes(user.progress) ? user.progress : user.progress.toFixed(2) }}%, finish w/ Update</span>
+            <span class="navbar-menu-updating" *ngIf="user.last_update && user.progress && user.progress <= -420">Full scrape pending...</span>
             <mat-progress-bar mode="determinate" color="warn" [value]="user.progress" *ngIf="user.progress"></mat-progress-bar>
             <span class="navbar-menu-updated" *ngIf="user.last_update && !user.progress" [matTooltip]="moment(user.last_update).locale('en')" matTooltipPosition="above" matTooltipClass="tooltip">Last fetched track was played<br> {{ moment(user.last_update).locale('en').fromNow() }}</span>
           </span>
           <button mat-menu-item [routerLink]="['/']">Home</button>
-          <div [matTooltip]="!user.last_update ? 'An update is currently in progress...' : null" matTooltipPosition="left">
-            <button [class.disable-click]="!user.last_update" mat-menu-item (click)="updateUser()">Update</button>
+          <div [matTooltip]="!user.last_update || (user.last_update && user.progress && user.progress <= -420) ? 'An update is currently in progress...' : null" matTooltipPosition="left">
+            <button [class.disable-click]="!user.last_update || (user.last_update && user.progress && user.progress <= -420)" mat-menu-item (click)="updateUser()">Update</button>
           </div>
           <button mat-menu-item [matMenuTriggerFor]="groupsMenu">Groups</button>
           <mat-menu #groupsMenu="matMenu">
@@ -76,13 +77,14 @@
               </span>
               <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMM Do, YYYY') }}</span>
               <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles ({{ [0,100].includes(user.progress) ? user.progress : user.progress.toFixed(2) }}%)</span>
-              <span class="navbar-menu-updating" *ngIf="user.last_update && user.progress">Failed at {{ [0,100].includes(user.progress) ? user.progress : user.progress.toFixed(2) }}%, finish w/ Update</span>
+              <span class="navbar-menu-updating" *ngIf="user.last_update && user.progress && user.progress > -420">Failed at {{ [0,100].includes(user.progress) ? user.progress : user.progress.toFixed(2) }}%, finish w/ Update</span>
+              <span class="navbar-menu-updating" *ngIf="user.last_update && user.progress && user.progress <= -420">Full scrape pending...</span>
               <mat-progress-bar mode="determinate" color="warn" [value]="user.progress" *ngIf="user.progress"></mat-progress-bar>
               <span class="navbar-menu-updated" *ngIf="user.last_update && !user.progress" [matTooltip]="moment(user.last_update).locale('en')" matTooltipPosition="above" matTooltipClass="tooltip">Last fetched track was played<br> {{ moment(user.last_update).locale('en').fromNow() }}</span>
             </span>
             <button mat-menu-item [routerLink]="['/']">Home</button>
-            <div [matTooltip]="!user.last_update ? 'An update is currently in progress...' : null" matTooltipPosition="left">
-              <button [class.disable-click]="!user.last_update" mat-menu-item (click)="updateUser()">Update</button>
+            <div [matTooltip]="!user.last_update || (user.last_update && user.progress && user.progress <= -420) ? 'An update is currently in progress...' : null" matTooltipPosition="left">
+              <button [class.disable-click]="!user.last_update || (user.last_update && user.progress && user.progress <= -420)" mat-menu-item (click)="updateUser()">Update</button>
             </div>
             <button mat-menu-item [matMenuTriggerFor]="groupsMenu">Groups</button>
             <mat-menu #groupsMenu="matMenu">

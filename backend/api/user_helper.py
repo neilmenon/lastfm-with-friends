@@ -102,15 +102,13 @@ def wipe_scrobbles(username, user_id):
     scrobbles = sql_helper.execute_db("SELECT COUNT(*) as scrobbles FROM track_scrobbles WHERE user_id = {}".format(user_id))[0]['scrobbles']
     logger.debug("New scrobble count from DB for {}: {} (expected: 0)".format(username, scrobbles))
 
-def delete_user(user_id, username):
-    result = sql_helper.execute_db("SELECT * FROM user_groups WHERE username = '{}';".format(username))
-    if result: # user needs to have manually left all groups first
-        return False
-    sql_helper.execute_db("DELETE FROM track_scrobbles WHERE user_id = {};".format(user_id), commit=True)
-    sql_helper.execute_db("DELETE FROM now_playing WHERE username = '{}';".format(username), commit=True)
-    sql_helper.execute_db("DELETE FROM sessions WHERE username = '{}';".format(user_id), commit=True)
-    sql_helper.execute_db("DELETE FROM users WHERE user_id = {};".format(user_id), commit=True)
-    return True
+def delete_user(user_id, username, app):
+    with app.app_context():
+        wipe_scrobbles(username, user_id)
+        sql_helper.execute_db("DELETE FROM now_playing WHERE username = '{}';".format(username), commit=True)
+        sql_helper.execute_db("DELETE FROM sessions WHERE username = '{}';".format(user_id), commit=True)
+        sql_helper.execute_db("DELETE FROM users WHERE user_id = {};".format(user_id), commit=True)
+        return True
 
 def get_settings(username):
     result = sql_helper.execute_db("SELECT settings FROM users WHERE username = '{}'".format(username))

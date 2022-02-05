@@ -1,6 +1,7 @@
 import random
 import requests
 import datetime
+from flask import current_app
 
 from . import group_helper
 from . import user_helper
@@ -278,5 +279,5 @@ def prune_inactive_users(dry_run=True):
                 for g in user['groups']:
                     logger.warn("\tDeleting group {}...".format(g['name']))
                     group_helper.delete_group(g['join_code'])
-                user_helper.delete_user(user['user_id'], user['username'])
+                user_helper.delete_user(user['user_id'], user['username'], current_app._get_current_object())
         
