@@ -1,4 +1,5 @@
 import sys
+from threading import Thread
 from flask import *
 import json
 import datetime
@@ -104,7 +105,10 @@ def update():
         abort(401)
     if full_scrape:
         user_helper.wipe_scrobbles(user_id)
-        response = lastfm_scraper.update_user(username, full=True, app=current_app._get_current_object())
+        thread = Thread(target=lastfm_scraper.update_user_from_thread, args=(username, True, current_app._get_current_object()))
+        thread.start()
+        return jsonify(True)
+        # response = lastfm_scraper.update_user(username, full=True, app=current_app._get_current_object())
     else:
         command_helper.nowplaying(single_user=username)
         response = lastfm_scraper.update_user(username)

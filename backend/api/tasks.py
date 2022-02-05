@@ -1,3 +1,5 @@
+from threading import Thread
+import time
 from flask import *
 
 from . import config
@@ -28,13 +30,17 @@ def globalupdate():
     if secret_key != cfg['api']['secret']:
         abort(401)
     for u in user_helper.get_users():
-        response = lastfm_scraper.update_user(u['username'])
+        # response = lastfm_scraper.update_user(u['username'])
+        thread = Thread(target=lastfm_scraper.update_user_from_thread, args=(u['username'], False, current_app._get_current_object()))
+        thread.start()
+        time.sleep(1)
     lastfm_scraper.scrape_artist_images()
     lastfm_scraper.scrape_extra_artist_info()
-    if response:
-        return jsonify(response)
-    else:
-        abort(500)
+    # if response:
+    #     return jsonify(response)
+    # else:
+    #     abort(500)
+    return jsonify(True)
 
 @task_api.route('/api/tasks/album', methods=['POST'])
 def albumartwork():
