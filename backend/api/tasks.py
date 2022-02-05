@@ -206,3 +206,21 @@ def personal_stats():
         if data:
             sql_helper.execute_db(sql_helper.replace_into("personal_stats", sql_helper.stringify_keys_in_dict(data.copy())), commit=True, pass_on_error=True)
     return jsonify(personal_stats)
+
+@task_api.route('/api/tasks/prune-users', methods=['POST'])
+def prune_users():
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+            dry_run = params['dry_run']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    task_helper.prune_inactive_users(dry_run)
+    return jsonify(True)

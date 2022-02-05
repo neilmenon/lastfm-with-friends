@@ -13,3 +13,10 @@
 span {
     color: #e0e0e0;
 }
+.footer-icons { 
+    margin-top: 0.25rem; 
+    position: relative;
+}
+.footer-icons a:not(:last-child) {
+    margin-right: 0.5rem;
+}

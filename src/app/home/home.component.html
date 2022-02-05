@@ -36,7 +36,7 @@
             <p class="center">
                 <span><a [routerLink]="['groups/join']">Join Group</a></span> • 
                 <span *ngFor="let group of user.groups last as lastChild">
-                    <strong><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> <span *ngIf="!lastChild">•</span></strong>
+                    <strong><a [routerLink]="['groups/' + group.join_code]">{{ group.name }}</a> <span *ngIf="!lastChild"> • </span></strong>
                 </span> •
                 <span><a [routerLink]="['groups/create']">Create Group</a></span>
             </p>

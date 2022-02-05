@@ -14,7 +14,7 @@ def get_user(username, extended=True, get_session=False, get_stats=False):
     if not result:
         return False
     user_data = result[0]
-    if not extended or not get_session:
+    if not extended and not get_session:
         return user_data
     if extended:
         result = sql_helper.execute_db("SELECT group_jc FROM user_groups WHERE username = '" + str(username) + "' ORDER BY joined ASC;")
@@ -60,6 +60,7 @@ def get_user_account(username, update=False):
         if update:
             sql = "UPDATE `users` SET `display_name` = '{}', `profile_image` = '{}', `scrobbles` = {}, registered = '{}' WHERE `username` = '{}'".format(data['display_name'], data['profile_image'], data['scrobbles'], data['registered'], username)
         else:
+            data['joined_date'] = datetime.datetime.utcnow() # date user joins the app.
             sql = sql_helper.insert_into_where_not_exists("users", data, "username")
         sql_helper.execute_db(sql, commit=True)
         if update:

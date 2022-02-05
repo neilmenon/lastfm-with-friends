@@ -1,6 +1,9 @@
 import random
 import requests
 import datetime
+
+from . import group_helper
+from . import user_helper
 from . import config
 from . import sql_helper
 from . import auth_helper
@@ -239,3 +242,41 @@ def personal_stats(username, genre_filter_list):
 
 def get_popular_genre_filter_list(limit):
     return ",".join([str(g['id']) for g in sql_helper.execute_db("SELECT genres.id FROM artist_genres LEFT JOIN genres ON genres.id = artist_genres.genre_id GROUP BY genres.id ORDER BY COUNT(*) DESC LIMIT {}".format(limit))])
+
+def prune_inactive_users(dry_run=True):
+    logger.info("===> Running prune users task")
+    for u in user_helper.get_users():
+        user = user_helper.get_user(u['username'], extended=True)
+
+        prune_user = False
+        if len(user['groups']) > 0:
+            # check if user is only one in group(s)
+            is_solo_in_group = True
+            latest_create_date = None
+            for g in user['groups']:
+                if len(g['members']) > 1:
+                    is_solo_in_group = False
+                    break
+                else:
+                    create_date = g['created']
+                    if latest_create_date is not None:
+                        if create_date > latest_create_date:
+                            latest_create_date = create_date
+                    else:
+                        latest_create_date = create_date
+            if is_solo_in_group:
+                # check if create date is > 7 days
+                if (datetime.datetime.utcnow() - latest_create_date) >= datetime.timedelta(days=7):
+                    prune_user = True
+        else:
+            if (datetime.datetime.utcnow() - user['joined_date']) >= datetime.timedelta(days=7):
+                prune_user = True
+
+        if prune_user:
+            logger.warn("{}Pruning user {} due to inactivity! {} group(s) with no users besides creator will be deleted.".format("[DRY RUN] " if dry_run else "", user['username'], len(user['groups'])))
+            if not dry_run:
+                for g in user['groups']:
+                    logger.warn("\tDeleting group {}...".format(g['name']))
+                    group_helper.delete_group(g['join_code'])
+                user_helper.delete_user(user['user_id'], user['username'])
+        
