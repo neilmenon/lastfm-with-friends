@@ -266,10 +266,10 @@ def prune_inactive_users(dry_run=True):
                         latest_create_date = create_date
             if is_solo_in_group:
                 # check if create date is > 7 days
-                if (datetime.datetime.utcnow() - latest_create_date) >= datetime.timedelta(days=7):
+                if ((datetime.datetime.utcnow() - latest_create_date) >= datetime.timedelta(days=7)) and ((datetime.datetime.utcnow() - user['joined_date']) >= datetime.timedelta(days=7)):
                     prune_user = True
         else:
-            if (datetime.datetime.utcnow() - user['joined_date']) >= datetime.timedelta(days=7):
+            if ((datetime.datetime.utcnow() - user['joined_date']) >= datetime.timedelta(days=7)):
                 prune_user = True
 
         if prune_user:

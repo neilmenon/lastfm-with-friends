@@ -315,6 +315,7 @@ CREATE TABLE `users` (
   `username` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `display_name` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `registered` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `joined_date` datetime NOT NULL DEFAULT current_timestamp(),
   `profile_image` varchar(191) CHARACTER SET utf8mb4 NOT NULL,
   `scrobbles` bigint(20) NOT NULL,
   `last_update` datetime DEFAULT NULL,
@@ -334,4 +335,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-01-29  2:43:41
+-- Dump completed on 2022-02-04 19:11:27
