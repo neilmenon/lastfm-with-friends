@@ -34,13 +34,14 @@ def replace_into(table, data):
     return sql
 
 def esc_db(item: str):
-    item_1 =  item.replace("'", "\\'") if "\\'" not in item else item.replace("\\", "").replace("'", "\\'")
-    if item_1:
-        if (len(item_1) == 1 and item_1[-1] == "\\"):
-            item_1 = "\\"
-        elif (len(item_1) >= 2 and item_1[-1] == "\\" and item_1[-2] != "\\"):
-            item_1 = item_1 + "\\"
-    return item_1
+    return "{}".format(json.dumps(item, ensure_ascii=False)[1:-1].replace('\\"', '"').replace("'", "\\'"))
+    # item_1 =  item.replace("'", "\\'") if "\\'" not in item else item.replace("\\", "").replace("'", "\\'")
+    # if item_1:
+    #     if (len(item_1) == 1 and item_1[-1] == "\\"):
+    #         item_1 = "\\"
+    #     elif (len(item_1) >= 2 and item_1[-1] == "\\" and item_1[-2] != "\\"):
+    #         item_1 = item_1 + "\\"
+    # return item_1
 
 def sanitize_db_field(db_field):
     special_chars_replace_with_blank = ['"', "\\'"]
