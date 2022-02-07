@@ -56,7 +56,7 @@ def create():
         try:
             data = {
                 "username": params['username'],
-                "display_name": params['display_name'],
+                "display_name": sql_helper.esc_db(params['display_name']),
                 "registered": params['registered'],
                 "profile_image": params['profile_image'],
             }
