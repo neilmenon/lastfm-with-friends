@@ -34,7 +34,11 @@ def replace_into(table, data):
     return sql
 
 def esc_db(item: str):
-    return item.replace("'", "\\'") if "\\'" not in item else item.replace("\\", "").replace("'", "\\'")
+    item_1 =  item.replace("'", "\\'") if "\\'" not in item else item.replace("\\", "").replace("'", "\\'")
+    if item_1:
+        if item_1[-1] == "\\":
+            item_1 = item_1 + "\\"
+    return item_1
 
 def sanitize_db_field(db_field):
     special_chars_replace_with_blank = ['"', "\\'"]
