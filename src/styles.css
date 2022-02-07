@@ -524,3 +524,10 @@ div.history-options-container > mat-paginator {
 ::-webkit-scrollbar-track-piece {
 	display: none;
 }
+.info-banner {
+    background: #517a8c;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+    text-align: center;
+}
