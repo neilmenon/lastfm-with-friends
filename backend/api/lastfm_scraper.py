@@ -247,9 +247,10 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(two_weeks_ago))
                     update_user(username, fix_count=True)
                 else:
-                    logger.warn("\tFix attempt did not resolve missing scrobbles for {}. Triggering full scrape...".format(username))
+                    logger.error("\tFix attempt did not resolve missing scrobbles for {}.".format(username))
                     user_helper.change_update_progress(username, None, clear_progress=True)
-                    update_user(username, full=True)
+                    # user_helper.change_update_progress(username, None, clear_progress=True)
+                    # update_user(username, full=True)
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
         result = sql_helper.execute_db(sql)
