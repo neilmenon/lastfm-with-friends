@@ -11,7 +11,7 @@
           <span class="navbar-user-panel">
             <img src="{{ user.profile_image }}" class="navbar-menu-user-image">
             <span class="navbar-menu-username">
-              {{ user.username }}
+              <a href="https://www.last.fm/user/{{ user.username }}" target="_blank" class="clear-color" matTooltip="Visit your Last.fm profile" matTooltipPosition="above">{{ user.username }}</a>
             </span>
             <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMM Do, YYYY') }}</span>
             <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles ({{ [0,100].includes(user.progress) ? user.progress : user.progress.toFixed(2) }}%)</span>
@@ -60,7 +60,13 @@
           <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
         </mat-menu>
       </a>
-      <span [routerLink]="['/']" style="cursor: pointer;outline: none;">Last.fm with Friends </span> <span class="beta">BETA</span> <span *ngIf="isDemo | async" style="background: #517a8c;" class="beta">DEMO</span>
+      <span [routerLink]="['/']" id="logo-title">
+        <span>
+          Last.fm with Friends
+          <span *ngIf="isDemo | async"class="beta demo">DEMO</span>
+        </span>
+      </span> 
+      <!-- <span class="beta">BETA</span>  -->
       <span class="spacer"></span>
       <span *ngIf="!(isHandset$ | async)">
         <a *ngIf="signed_in && user" class="navbar-user-button" mat-button [matMenuTriggerFor]="menu">
@@ -73,7 +79,7 @@
             <span class="navbar-user-panel">
               <img src="{{ user.profile_image }}" class="navbar-menu-user-image">
               <span class="navbar-menu-username">
-                {{ user.username }}
+                <a href="https://www.last.fm/user/{{ user.username }}" target="_blank" class="clear-color" matTooltip="Visit your Last.fm profile" matTooltipPosition="above">{{ user.username }}</a>
               </span>
               <span class="navbar-menu-since">Scrobbling since {{ moment.unix(user.registered).format('MMM Do, YYYY') }}</span>
               <span class="navbar-menu-updating" *ngIf="!user.last_update">Fetching new scrobbles ({{ [0,100].includes(user.progress) ? user.progress : user.progress.toFixed(2) }}%)</span>

@@ -101,3 +101,21 @@
 .mat-mobile-loading-shift {
   margin-right: 10px;
 }
+#logo-title {
+  background: url(/assets/img/android-chrome-192x192.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  position: relative;
+}
+#logo-title > span {
+  cursor: pointer;
+  outline: none;
+  padding-left: 2.5rem;
+}
+.demo {
+  top: 3.5px!important;
+  position: absolute!important;
+  right: -50px!important;
+  background: #517a8c!important;
+  cursor: default;
+}
