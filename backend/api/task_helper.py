@@ -1,8 +1,11 @@
 import random
+from threading import Thread
 import requests
 import datetime
 from flask import current_app
+import time
 
+from . import lastfm_scraper
 from . import group_helper
 from . import user_helper
 from . import config
@@ -280,4 +283,32 @@ def prune_inactive_users(dry_run=True):
                     logger.warn("\tDeleting group {}...".format(g['name']))
                     group_helper.delete_group(g['join_code'])
                 user_helper.delete_user(user['user_id'], user['username'], current_app._get_current_object())
-        
+
+def full_scrape_queue():
+    # handle full scrapes in a queue manner
+    logger.info("====== FULL SCRAPE QUEUE ======")
+    currently_running_updates = sql_helper.execute_db("SELECT username, progress, scrobbles FROM users WHERE last_update IS NULL AND progress > 0")
+    logger.info("There are currently {} running full scrape(s) or regular update(s).".format(len(currently_running_updates)))
+    for update in currently_running_updates:
+        logger.info("\t==> {} | progress: {} | scrbl: {}".format(update['username'], update['progress'], update['scrobbles']))
+
+    queued_updates = sql_helper.execute_db("SELECT username, last_update, progress, scrobbles FROM users WHERE last_update IS NOT NULL AND progress = -22 ORDER BY last_update ASC")
+    logger.info("There are currently {} queued full scrape(s).".format(len(queued_updates)))
+    for update in queued_updates:
+        logger.info("\t==> {} | queued for: {} min | scrbl: {}".format(update['username'], round((datetime.datetime.utcnow() - update['last_update']).total_seconds() / 60), update['scrobbles']))
+    
+    max_concurrent = cfg['max_concurrent_full_scrapes']
+
+    if len(currently_running_updates) >= max_concurrent:
+        logger.info("Full scrape max concurrent runs currently met or exceeded ({}/{}) Unable to start anymore updates!".format(len(currently_running_updates), max_concurrent))
+    else:
+        num_able_to_start = max_concurrent - len(currently_running_updates)
+        logger.info("Able to start {} full scrape(s) this cycle!".format(num_able_to_start))
+        updates_to_start = queued_updates if len(queued_updates) <= num_able_to_start else queued_updates[:num_able_to_start]
+        for update in updates_to_start:
+            logger.info("\t==> Starting full scrape for {}...".format(update['username']))
+            thread = Thread(target=lastfm_scraper.update_user_from_thread, args=(update['username'], True, current_app._get_current_object(), False, True, None, True))
+            thread.start()
+            time.sleep(1)
+    
+    return True

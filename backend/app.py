@@ -24,11 +24,26 @@ app.register_blueprint(group_session_api)
 CORS(app)
 
 def reset_running_tasks():
-   # logger.info("[reset_running_tasks] Resetting any old running tasks...")
    mdb = mariadb.connect(**(cfg['sql']))
    cursor = mdb.cursor(dictionary=True)
+   
+   # reset tasks in task_handler
    cursor.execute("UPDATE tasks SET last_finished = '{}' WHERE last_finished IS NULL".format(str(datetime.datetime.utcfromtimestamp(1))))
    mdb.commit()
+
+   # store earliest track date for any unfinished user updates
+   cursor.execute("SELECT user_id, username, progress FROM users WHERE last_update IS NULL")
+   users_unfinished_update = list(cursor)
+   for user in users_unfinished_update:
+      cursor.execute('SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` {} LIMIT 1'.format(user['user_id'], "ASC" if user['progress'] else "DESC"))
+      result = list(cursor)
+      if len(result): # store timestamp from DB
+         sql = "UPDATE users SET last_update = '{}' WHERE user_id = {}".format(datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])), user['user_id'])
+      else: # store early timestamp because they don't have anything in the DB
+         sql = "UPDATE users SET last_update = '{}' WHERE user_id = {}".format(datetime.datetime.utcfromtimestamp(1), user['user_id'])
+      cursor.execute(sql)
+      mdb.commit()
+
    mdb.close()
 
 @app.teardown_appcontext

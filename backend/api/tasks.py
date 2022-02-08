@@ -30,17 +30,27 @@ def globalupdate():
     if secret_key != cfg['api']['secret']:
         abort(401)
     for u in user_helper.get_users():
-        # response = lastfm_scraper.update_user(u['username'])
         thread = Thread(target=lastfm_scraper.update_user_from_thread, args=(u['username'], False, current_app._get_current_object()))
         thread.start()
         time.sleep(1)
-    # lastfm_scraper.scrape_artist_images()
-    # lastfm_scraper.scrape_extra_artist_info()
-    # if response:
-    #     return jsonify(response)
-    # else:
-    #     abort(500)
     return jsonify(True)
+
+@task_api.route('/api/tasks/full-scrape-queue', methods=['POST'])
+def full_scrape_queue():
+    params = request.get_json()
+    if params:
+        try:
+            secret_key = params['secret_key']
+        except KeyError as e:
+            response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
+            abort(response)
+    else:
+        response = make_response(jsonify(error="Empty JSON body - no data was sent."), 400)
+        abort(response)
+    if secret_key != cfg['api']['secret']:
+        abort(401)
+    response = task_helper.full_scrape_queue()
+    return jsonify(response)
 
 @task_api.route('/api/tasks/album', methods=['POST'])
 def albumartwork():

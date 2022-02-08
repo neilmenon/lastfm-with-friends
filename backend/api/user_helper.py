@@ -53,13 +53,13 @@ def get_user_account(username, update=False):
         user_info = requests.post("http://ws.audioscrobbler.com/2.0", data=data).json()
         data = {}
         data['username'] = username
-        data['display_name'] = user_info['user']['realname']
+        data['display_name'] = sql_helper.esc_db(user_info['user']['realname'])
         data['registered'] = user_info['user']['registered']['unixtime']
         data['profile_image'] = user_info['user']['image'][3]['#text'] if user_info['user']['image'][3]['#text'] else "https://lastfm.freetls.fastly.net/i/u/avatar170s/818148bf682d429dc215c1705eb27b98.webp"
         data['scrobbles'] = user_info['user']['playcount']
         data['progress'] = 0
         if update:
-            sql = "UPDATE `users` SET `display_name` = '{}', `profile_image` = '{}', `scrobbles` = {}, registered = '{}' WHERE `username` = '{}'".format(sql_helper.esc_db(data['display_name']), data['profile_image'], data['scrobbles'], data['registered'], username)
+            sql = "UPDATE `users` SET `display_name` = '{}', `profile_image` = '{}', `scrobbles` = {}, registered = '{}' WHERE `username` = '{}'".format(data['display_name'], data['profile_image'], data['scrobbles'], data['registered'], username)
         else:
             data['joined_date'] = datetime.datetime.utcnow() # date user joins the app.
             sql = sql_helper.insert_into_where_not_exists("users", data, "username")
@@ -142,5 +142,5 @@ def get_personal_stats(username):
     else:
         stats: dict = stats[0]
         for k in stats.keys():
-            stats[k] = json.loads(stats[k]) if stats[k] and k in ["cant_get_enough", "scrobble_compare", "top_genre", "top_rising"] else stats[k]
+            stats[k] = json.loads(stats[k].replace("\\", "")) if stats[k] and k in ["cant_get_enough", "scrobble_compare", "top_genre", "top_rising"] else stats[k]
         return stats

@@ -16,37 +16,55 @@ cfg = config.config
 # (i.e. the request will not wait until a user update finishes to return)
 # this function is ALWAYS called inside a thread instance, where we need to manually
 # specify the Flask application context (this function must be called via a new thread!)
-def update_user_from_thread(username, full=False, app=None, fix_count=False, stall_if_existing=True, wipe=None):
+def update_user_from_thread(username, full=False, app=None, fix_count=False, stall_if_existing=True, wipe=None, from_queue=False):
     if app:
         with app.app_context():
             if wipe:
                 user_helper.change_update_progress(username, -420)
                 user_helper.wipe_scrobbles(username, wipe) # wipe is user_id
                 user_helper.change_update_progress(username, 3, clear_progress=True)
-            update_user(username, full, app, fix_count, stall_if_existing)
+            update_user(username, full, app, fix_count, stall_if_existing, from_queue=from_queue)
     else:
-        update_user(username, full, app, fix_count, stall_if_existing)
+        update_user(username, full, app, fix_count, stall_if_existing, from_queue=from_queue)
 
-def update_user(username, full=False, app=None, fix_count=False, stall_if_existing=True):
+def update_user(username, full=False, app=None, fix_count=False, stall_if_existing=True, from_queue=False):
     logger.info("User update triggered for: " + username, app)
     user: dict = user_helper.get_user(username, extended=False)
     last_update = user_helper.get_updated_date(username)
     full_scrape = not last_update or full
     failed_update = False
-    # if progress value is -420, system is wiping the old scrobbles in preparation for a full scrape
-    # exit here
+
+    # start queue handling
+    if from_queue and user['progress'] == -22: # if pulled off queue, start execution
+        user_helper.change_update_progress(username, None, clear_progress=True)
+        user_helper.change_updated_date(username, clear_date=True)
+        user['progress'] = 0
+    else: # if not from queue, check if we are trying a full scrape, if so, we need to queue it first
+        if full_scrape:
+            logger.info("\tQueueing full scrape update for {}.".format(username))
+            user_helper.change_update_progress(username, -22)
+            user_helper.change_updated_date(username, start_time=datetime.datetime.utcnow())
+            return
+    
     if user['progress']:
+        # if progress value is -420, system is wiping the old scrobbles in preparation for a full scrape
+        # exit here
         if int(user["progress"]) == -420:
             logger.warn("\tDetected another process is wiping scrobbles in order to do a full scrape. Exiting here...", app)
             return
+        elif int(user["progress"]) == -22:
+            logger.info("\tUser update already queued for {}. Exiting here...".format(username))
+            return
+    # end queue handling
+
     if not full_scrape:
         updated_unix = str(int(last_update.replace(tzinfo=datetime.timezone.utc).timestamp()))
         current_unix = str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp()))
         if user['progress']: # if there is a value here it means a scrape has not/did not finish
             # logger.info("\tDetected an unfinished ({}%) scrape. Finishing it...".format(user['progress']), app)
             registered_unix = str(user['registered'])
-            # we can clear the last updated date now to signify an update
-            user_helper.change_updated_date(username, clear_date=True)
+        # we can clear the last updated date now to signify an update
+        user_helper.change_updated_date(username, clear_date=True)
     else: # if full scrape, we always clear this date
         user_helper.change_updated_date(username, clear_date=True)
         if user['progress'] and stall_if_existing: # we don't always want to stall, for example, user updates triggered from group sessions tasks
@@ -93,7 +111,10 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     logger.error("\tSomething went during the initial update or fixing failed update, storing earliest grabbed track date as last updated date.", app)
                     sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
                     result = sql_helper.execute_db(sql)
-                    user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp']))) 
+                    if (len(result)):
+                        user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
+                    else:
+                        logger.warn("\tNo earliest track to store for {}!".format(username), app)
                     return
                 return
 
@@ -109,6 +130,12 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                 earliest_scrobble_time = datetime.datetime.utcfromtimestamp(int(user['registered'])) - datetime.timedelta(days=15)
                 user_helper.change_updated_date(username, start_time=earliest_scrobble_time)
                 return {'tracks_fetched': -1, "last_update": str(earliest_scrobble_time)}
+            # store latest track timestamp
+            sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
+            result = sql_helper.execute_db(sql)
+            if len(result):
+                user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
+                user_helper.change_update_progress(username, None, clear_progress=True)
             return {'tracks_fetched': -1, "last_update": last_update}
 
         for entry in lastfm["track"]:
@@ -127,6 +154,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
             album = sql_helper.esc_db(entry['album']['#text'])
             album_url = artist_url + "/" + sql_helper.format_lastfm_string(entry['album']['#text'])
             track = sql_helper.esc_db(entry['name'])
+            track = track[:400] if len(track) > 400 else track
             timestamp = entry['date']['uts']
             image_url = entry['image'][3]['#text']
 
@@ -254,7 +282,10 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
         result = sql_helper.execute_db(sql)
-        user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
+        if len(result):
+            user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
+        else:
+            user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(1))
     else:
         user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(most_recent_uts))
     user_helper.change_update_progress(username, None, clear_progress=True)
