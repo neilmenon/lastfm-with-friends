@@ -56,9 +56,9 @@
                 Flushes all of your scrobbles from our database and fetches them anew from Last.fm.<br>
                 <strong>Warning!</strong> This process can take time, especially if you have a lot of scrobbles. Your app scrobble count is regularly compared to your Last.fm account and re-scraped/corrected automatically, so this action should only be used if there is a data discrepancy between Last.fm and the app (for example, if you edit scrobbles on Last.fm).
             </p>
-            <span [matTooltip]="user.scrobbles > 100000 ? 'Full scrape is currently disabled for users with more than 100K scrobbles due to the resources it takes. To request a full scrape please open an issue on Github (neilmenon/lastfm-with-friends)' : null" matTooltipPosition="above">
+            <span [matTooltip]="user?.scrobbles > 100000 ? 'Full scrape is currently disabled for users with more than 100K scrobbles due to the resources it takes. To request a full scrape please open an issue on Github (neilmenon/lastfm-with-friends)' : null" matTooltipPosition="above">
                 <button color="accent" mat-raised-button type="submit" *ngIf="!confirmFullScrape && !fullScrapeInProgress" 
-                    (click)="fullScrape()" [class.disable-click]="isDemo | async" [disabled]="user.scrobbles > 100000">
+                    (click)="fullScrape()" [class.disable-click]="isDemo | async" [disabled]="user?.scrobbles > 100000">
                     Trigger Full Scrape
                 </button>
             </span>

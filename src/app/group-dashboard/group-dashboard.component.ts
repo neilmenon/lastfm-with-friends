@@ -292,27 +292,27 @@ export class GroupDashboardComponent implements OnInit {
         this.wkArtistInput.closePanel()
         this.wkArtistInputRaw.nativeElement.blur();  
       }
+      this.wkArtistDateLoading = false;
+      // if (results) {
+      //   for (let i = 0; i < results?.length; i++) {
+      //     data?.users.forEach(x => {
+      //       if (results[i].id == x.id) {
+      //         x.rankNum = results[i].rank
+      //       }
+      //     })
+      //   }
+      // }
+      if (fromSliderChange) {
+        this.wkArtistResults = data
+      }
+      if (data['artist']['fallback'] && !data['artist']['redirect']) {
+        this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
+      } else if (data['artist']['redirect']) {
+        this.messageService.open("Redirected to " + data['artist']['name'] + ".")
+      }
       let wkUsers: Array<number> = data?.users.map(u => u.id)
-      this.userService.wkCharts(wkUsers, data.artist.id, null, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
-        this.wkArtistDateLoading = false;
-        if (results) {
-          for (let i = 0; i < results?.length; i++) {
-            data?.users.forEach(x => {
-              if (results[i].id == x.id) {
-                x.rankNum = results[i].rank
-              }
-            })
-          }
-        }
-        if (fromSliderChange) {
-          this.wkArtistResults = data
-        }
-        if (data['artist']['fallback'] && !data['artist']['redirect']) {
-          this.messageService.open("No one knows \"" + formData['query'] + "\" in " + this.group.name + ". Showing results for " + data['artist']['name'] + ".")
-        } else if (data['artist']['redirect']) {
-          this.messageService.open("Redirected to " + data['artist']['name'] + ".")
-        }
-      })
+      // this.userService.wkCharts(wkUsers, data.artist.id, null, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+      // })
     }).catch(error => {
       if (this.detectorService.isMobile()) {
         this.wkArtistInput.closePanel()
@@ -368,22 +368,22 @@ export class GroupDashboardComponent implements OnInit {
           this.wkAlbumInput.closePanel()
           this.wkAlbumInputRaw.nativeElement.blur();
         }
+        this.wkAlbumDateLoading = false;
+        // if (results) {
+        //   for (let i = 0; i < results?.length; i++) {
+        //     data?.users.forEach(x => {
+        //       if (results[i].id == x.id) {
+        //         x.rankNum = results[i].rank
+        //       }
+        //     })
+        //   }
+        // }
+        if (fromSliderChange) {
+          this.wkAlbumResults = data
+        }
         let wkUsers: Array<number> = data?.users.map(u => u.id)
-        this.userService.wkCharts(wkUsers, data.artist.id, data.album.id, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
-          this.wkAlbumDateLoading = false;
-          if (results) {
-            for (let i = 0; i < results?.length; i++) {
-              data?.users.forEach(x => {
-                if (results[i].id == x.id) {
-                  x.rankNum = results[i].rank
-                }
-              })
-            }
-          }
-          if (fromSliderChange) {
-            this.wkAlbumResults = data
-          }
-        })
+        // this.userService.wkCharts(wkUsers, data.artist.id, data.album.id, null, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+        // })
       }).catch(error => {
         if (this.detectorService.isMobile()) {
           this.wkAlbumInput.closePanel()
@@ -428,22 +428,22 @@ export class GroupDashboardComponent implements OnInit {
           this.wkTrackInput.closePanel()
           this.wkTrackInputRaw.nativeElement.blur();
         }
+        this.wkTrackDateLoading = false;
+        // if (results) {
+        //   for (let i = 0; i < results?.length; i++) {
+        //     data?.users.forEach(x => {
+        //       if (results[i].id == x.id) {
+        //         x.rankNum = results[i].rank
+        //       }
+        //     })
+        //   }
+        // }
+        if (fromSliderChange) {
+          this.wkTrackResults = data
+        }
         let wkUsers: Array<number> = data?.users.map(u => u.id)
-        this.userService.wkCharts(wkUsers, data.artist.id, null, data.track.name, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
-          this.wkTrackDateLoading = false;
-          if (results) {
-            for (let i = 0; i < results?.length; i++) {
-              data?.users.forEach(x => {
-                if (results[i].id == x.id) {
-                  x.rankNum = results[i].rank
-                }
-              })
-            }
-          }
-          if (fromSliderChange) {
-            this.wkTrackResults = data
-          }
-        })
+        // this.userService.wkCharts(wkUsers, data.artist.id, null, data.track.name, startRange?.format(), endRange?.format()).toPromise().then((results: any) => {
+        // })
       }).catch(error => {
         if (this.detectorService.isMobile()) {
           this.wkTrackInput.closePanel()
