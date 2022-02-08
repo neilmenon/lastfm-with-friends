@@ -108,13 +108,15 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
         finally:
             if failed_update:
                 if full_scrape or user['progress']:
-                    logger.error("\tSomething went during the initial update or fixing failed update, storing earliest grabbed track date as last updated date.", app)
-                    sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
-                    result = sql_helper.execute_db(sql)
-                    if (len(result)):
-                        user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
-                    else:
-                        logger.warn("\tNo earliest track to store for {}!".format(username), app)
+                    logger.error("\tSomething went during the initial update or fixing failed update, now's date and queueing.", app)
+                    user_helper.change_update_progress(username, -22)
+                    user_helper.change_updated_date(username, start_time=datetime.datetime.utcnow())
+                    # sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` ASC LIMIT 1'.format(user['user_id'])
+                    # result = sql_helper.execute_db(sql)
+                    # if (len(result)):
+                    #     user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(int(result[0]['timestamp'])))
+                    # else:
+                    #     logger.warn("\tNo earliest track to store for {}!".format(username), app)
                     return
                 return
 
