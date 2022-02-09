@@ -21,18 +21,6 @@
             </p>
         </div>
         <div class="box" style="position: relative;">
-            <!-- <p>
-                Welcome to Last.fm with Friends, {{ user.display_name ? user.display_name : user.username }}! You've scrobbled a total of {{ user.scrobbles | pluralize:'track' }} over the past
-                <span>{{ moment.unix(user.registered).locale("en-US").toNow(true) }}</span> — 
-                <span *ngIf="user.last_update" 
-                        [matTooltip]="moment().add(30 - (moment().minute() % 30), 'minutes').startOf('minute').locale('en-US').format()" 
-                        matTooltipPosition="above"
-                >{{ "next update " + moment().add(30 - (moment().minute() % 30), 'minutes').startOf('minute').locale('en-US').fromNow() }}.</span>
-                <span *ngIf="!user.last_update">updating now...</span>
-            </p> -->
-            <div class="info-banner">
-                <strong>A note from the developer</strong><br> Thanks everyone for joining! As you may probably see, some features have stopped working due to the heaps and heaps of scrobbles y'all brought to the app. I am working on adjusting some of the features & DB queries so they don't time out. As with any project that uses COUNT(*) operators in queries, performance is affected. Stay tuned on the app as I iron out these issues! Thanks!
-            </div>
             <p style="font-weight: bold;" class="center">Welcome to Last.fm with Friends, {{ user.display_name ? user.display_name : user.username }}. Here's what's counting:</p>
             <span class="home-info-icon clickable" matTooltip="About personal stats" matTooltipPosition="left" (click)="openPersonalStatsInfo()" *ngIf="user.stats"><i class="fas fa-info-circle"></i></span>
             <app-personal-stats [user]="user"></app-personal-stats>
