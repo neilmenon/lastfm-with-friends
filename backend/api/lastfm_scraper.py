@@ -202,61 +202,6 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
             sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
             sql_helper.execute_db(sql, commit=True, pass_on_error=True)
             previous_track = scrobble_record
-            # except mariadb.Error as e:
-            #     if "albums_ibfk_1" in str(e) and artist != "Various Artists": 
-            #         logger.info("\t\tRedirected artist name conflict detected for '{} ({})'. Trying to get the Last.fm listed name...".format(artist, album_url), app)
-            #         # artist name redirected to different page so not in artist table
-            #         # add alternate name to artist_redirects table
-
-            #         redirected_url = entry['artist']['url']
-            #         artist_page = requests.get(redirected_url).text
-            #         soup = BeautifulSoup(artist_page, features="html.parser")
-            #         if "noredirect" in redirected_url:
-            #             s = soup.select('p.nag-bar-message > strong > a')[0].text.strip()
-            #         else:
-            #             s = soup.select('h1.header-new-title')[0].text.strip()
-            #         if s:
-            #             artist_name = artist
-            #             redirected_name = s
-            #             logger.info("\t\t\tFound Last.fm artist name: {}. Continuing with inserts...".format(redirected_name), app)
-                        
-            #             try:
-            #                 # insert into artist_redirects table
-            #                 data = {"artist_name": artist_name, "redirected_name": redirected_name}
-            #                 sql = sql_helper.insert_into_where_not_exists("artist_redirects", data, "artist_name")
-            #                 sql_helper.execute_db(sql, commit=True)
-
-            #                 # now we can insert into the the albums table and album_scrobbles tables
-            #                 album_record["artist_name"] = redirected_name
-            #                 sql = sql_helper.insert_into_where_not_exists_2("albums", album_record, "artist_name", "name")
-            #                 sql_helper.execute_db(sql, commit=True)
-
-            #                 # get the album id that was created
-            #                 result = sql_helper.execute_db("SELECT id FROM albums WHERE artist_name = '"+artist+"' AND name = '"+album+"';")
-            #                 album_id = result[0]["id"]
-
-            #                 # insert full track record
-            #                 scrobble_record = {
-            #                     "artist_id": artist_id,
-            #                     "album_id": album_id,
-            #                     "user_id": user['user_id'],
-            #                     "track": track,
-            #                     "timestamp": timestamp
-            #                 }
-            #                 sql = sql_helper.replace_into("track_scrobbles", scrobble_record)
-            #                 sql_helper.execute_db(sql, commit=True)
-            #             except mariadb.Error as e:
-            #                 logger.info("\t\t\tFailed to insert.", app)
-            #                 break
-            #     elif artist == "Various Artists":
-            #         continue
-            #     else:
-            #         logger.info("A database error occurred while inserting a record: " + str(e), app)
-            #         logger.info("\t\tQuery: " + sql, app)
-            #     continue
-            # except Exception as e:
-            #     logger.info("An unknown error occured while inserting a record: " + str(e), app)
-            #     continue
         page += 1
     if tracks_fetched > 0:
         updated_user = user_helper.get_user_account(username, update=True)
@@ -275,10 +220,9 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(two_weeks_ago))
                     update_user(username, fix_count=True)
                 else:
-                    logger.error("\tFix attempt did not resolve missing scrobbles for {}.".format(username))
+                    logger.error("\tFix attempt did not resolve missing scrobbles for {}. Triggering full scrape...".format(username))
                     user_helper.change_update_progress(username, None, clear_progress=True)
-                    # user_helper.change_update_progress(username, None, clear_progress=True)
-                    # update_user(username, full=True)
+                    update_user(username, full=True)
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
         result = sql_helper.execute_db(sql)
