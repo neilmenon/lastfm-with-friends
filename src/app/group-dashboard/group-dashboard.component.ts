@@ -894,7 +894,7 @@ export class GroupDashboardComponent implements OnInit {
     let entry: HttpScrobbleModel = new HttpScrobbleModel()
     entry.artist = track.artist.name
     entry.track = track.track.name
-    entry.album = track.track.name
+    entry.album = track.track.album_name
     const dialogRef = this.dialog.open(ConfirmPopupComponent, {
       data: { 
         title: `Scrobble ${entry.artist} - ${entry.track}`,
