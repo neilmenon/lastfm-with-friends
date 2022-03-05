@@ -17,10 +17,10 @@
     </div>
     <div class="stat">
         <div>top rising artist</div>
-        <div>{{ stats.top_rising[0].artist }}</div>
+        <div>{{ topRisingArtist.artist }}</div>
         <div>
             <span><i class="fas fa-arrow-circle-up"></i></span>
-            {{ stats.top_rising[0].percent }}% (from {{ stats.top_rising[0].prev_scrobbles | number }} to {{ stats.top_rising[0].scrobbles | number}} scrobbles)
+            {{ topRisingArtist.percent }}% (from {{ topRisingArtist.prev_scrobbles | number }} to {{ topRisingArtist.scrobbles | number}} scrobbles)
         </div>
     </div>
     <div class="stat">

@@ -12,12 +12,14 @@ export class PersonalStatsComponent implements OnInit {
   stats: PersonalStatsModel
   moment = moment
   activeHourText: string = ""
+  topRisingArtist: { artist: string, artist_id: number, percent: number, prev_scrobbles: number, scrobbles: number }
 
   constructor() { }
 
   ngOnInit(): void {
     this.stats = this.user.stats
     this.activeHourText = this.getActiveHourText()
+    this.topRisingArtist = this.stats.top_rising.filter(x => x.prev_scrobbles > 1)[0]
   }
 
   getActiveHourText(): string {
