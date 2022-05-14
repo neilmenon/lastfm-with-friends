@@ -227,14 +227,14 @@ def nowplaying(single_user=None):
 
         # fix bug where Last.fm recenttracks endpoint returns a very old/incorrect nowplaying status (hard to reproduce)
         # check if the now playing timestamp is BEFORE the latest track fetched in the db (never should happen)
-        if tmp_user['timestamp']:
-            latest_track = sql_helper.execute_db("SELECT timestamp FROM track_scrobbles WHERE user_id = {} ORDER BY timestamp DESC LIMIT 1".format(user['user_id']))
-            if len(latest_track):
-                latest_timestamp = int(latest_track[0]['timestamp'])
-                if tmp_user['timestamp'] < latest_timestamp:
-                    logger.warn("Detected now playing timestamp earlier than latest timestamp in DB for {}. Skipping...")
-                    logger.warn("Response from API: {}".format(track))
-                    continue
+        # if tmp_user['timestamp']:
+        #     latest_track = sql_helper.execute_db("SELECT timestamp FROM track_scrobbles WHERE user_id = {} ORDER BY timestamp DESC LIMIT 1".format(user['user_id']))
+        #     if len(latest_track):
+        #         latest_timestamp = int(latest_track[0]['timestamp'])
+        #         if tmp_user['timestamp'] < latest_timestamp:
+        #             logger.warn("Detected now playing timestamp earlier than latest timestamp in DB for {}. Skipping...")
+        #             logger.warn("Response from API: {}".format(track))
+        #             continue
         sql = sql_helper.replace_into("now_playing", tmp_user)
         sql_helper.execute_db(sql, commit=True, pass_on_error=True)
     return True
