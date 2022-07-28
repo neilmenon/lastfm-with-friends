@@ -1,0 +1,15 @@
+<div class="center" style="margin-bottom: -16px;">
+    <h3 mat-dialog-title>Enter Last.fm Username</h3>
+</div>
+<div mat-dialog-content class="center">
+    <p class="center-all">Currently, access is restricted to existing users only.
+        <br>If you are already on the app, please enter your Last.fm username below to continue.
+    </p>
+    <form [formGroup]="userForm">
+        <mat-form-field color="accent">
+            <mat-label>Last.fm Username</mat-label>
+            <input matInput name="lastfmUsername" type="text" formControlName="lastfmUsername">
+        </mat-form-field><br>
+        <button color="accent" mat-raised-button [disabled]="!(userForm.controls['lastfmUsername'].value?.trim()?.length > 0)" (click)="validateUser()">Continue</button>
+    </form>
+</div>

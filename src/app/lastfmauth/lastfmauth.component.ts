@@ -15,32 +15,37 @@ export class LastfmauthComponent implements OnInit {
   constructor(private route: ActivatedRoute, public router: Router, private messageService: MessageService, private http: HttpClient, private userService: UserService) { }
 
   ngOnInit(): void {
-    let session = localStorage.getItem('lastfm_session');
-    if (session == null) {
-      this.route.queryParams.subscribe(params => {
-        if (params['token']) {
-          this.messageService.open('Signing in...', "center", true)
-          this.authenticate(params['token']).then(response => {
-            localStorage.setItem("lastfm_session", response['session_key'])
-            localStorage.setItem("lastfm_username", response['username'])
-            window.location.href = config.project_root;
-          }).catch(error => {
-            console.log(error)
-            if (error['error']['error']) {
-              this.messageService.save(error['error']['error'])
-            } else {
-              this.messageService.save("Authentication failed. Most likely the backend service is down.")
-            }
-            this.router.navigate([''])
-          })
-        } else {
-          this.messageService.open("Sending you to authentication page...", "center", true)
-          window.location.href = 'https://www.last.fm/api/auth/?api_key='+ config.api_key +'&cb='+ config.project_root +'/lastfmauth';
-        }
-      });
-    } else {
-      this.messageService.save('Already signed in!')
+    if (localStorage.getItem("verifiedUser") != "true") {
+      this.messageService.save('You do not have access to sign in to Last.fm with Friends.')
       this.router.navigate([''])
+    } else {
+      let session = localStorage.getItem('lastfm_session');
+      if (session == null) {
+        this.route.queryParams.subscribe(params => {
+          if (params['token']) {
+            this.messageService.open('Signing in...', "center", true)
+            this.authenticate(params['token']).then(response => {
+              localStorage.setItem("lastfm_session", response['session_key'])
+              localStorage.setItem("lastfm_username", response['username'])
+              window.location.href = config.project_root;
+            }).catch(error => {
+              console.log(error)
+              if (error['error']['error']) {
+                this.messageService.save(error['error']['error'])
+              } else {
+                this.messageService.save("Authentication failed. Most likely the backend service is down.")
+              }
+              this.router.navigate([''])
+            })
+          } else {
+            this.messageService.open("Sending you to authentication page...", "center", true)
+            window.location.href = 'https://www.last.fm/api/auth/?api_key='+ config.api_key +'&cb='+ config.project_root +'/lastfmauth';
+          }
+        });
+      } else {
+        this.messageService.save('Already signed in!')
+        this.router.navigate([''])
+      }
     }
   }
 

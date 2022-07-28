@@ -194,3 +194,9 @@ def users_all():
         if username == cfg['admin_username']:
             return jsonify(sql_helper.execute_db("SELECT users.username, sessions.session_key FROM users LEFT JOIN sessions ON users.username = sessions.username GROUP BY users.username"))
     abort(401)
+
+@user_api.route('/api/user-verify/<string:username>', methods=['GET'])
+def user_verify(username):
+    if user_helper.get_user(username):
+        return jsonify(True)
+    abort(404)

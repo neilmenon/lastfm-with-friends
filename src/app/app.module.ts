@@ -73,6 +73,7 @@ import { PersonalStatsComponent } from './personal-stats/personal-stats.componen
 import { AbsolutePipe } from './absolute.pipe';
 import { AboutGroupSessionsComponent } from './about-group-sessions/about-group-sessions.component';
 import { CreditsComponent } from './credits/credits.component';
+import { SignInUsernameComponent } from './sign-in-username/sign-in-username.component';
 
 @NgModule({
   declarations: [
@@ -106,6 +107,7 @@ import { CreditsComponent } from './credits/credits.component';
     AbsolutePipe,
     AboutGroupSessionsComponent,
     CreditsComponent,
+    SignInUsernameComponent,
   ],
   imports: [
     BrowserModule,

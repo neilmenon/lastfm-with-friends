@@ -119,7 +119,7 @@
         Sign in with your Last.fm account to get started or try out our demo.<br><br>
         <div id="homeButtons">
             <button color="accent" mat-raised-button (click)="gettingStarted()">Geting Started</button>
-            <button color="primary" mat-raised-button [routerLink]="['/lastfmauth']">Sign In with Last.fm</button>
+            <button color="primary" mat-raised-button (click)="validateUser()">Sign In with Last.fm</button>
             <button color="accent" mat-raised-button (click)="enterDemo()" [disabled]="demoLoading">Try Out Demo</button>
         </div>
     </div>

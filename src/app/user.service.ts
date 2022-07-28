@@ -67,6 +67,10 @@ export class UserService {
     }
   }
 
+  verifyUserExists(username: string): any {
+    return this.http.get(config.api_root + '/user-verify/' + username).toPromise()
+  }
+
   setSettings(settings: SettingsModel, showMessage: boolean) {
     this.http.post(config.api_root + '/users/' + this.username + '/settings', {
       'settings': JSON.stringify(settings),

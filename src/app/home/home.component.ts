@@ -16,6 +16,7 @@ import { MatDialog, MatDialogRef, MatDialogState, MAT_DIALOG_DATA } from '@angul
 import { GroupSessionComponent } from '../group-session/group-session.component';
 import { PluralizePipe } from '../pluralize.pipe';
 import { GettingStartedComponent } from '../getting-started/getting-started.component';
+import { SignInUsernameComponent } from '../sign-in-username/sign-in-username.component';
 
 @Component({
   selector: 'app-home',
@@ -193,6 +194,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   openPersonalStatsInfo() {
     let text: string = `Personal stat reports are generated daily. The time period used to calculate the stats varies per user, based on how much you listen.<br><br>This report was generated on <strong><u>${ moment(this.user.stats?.date_generated).local().format() }</u></strong> with a time period of <strong><u>${this.user.stats?.time_period_days} days</u></strong> until <em>today</em> (which means the stats will change slightly each day).`
     this.dialog.open(GenericTextComponent, { data: { text: text, title: "About Personal Stats Report" } })
+  }
+
+  validateUser() {
+    this.dialog.open(SignInUsernameComponent)
   }
 }
 
