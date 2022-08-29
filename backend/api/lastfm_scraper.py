@@ -31,7 +31,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
     logger.info("User update triggered for: " + username, app)
     user: dict = user_helper.get_user(username, extended=False)
     last_update = user_helper.get_updated_date(username)
-    full_scrape = not last_update or full
+    full_scrape = not last_update or full or (user['scrobbles'] == 0 and last_update and user['progress'] > 0)
     failed_update = False
 
     # start queue handling

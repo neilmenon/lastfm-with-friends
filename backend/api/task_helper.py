@@ -122,6 +122,10 @@ def task_handler(task_name, task_operation):
     if task_operation == "start":
         if not task['last_finished']: # task is currently running somewhere else!
             logger.warn("[task_handler] [{}] [skips: {}] This task is currently running somewhere else. Skipping current run.".format(task_name, task['skips']))
+            if task['skips'] >= 30:
+                # clear out stuck task
+                sql_helper.execute_db("UPDATE tasks SET last_finished = '{}', skips = 0 WHERE name = '{}'".format(str(datetime.datetime.utcnow()), task_name), commit=True)
+                return True
             # increment skips counter on task
             sql_helper.execute_db("UPDATE tasks SET skips = {} WHERE name = '{}'".format(task['skips'] + 1, task_name), commit=True)
             return False
