@@ -205,7 +205,7 @@ def personal_stats(username, genre_filter_list):
     sql = "SELECT COUNT(*) as scrobbles FROM track_scrobbles WHERE from_unixtime(track_scrobbles.timestamp) BETWEEN '{}' AND '{}' AND track_scrobbles.user_id = {}".format(calc_days_ago, now, u['user_id'])
     current_period_scrobbles = sql_helper.execute_db(sql)[0]['scrobbles']
 
-    percentage_increase = round(((current_period_scrobbles - previous_period_scrobbles)/previous_period_scrobbles) * 100, 1)
+    percentage_increase = round(((current_period_scrobbles - previous_period_scrobbles)/(previous_period_scrobbles if previous_period_scrobbles else 1)) * 100, 1)
     stats['scrobble_compare'] = {
         "current": current_period_scrobbles,
         "previous": previous_period_scrobbles,
@@ -239,7 +239,7 @@ def personal_stats(username, genre_filter_list):
                 previous_record = previous_record[0]
 
             a['prev_scrobbles'] = previous_record['scrobbles']
-            a['percent'] = round(((a['scrobbles'] - previous_record['scrobbles'])/previous_record['scrobbles']) * 100, 1)
+            a['percent'] = round(((a['scrobbles'] - previous_record['scrobbles'])/(previous_record['scrobbles'] if previous_record['scrobbles'] else 1)) * 100, 1)
             unsorted_top_rising.append(a)
 
         stats['top_rising'] = [sql_helper.escape_keys_in_dict(t) for t in sorted(unsorted_top_rising, key = lambda i: i['percent'], reverse=True)]
