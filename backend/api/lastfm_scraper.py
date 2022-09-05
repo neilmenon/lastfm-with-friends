@@ -209,8 +209,8 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
             sql = "SELECT COUNT(*) as total FROM `track_scrobbles` WHERE user_id = {} ORDER BY `timestamp` DESC".format(user['user_id'])
             result = sql_helper.execute_db(sql)
             lfm_more_scrobbles = int(updated_user['scrobbles']) > result[0]['total']
-            app_more_scrobbles_threshold = int(updated_user['scrobbles']) - result[0]['total'] > 5
-            app_more_scrobbles = int(updated_user['scrobbles']) - result[0]['total']
+            app_more_scrobbles_threshold = result[0]['total'] - int(updated_user['scrobbles']) > 5
+            app_more_scrobbles = result[0]['total'] - int(updated_user['scrobbles'])
             if app_more_scrobbles > 0:
                 logger.warn("\tDetected {} unaccounted for scrobble(s) in DB which are not in Last.fm for {}. Fetched {} tracks this update.".format(app_more_scrobbles, username, tracks_fetched))
             if lfm_more_scrobbles or app_more_scrobbles_threshold: # if Last.fm has more scrobbles than the database, or vis versa
