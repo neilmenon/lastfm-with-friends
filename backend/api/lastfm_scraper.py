@@ -229,8 +229,8 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     logger.error("\tFix attempt did not resolve {} scrobbles for {}. Triggering full scrape...".format("missing" if lfm_more_scrobbles else "extra", username))
                     user_helper.change_update_progress(username, -420)
                     user_helper.wipe_scrobbles(username, user["user_id"])
-                    user_helper.change_update_progress(username, None, clear_progress=True)
-                    update_user(username, full=True)
+                    user_helper.change_update_progress(username, 3, clear_progress=True)
+                    return
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
         result = sql_helper.execute_db(sql)
