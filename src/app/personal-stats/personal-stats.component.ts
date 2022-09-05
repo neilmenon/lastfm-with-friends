@@ -24,7 +24,7 @@ export class PersonalStatsComponent implements OnInit {
 
   getActiveHourText(): string {
     let hour: number = moment().utc().set({ hour: this.stats.most_active_hour, minute: 0 }).local().hour()
-    let randomArtist: string = this.randomChoice(this.stats.top_rising).artist
+    let randomArtist: string = this.randomChoice(this.stats.top_rising)?.artist
     switch(hour) {
       case 0:
       case 1:

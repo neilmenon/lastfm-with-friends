@@ -208,11 +208,17 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
         if not full_scrape or not user['progress']: # if it's a normal routine update
             sql = "SELECT COUNT(*) as total FROM `track_scrobbles` WHERE user_id = {} ORDER BY `timestamp` DESC".format(user['user_id'])
             result = sql_helper.execute_db(sql)
-            if int(updated_user['scrobbles']) > result[0]['total']: # if Last.fm has more scrobbles than the database
-                # this could happen if user went back and submitted scrobbles before most recent updated timestamp in database
+            lfm_more_scrobbles = int(updated_user['scrobbles']) > result[0]['total']
+            app_more_scrobbles_threshold = int(updated_user['scrobbles']) - result[0]['total'] > 5
+            app_more_scrobbles = int(updated_user['scrobbles']) - result[0]['total']
+            if app_more_scrobbles > 0:
+                logger.warn("\tDetected {} unaccounted for scrobble(s) in DB which are not in Last.fm for {}. Fetched {} tracks this update.".format(app_more_scrobbles, username, tracks_fetched))
+            if lfm_more_scrobbles or app_more_scrobbles_threshold: # if Last.fm has more scrobbles than the database, or vis versa
+                # lfm_more_scrobbles: this could happen if user went back and submitted scrobbles before most recent updated timestamp in database
+                # app_more_scrobbles: cause unknown
                 # delete scrobbles from past two weeks and fetch again in the same time period
                 if not fix_count: # if we haven't already tried to fix the scrobble count (prevent infinite loop)
-                    logger.warn("\tMissing scrobbles for {} ({} lfm/{} db)! Deleting & re-fetching past two weeks...".format(username, updated_user['scrobbles'], result[0]['total']))
+                    logger.warn("\t{} scrobbles for {} ({} lfm/{} db)! Deleting & re-fetching past two weeks...".format("Missing" if lfm_more_scrobbles else "Extra", username, updated_user['scrobbles'], result[0]['total']))
                     two_weeks_ago = most_recent_uts - 1209600
                     sql = "DELETE FROM `track_scrobbles` WHERE `user_id` = {} AND CAST(timestamp AS FLOAT) BETWEEN {} AND {}".format(user['user_id'], two_weeks_ago, str(int(datetime.datetime.now(tz=datetime.timezone.utc).timestamp())))
                     sql_helper.execute_db(sql, commit=True)
@@ -220,7 +226,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     user_helper.change_updated_date(username, start_time=datetime.datetime.utcfromtimestamp(two_weeks_ago))
                     update_user(username, fix_count=True)
                 else:
-                    logger.error("\tFix attempt did not resolve missing scrobbles for {}. Triggering full scrape...".format(username))
+                    logger.error("\tFix attempt did not resolve {} scrobbles for {}. Triggering full scrape...".format("missing" if lfm_more_scrobbles else "extra", username))
                     user_helper.change_update_progress(username, None, clear_progress=True)
                     update_user(username, full=True)
     if user['progress']:
