@@ -227,6 +227,8 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     update_user(username, fix_count=True)
                 else:
                     logger.error("\tFix attempt did not resolve {} scrobbles for {}. Triggering full scrape...".format("missing" if lfm_more_scrobbles else "extra", username))
+                    user_helper.change_update_progress(username, -420)
+                    user_helper.wipe_scrobbles(username, user["user_id"])
                     user_helper.change_update_progress(username, None, clear_progress=True)
                     update_user(username, full=True)
     if user['progress']:
