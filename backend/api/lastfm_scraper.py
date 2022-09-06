@@ -211,7 +211,7 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
             lfm_more_scrobbles = int(updated_user['scrobbles']) > result[0]['total']
             app_more_scrobbles_threshold = result[0]['total'] - int(updated_user['scrobbles']) > 5
             app_more_scrobbles = result[0]['total'] - int(updated_user['scrobbles'])
-            if app_more_scrobbles > 0:
+            if app_more_scrobbles:
                 logger.warn("\tDetected {} unaccounted for scrobble(s) in DB which are not in Last.fm for {}. Fetched {} tracks this update.".format(app_more_scrobbles, username, tracks_fetched))
             if lfm_more_scrobbles or app_more_scrobbles_threshold: # if Last.fm has more scrobbles than the database, or vis versa
                 # lfm_more_scrobbles: this could happen if user went back and submitted scrobbles before most recent updated timestamp in database
@@ -227,10 +227,12 @@ def update_user(username, full=False, app=None, fix_count=False, stall_if_existi
                     update_user(username, fix_count=True)
                 else:
                     logger.error("\tFix attempt did not resolve {} scrobbles for {}. Triggering full scrape...".format("missing" if lfm_more_scrobbles else "extra", username))
-                    user_helper.change_update_progress(username, -420)
-                    user_helper.wipe_scrobbles(username, user["user_id"])
-                    user_helper.change_update_progress(username, 3, clear_progress=True)
-                    return
+                    if app_more_scrobbles:
+                        user_helper.change_update_progress(username, -420)
+                        user_helper.wipe_scrobbles(username, user["user_id"])
+                    user_helper.change_update_progress(username, -22)
+                    user_helper.change_updated_date(username, start_time=datetime.datetime.utcnow())
+                    return { "message": "Discrepancy between Last.fm and app detected, queueing full scrape to resolve.", 'progress': -22, 'last_update': str(datetime.datetime.utcnow()) }
     if user['progress']:
         sql = 'SELECT timestamp FROM `track_scrobbles` WHERE user_id = {} ORDER BY `track_scrobbles`.`timestamp` DESC LIMIT 1'.format(user['user_id'])
         result = sql_helper.execute_db(sql)

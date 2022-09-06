@@ -125,17 +125,28 @@ export class HeaderComponent implements OnInit, OnDestroy {
     let tmp = this.user.last_update
     this.user.last_update = null
     this.userService.updateUser(this.user, false).toPromise().then((data: any) => {
-      if (data['tracks_fetched'] == -1) {
-        this.user.last_update = tmp
-        this.messageService.open("You are up to date!")
-      } else if (data['tracks_fetched'] == 1) {
+      if (data['last_update']) {
         this.user.last_update = data['last_update']
-        this.messageService.open("Fetched 1 new track for " + this.user.username + ".")
-      } else {
-        this.user.last_update = data['last_update']
-        this.messageService.open("Fetched "+data['tracks_fetched']+" new tracks for " + this.user.username + ".")
       }
-      this.user.progress = 0
+      if (data['progress']) {
+        this.user.progress = data['progress']
+      }
+      if (data['message']) {
+        this.messageService.open(data['message'])
+      } else {
+        if (data['tracks_fetched'] == -1) {
+          this.user.last_update = tmp
+          this.messageService.open("You are up to date!")
+        } else if (data['tracks_fetched'] == 1) {
+          this.user.last_update = data['last_update']
+          this.messageService.open("Fetched 1 new track for " + this.user.username + ".")
+        } else {
+          this.user.last_update = data['last_update']
+          this.messageService.open("Fetched "+data['tracks_fetched']+" new tracks for " + this.user.username + ".")
+        }
+      }
+      if (!data['progress'])
+        this.user.progress = 0
     }).catch(error => {
         this.user.last_update = tmp
         this.messageService.open("Error while updating your user scrobbles!")
