@@ -21,6 +21,7 @@ def globalupdate():
     if params:
         try:
             secret_key = params['secret_key']
+            full = params['full']
         except KeyError as e:
             response = make_response(jsonify(error="Missing required parameter: " + str(e.args[0]) + "."), 400)
             abort(response)
@@ -30,7 +31,7 @@ def globalupdate():
     if secret_key != cfg['api']['secret']:
         abort(401)
     for u in user_helper.get_users():
-        thread = Thread(target=lastfm_scraper.update_user_from_thread, args=(u['username'], False, current_app._get_current_object()))
+        thread = Thread(target=lastfm_scraper.update_user_from_thread, args=(u['username'], full, current_app._get_current_object()))
         thread.start()
         time.sleep(1)
     return jsonify(True)
