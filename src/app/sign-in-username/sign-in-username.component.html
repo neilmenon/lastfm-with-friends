@@ -4,13 +4,13 @@
 <div mat-dialog-content class="center">
     <p class="center-all">Currently, access is restricted. I <a href="https://www.reddit.com/r/lastfm/comments/smw5vr/introducing_lastfm_with_friends_stats_charts/" target="_blank">tried</a> to release it publicly, but it got too many users... and crashed :(.
         <br>If you are already on the app, please enter your Last.fm username below to continue.
-        <br>Or, if I gave you this link to register just let me know and I'll add your Last.fm user manually so you can sign in here.
+        <br>Or, if I gave you this link to register, enter the passphrase I gave (or will give) you below.
     </p>
     <form [formGroup]="userForm">
         <mat-form-field color="accent">
-            <mat-label>Last.fm Username</mat-label>
+            <mat-label>Username or Passphrase</mat-label>
             <input matInput name="lastfmUsername" type="text" formControlName="lastfmUsername">
         </mat-form-field><br>
-        <button color="accent" mat-raised-button [disabled]="!(userForm.controls['lastfmUsername'].value?.trim()?.length > 0)" (click)="validateUser()">Continue</button>
+        <button color="accent" mat-raised-button [disabled]="!(userForm.controls['lastfmUsername'].value?.trim()?.length > 0) || redirecting" (click)="validateUser()">Continue</button>
     </form>
 </div>

@@ -12,6 +12,7 @@ import { UserService } from '../user.service';
 })
 export class SignInUsernameComponent implements OnInit {
   userForm: FormGroup
+  redirecting: boolean
   
   constructor(
     private userService: UserService,
@@ -27,15 +28,22 @@ export class SignInUsernameComponent implements OnInit {
   }
 
   validateUser() {
-    this.userService.verifyUserExists(this.userForm.controls['lastfmUsername'].value.trim()).then(() => {
-      this.messageService.open(`Welcome back, ${this.userForm.controls['lastfmUsername'].value.trim()}! Sending you to sign in...`, "center", true)
+    this.userService.verifyUserExists(this.userForm.controls['lastfmUsername'].value.trim()).then((code: number) => {
+      this.redirecting = true
+      this.userForm.disable()
+      if (code == 1) {
+        this.messageService.open(`Welcome back, ${this.userForm.controls['lastfmUsername'].value.trim()}! Sending you to sign in...`, "center", true)
+      } else if (code == 2) {
+        this.messageService.open(`Thanks for registering! Sending you to sign in...`, "center", true)
+      } else if (code == 2) {
+      }
       localStorage.setItem("verifiedUser", "true")
       setTimeout(() => this.router.navigate(['/lastfmauth']), 2000)
     }).catch((error: HttpErrorResponse) => {
-      if (error.status == 404) {
-        this.messageService.open("This user is not registered with Last.fm with Friends.")
+      if (error.status == 403) {
+        this.messageService.open("Incorrect username or passphrase!")
       } else {
-        this.messageService.open("An unknown error occured while trying to validate your user. Please try again.")
+        this.messageService.open("An unknown error occured. Please try again.")
       }
     });
   }

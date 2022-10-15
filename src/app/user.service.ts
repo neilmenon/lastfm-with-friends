@@ -41,6 +41,7 @@ export class UserService {
     localStorage.removeItem("lastfm_show_clear_local")
     localStorage.removeItem("prev_lastfm_username")
     localStorage.removeItem("prev_lastfm_session")
+    localStorage.removeItem("verifiedUser")
   }
 
   signOut() {
