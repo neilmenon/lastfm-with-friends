@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import { config } from '../config'
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux } from '@angular-redux2/store';
 import { AppState } from '../store';
 import { IS_DEMO_MODE } from '../actions';
 

@@ -1,4 +1,4 @@
-import { NgRedux, select } from '@angular-redux/store';
+import { NgRedux, Select } from '@angular-redux2/store';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,7 +20,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./user-settings.component.css']
 })
 export class UserSettingsComponent implements OnInit {
-  @select(s => s.isDemo)
+  @Select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   private subscription: Subscription = new Subscription()

@@ -1,4 +1,4 @@
-import { select } from '@angular-redux/store';
+import { Select } from '@angular-redux2/store';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
@@ -14,7 +14,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./create-group.component.css']
 })
 export class CreateGroupComponent implements OnInit {
-  @select(s => s.isDemo)
+  @Select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   groupForm;

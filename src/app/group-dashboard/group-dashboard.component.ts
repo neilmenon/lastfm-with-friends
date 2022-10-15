@@ -19,7 +19,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { discreteTimePeriods, releaseTypes } from '../constants';
 import { TimePeriodModel } from '../models/timePeriodModel';
 import { UserGroupModel, UserModel } from '../models/userGroupModel';
-import { select } from '@angular-redux/store';
+import { Select } from '@angular-redux2/store';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { HttpScrobbleModel } from '../models/httpScrobbleModel';
 import { GenreTopArtistsRecordModel } from '../models/commandsModel';
@@ -31,7 +31,7 @@ import { GenreTopArtistsComponent } from '../genre-top-artists/genre-top-artists
   styleUrls: ['./group-dashboard.component.css']
 })
 export class GroupDashboardComponent implements OnInit {
-  @select(s => s.isDemo)
+  @Select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   @Input() group: UserGroupModel

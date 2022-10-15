@@ -1,4 +1,4 @@
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux } from '@angular-redux2/store';
 import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';

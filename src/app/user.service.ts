@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { config } from './config'
 import { MessageService } from './message.service';
 import { SettingsModel } from './models/settingsModel';
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux } from '@angular-redux2/store';
 import { AppState } from './store';
 import { SETTINGS_MODEL } from './actions';
 import { HttpScrobbleModel } from './models/httpScrobbleModel';

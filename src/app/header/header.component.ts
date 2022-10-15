@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MessageService } from '../message.service';
 import { JoinGroupComponent } from '../join-group/join-group.component';
 import { UserModel } from '../models/userGroupModel';
-import { NgRedux, select } from '@angular-redux/store';
+import { NgRedux, Select } from '@angular-redux2/store';
 import { AppState } from '../store';
 import { SETTINGS_MODEL, USER_MODEL } from '../actions'
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
@@ -26,7 +26,7 @@ import { GenericTextComponent } from '../home/home.component';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  @select(s => s.isDemo)
+  @Select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   private subscription: Subscription = new Subscription()

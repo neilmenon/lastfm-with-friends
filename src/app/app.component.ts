@@ -1,4 +1,4 @@
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux } from '@angular-redux2/store';
 import { Component, ViewEncapsulation } from '@angular/core';
 import * as moment from 'moment';
 import { IS_DEMO_MODE } from './actions';

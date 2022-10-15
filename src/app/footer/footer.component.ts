@@ -3,7 +3,7 @@ import { BuildModel, BuildService } from '../build.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
 import { NavigationEnd, Router } from '@angular/router';
-import { NgRedux } from '@angular-redux/store';
+import { NgRedux } from '@angular-redux2/store';
 import { AppState } from '../store';
 import { Subscription } from 'rxjs';
 

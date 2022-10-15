@@ -7,7 +7,7 @@ import * as moment from 'moment';
 import { BuildModel, BuildService } from '../build.service';
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { GroupSessionMemberModel, GroupSessionModel, UserModel } from '../models/userGroupModel';
-import { NgRedux, select } from '@angular-redux/store';
+import { NgRedux, Select } from '@angular-redux2/store';
 import { AppState } from '../store';
 import { Observable, Subscription } from 'rxjs';
 import { IS_DEMO_MODE, USER_MODEL } from '../actions';
@@ -24,7 +24,7 @@ import { SignInUsernameComponent } from '../sign-in-username/sign-in-username.co
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  @select(s => s.isDemo)
+  @Select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   private subscription: Subscription = new Subscription()

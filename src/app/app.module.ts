@@ -58,7 +58,7 @@ import { CustomDateRangeComponent } from './custom-date-range/custom-date-range.
 import { ListeningTrendsComponent } from './listening-trends/listening-trends.component';
 import { FooterComponent } from './footer/footer.component';
 import { PluralizePipe } from './pluralize.pipe';
-import { NgRedux, NgReduxModule } from '@angular-redux/store';
+import { NgRedux, NgReduxModule } from '@angular-redux2/store';
 import { INITIAL_STATE, rootReducer } from './store';
 import { ConfirmPopupComponent } from './confirm-popup/confirm-popup.component';
 import { GroupSessionComponent } from './group-session/group-session.component';
