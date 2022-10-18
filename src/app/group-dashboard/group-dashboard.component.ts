@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
@@ -46,7 +46,7 @@ export class GroupDashboardComponent implements OnInit {
 
   // wkArtist
   @ViewChild('wkArtist', { static: true }) wkArtistDom: ElementRef;
-  wkArtistForm: FormGroup;
+  wkArtistForm: UntypedFormGroup;
   wkArtistResults;
   wkArtistInit: boolean = false;
   wkArtistRedirectLoading: boolean = false;
@@ -59,7 +59,7 @@ export class GroupDashboardComponent implements OnInit {
 
   // wkAlbum
   @ViewChild('wkAlbum', { static: true }) wkAlbumDom: ElementRef;
-  wkAlbumForm: FormGroup;
+  wkAlbumForm: UntypedFormGroup;
   wkAlbumResults;
   wkAlbumInit: boolean = false;
   wkAlbumSelectedIndex: number = this.leaderboardSliderMappings.length - 1;
@@ -71,7 +71,7 @@ export class GroupDashboardComponent implements OnInit {
 
   // wkTrack
   @ViewChild('wkTrack', { static: true }) wkTrackDom: ElementRef;
-  wkTrackForm: FormGroup;
+  wkTrackForm: UntypedFormGroup;
   wkTrackResults;
   wkTrackInit: boolean = false;
   wkTrackSelectedIndex: number = this.leaderboardSliderMappings.length - 1;
@@ -124,7 +124,7 @@ export class GroupDashboardComponent implements OnInit {
   chartTopEntry;
 
   constructor(
-    private formBuilder: FormBuilder, 
+    private formBuilder: UntypedFormBuilder, 
     private userService: UserService, 
     public messageService: MessageService, 
     public dialog: MatDialog, 

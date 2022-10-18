@@ -1,6 +1,6 @@
 import { NgRedux, Select } from '@angular-redux2/store';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
@@ -31,7 +31,7 @@ export class UserSettingsComponent implements OnInit {
   reduxPatched: boolean = false
   signed_in: boolean;
   updateInterval: any;
-  settingsForm: FormGroup
+  settingsForm: UntypedFormGroup
   releaseTypes: Array<string> = releaseTypes
   discreteTimePeriods: Array<TimePeriodModel> = discreteTimePeriods
   randomTimePeriod: TimePeriodModel = {days: 0, label: 'Random'}
@@ -39,7 +39,7 @@ export class UserSettingsComponent implements OnInit {
     private userService: UserService, 
     public messageService: MessageService, 
     public router: Router,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private ngRedux: NgRedux<AppState>,
     public dialog: MatDialog
   ) {

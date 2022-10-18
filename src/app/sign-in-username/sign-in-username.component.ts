@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
@@ -11,13 +11,13 @@ import { UserService } from '../user.service';
   styleUrls: ['./sign-in-username.component.css']
 })
 export class SignInUsernameComponent implements OnInit {
-  userForm: FormGroup
+  userForm: UntypedFormGroup
   redirecting: boolean
   
   constructor(
     private userService: UserService,
     private messageService: MessageService,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     public router: Router
   ) { }
 

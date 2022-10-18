@@ -1,6 +1,6 @@
 import { NgRedux } from '@angular-redux2/store';
 import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSelectChange } from '@angular/material/select';
 import * as moment from 'moment';
@@ -24,7 +24,7 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
   session: GroupSessionModel
   moment: any = moment
   leaveEndLoading: boolean = false
-  cForm: FormGroup
+  cForm: UntypedFormGroup
   groupMembersForDropdown: Array<MemberModel>
   recentTracks: Array<any> = []
   enableCatchUp: boolean = false
@@ -35,7 +35,7 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
   joinLoading: boolean
   isJoinCatchUp: boolean = false
   joinCatchUpTimestamp: string
-  jForm: FormGroup
+  jForm: UntypedFormGroup
 
   @Output() removeSession: EventEmitter<any> = new EventEmitter(true)
   @Output() createSessionEmitter: EventEmitter<GroupSessionModel> = new EventEmitter(true)
@@ -46,7 +46,7 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
     private userService: UserService,
     public messageService: MessageService,
     public dialogRef: MatDialogRef<GroupSessionComponent>,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private ngRedux: NgRedux<AppState>
   ) { 
     this.user = data.user

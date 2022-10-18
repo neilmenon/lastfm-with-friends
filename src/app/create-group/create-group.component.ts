@@ -1,6 +1,6 @@
 import { Select } from '@angular-redux2/store';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -20,7 +20,7 @@ export class CreateGroupComponent implements OnInit {
   groupForm;
   createLoading: boolean = false;
   constructor(
-    private formBuilder: FormBuilder, 
+    private formBuilder: UntypedFormBuilder, 
     private messageService: MessageService, 
     private userService: UserService, 
     public router: Router,

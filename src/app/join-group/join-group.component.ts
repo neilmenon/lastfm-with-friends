@@ -1,7 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageService } from '../message.service';
-import { FormBuilder } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { UserService } from '../user.service';
 import { Select } from '@angular-redux2/store';
@@ -20,7 +20,7 @@ export class JoinGroupComponent implements OnInit {
   joinLoading: boolean = false;
   @Output() joinSuccess: EventEmitter<any> = new EventEmitter(true)
   constructor( 
-    private formBuilder: FormBuilder, 
+    private formBuilder: UntypedFormBuilder, 
     private messageService: MessageService, 
     private userService: UserService,
     public router: Router,

@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
 import { Validators } from '@angular/forms';
 import { MessageService } from '../message.service';
 import { GroupDetailModel, UserModel } from '../models/userGroupModel';
@@ -14,7 +14,7 @@ export class EditGroupComponent implements OnInit {
   groupForm;
   editConfirmed: boolean = false;
   loadingEdit: boolean = false;
-  constructor( private formBuilder: FormBuilder, private userService: UserService, public messageService: MessageService) { 
+  constructor( private formBuilder: UntypedFormBuilder, private userService: UserService, public messageService: MessageService) { 
     this.groupForm = this.formBuilder.group({
       name: ['', Validators.required],
       description: ['', Validators.required],

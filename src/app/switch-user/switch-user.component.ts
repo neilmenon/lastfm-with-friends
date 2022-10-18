@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { config } from '../config';
 import { MessageService } from '../message.service';
@@ -12,14 +12,14 @@ import { UserService } from '../user.service';
 })
 export class SwitchUserComponent implements OnInit {
   users: Array<{ username: string, session_key:string }> = []
-  userForm: FormGroup
+  userForm: UntypedFormGroup
 
   constructor(
     public dialogRef: MatDialogRef<SwitchUserComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private userService: UserService,
     private messageService: MessageService,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) { }
 
   ngOnInit(): void {
