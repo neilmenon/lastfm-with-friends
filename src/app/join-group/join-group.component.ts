@@ -6,7 +6,6 @@ import { Validators } from '@angular/forms';
 import { UserService } from '../user.service';
 import { Select } from '@angular-redux2/store';
 import { Observable } from 'rxjs';
-import { disticn }
 
 @Component({
   selector: 'app-join-group',

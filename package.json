@@ -31,7 +31,7 @@
     "ng-redux": "~4.4.3",
     "ngx-device-detector": "^2.2.1",
     "redux": "^4.0.1",
-    "rxjs": "^6.6.7",
+    "rxjs": "^7.5.0",
     "tassign": "^1.0.0",
     "ts-md5": "^1.2.10",
     "tslib": "^2.3.1",
