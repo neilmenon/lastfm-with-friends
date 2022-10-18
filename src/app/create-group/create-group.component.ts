@@ -14,7 +14,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./create-group.component.css']
 })
 export class CreateGroupComponent implements OnInit {
-  @Select(s => s.isDemo)
+  //@Select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   groupForm;

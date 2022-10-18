@@ -19,6 +19,7 @@ import { SwitchUserComponent } from '../switch-user/switch-user.component';
 import { FaqsComponent } from '../faqs/faqs.component';
 import { CreditsComponent } from '../credits/credits.component';
 import { GenericTextComponent } from '../home/home.component';
+import { ObservableStore } from '../observable-store';
 
 @Component({
   selector: 'app-header',
@@ -26,7 +27,7 @@ import { GenericTextComponent } from '../home/home.component';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  @Select(s => s.isDemo)
+  //@Select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   private subscription: Subscription = new Subscription()
@@ -45,7 +46,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private userService: UserService, 
     public dialog: MatDialog, 
     private messageService: MessageService,
-    private ngRedux: NgRedux<AppState>,
+    private ngRedux: ObservableStore<AppState>,
     public router: Router
   ) {
     moment.locale('en-short', {

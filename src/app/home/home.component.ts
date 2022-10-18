@@ -17,6 +17,7 @@ import { GroupSessionComponent } from '../group-session/group-session.component'
 import { PluralizePipe } from '../pluralize.pipe';
 import { GettingStartedComponent } from '../getting-started/getting-started.component';
 import { SignInUsernameComponent } from '../sign-in-username/sign-in-username.component';
+import { ObservableStore } from '../observable-store';
 
 @Component({
   selector: 'app-home',
@@ -24,7 +25,7 @@ import { SignInUsernameComponent } from '../sign-in-username/sign-in-username.co
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  @Select(s => s.isDemo)
+  //@Select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   private subscription: Subscription = new Subscription()
@@ -45,7 +46,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     public http: HttpClient, 
     private userService: UserService, 
     private buildService: BuildService,
-    private ngRedux: NgRedux<AppState>,
+    private ngRedux: ObservableStore<AppState>,
     public dialog: MatDialog,
     private pluralizePipe: PluralizePipe
   ) {

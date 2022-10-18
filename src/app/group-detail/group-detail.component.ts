@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./group-detail.component.css']
 })
 export class GroupDetailComponent implements OnInit {
-  @Select(s => s.isDemo)
+  //@Select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   group: GroupDetailModel;

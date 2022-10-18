@@ -74,6 +74,8 @@ import { AbsolutePipe } from './absolute.pipe';
 import { AboutGroupSessionsComponent } from './about-group-sessions/about-group-sessions.component';
 import { CreditsComponent } from './credits/credits.component';
 import { SignInUsernameComponent } from './sign-in-username/sign-in-username.component';
+import { ObservableStore } from './observable-store';
+import { createStore } from 'redux';
 
 @NgModule({
   declarations: [
@@ -163,7 +165,7 @@ import { SignInUsernameComponent } from './sign-in-username/sign-in-username.com
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  constructor(ngRedux: NgRedux<{}>) {
-    ngRedux.configureStore(rootReducer, INITIAL_STATE)
+  constructor(ngRedux: ObservableStore<{}>) {
+    ngRedux.provideStore(createStore(rootReducer, INITIAL_STATE))
   }
 }

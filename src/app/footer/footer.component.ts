@@ -6,6 +6,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { NgRedux } from '@angular-redux2/store';
 import { AppState } from '../store';
 import { Subscription } from 'rxjs';
+import { ObservableStore } from '../observable-store';
 
 @Component({
   selector: 'app-footer',
@@ -23,7 +24,7 @@ export class FooterComponent implements OnInit, AfterViewInit, OnDestroy {
     private userService: UserService, 
     private buildService: BuildService, 
     private router: Router,
-    private ngRedux: NgRedux<AppState>
+    private ngRedux: ObservableStore<AppState>
   ) { }
   
   ngAfterViewInit(): void {

@@ -10,6 +10,7 @@ import { USER_MODEL } from '../actions';
 import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component';
 import { MessageService } from '../message.service';
 import { GroupSessionModel, MemberModel, UserGroupModel, UserModel } from '../models/userGroupModel';
+import { ObservableStore } from '../observable-store';
 import { AppState } from '../store';
 import { UserService } from '../user.service';
 
@@ -47,7 +48,7 @@ export class GroupSessionComponent implements OnInit, OnDestroy {
     public messageService: MessageService,
     public dialogRef: MatDialogRef<GroupSessionComponent>,
     private fb: UntypedFormBuilder,
-    private ngRedux: NgRedux<AppState>
+    private ngRedux: ObservableStore<AppState>
   ) { 
     this.user = data.user
     this.session = data.user.group_session

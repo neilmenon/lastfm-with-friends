@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./who-knows-top.component.css']
 })
 export class WhoKnowsTopComponent implements OnInit {
-  @Select(s => s.isDemo)
+  //@Select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   resultsObject: any;

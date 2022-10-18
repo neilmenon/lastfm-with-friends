@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./join-group.component.css']
 })
 export class JoinGroupComponent implements OnInit {
-  @Select(s => s.isDemo)
+  //@Select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   joinForm;

@@ -9,6 +9,7 @@ import { NgRedux } from '@angular-redux2/store';
 import { AppState } from './store';
 import { SETTINGS_MODEL } from './actions';
 import { HttpScrobbleModel } from './models/httpScrobbleModel';
+import { ObservableStore } from './observable-store';
 
 @Injectable()
 export class UserService {
@@ -19,7 +20,7 @@ export class UserService {
   constructor(
     private http: HttpClient, 
     public messageService: MessageService,
-    private ngRedux: NgRedux<AppState>
+    private ngRedux: ObservableStore<AppState>
   ) { }
 
   isSignedIn() {

@@ -31,7 +31,7 @@ import { GenreTopArtistsComponent } from '../genre-top-artists/genre-top-artists
   styleUrls: ['./group-dashboard.component.css']
 })
 export class GroupDashboardComponent implements OnInit {
-  @Select(s => s.isDemo)
+  //@Select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   @Input() group: UserGroupModel

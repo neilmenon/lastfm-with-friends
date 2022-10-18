@@ -6,6 +6,7 @@ import { BuildModel, BuildService } from './build.service';
 import { config } from './config';
 import { MessageService } from './message.service';
 import { UserModel } from './models/userGroupModel';
+import { ObservableStore } from './observable-store';
 import { AppState } from './store';
 import { UserService } from './user.service';
 
@@ -21,7 +22,7 @@ export class AppComponent {
   constructor(
     private buildService: BuildService, 
     private messageService: MessageService,
-    private ngRedux: NgRedux<AppState>
+    private ngRedux: ObservableStore<AppState>
     ) {
     this.ngRedux.dispatch({ type: IS_DEMO_MODE, isDemo: localStorage.getItem("lastfm_username") == config.demo_user })
     const sub1 = this.ngRedux.select(s => s.userModel).subscribe(obj => {

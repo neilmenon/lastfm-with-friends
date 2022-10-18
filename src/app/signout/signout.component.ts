@@ -6,6 +6,7 @@ import { config } from '../config'
 import { NgRedux } from '@angular-redux2/store';
 import { AppState } from '../store';
 import { IS_DEMO_MODE } from '../actions';
+import { ObservableStore } from '../observable-store';
 
 @Component({
   selector: 'app-signout',
@@ -18,7 +19,7 @@ export class SignoutComponent implements OnInit {
     private messageService: MessageService, 
     private userService: UserService, 
     public router: Router,
-    private ngRedux: NgRedux<AppState>
+    private ngRedux: ObservableStore<AppState>
   ) { }
 
   ngOnInit(): void {

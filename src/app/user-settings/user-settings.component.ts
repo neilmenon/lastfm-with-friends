@@ -11,6 +11,7 @@ import { MessageService } from '../message.service';
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { TimePeriodModel } from '../models/timePeriodModel';
 import { UserModel } from '../models/userGroupModel';
+import { ObservableStore } from '../observable-store';
 import { AppState } from '../store';
 import { UserService } from '../user.service';
 
@@ -20,7 +21,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./user-settings.component.css']
 })
 export class UserSettingsComponent implements OnInit {
-  @Select(s => s.isDemo)
+  //@Select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   private subscription: Subscription = new Subscription()
@@ -40,7 +41,7 @@ export class UserSettingsComponent implements OnInit {
     public messageService: MessageService, 
     public router: Router,
     private fb: UntypedFormBuilder,
-    private ngRedux: NgRedux<AppState>,
+    private ngRedux: ObservableStore<AppState>,
     public dialog: MatDialog
   ) {
     this.signed_in = this.userService.isSignedIn();
