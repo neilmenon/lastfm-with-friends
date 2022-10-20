@@ -6,6 +6,7 @@ import * as moment from 'moment';
 import { GroupDetailModel, UserModel } from '../models/userGroupModel';
 import { Select } from '@angular-redux2/store';
 import { Observable } from 'rxjs';
+import { select } from '../observable-store';
 
 @Component({
   selector: 'app-group-detail',
@@ -13,7 +14,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./group-detail.component.css']
 })
 export class GroupDetailComponent implements OnInit {
-  //@Select(s => s.isDemo)
+  @select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   group: GroupDetailModel;

@@ -3,8 +3,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MessageService } from '../message.service';
 import { UserService } from '../user.service';
 import * as moment from 'moment';
-import { Select } from '@angular-redux2/store';
 import { Observable } from 'rxjs';
+import { select } from '../observable-store';
 
 @Component({
   selector: 'app-who-knows-top',
@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./who-knows-top.component.css']
 })
 export class WhoKnowsTopComponent implements OnInit {
-  //@Select(s => s.isDemo)
+  @select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   resultsObject: any;

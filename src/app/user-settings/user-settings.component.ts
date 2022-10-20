@@ -11,7 +11,7 @@ import { MessageService } from '../message.service';
 import { getSettingsModel, SettingsModel } from '../models/settingsModel';
 import { TimePeriodModel } from '../models/timePeriodModel';
 import { UserModel } from '../models/userGroupModel';
-import { ObservableStore } from '../observable-store';
+import { ObservableStore, select } from '../observable-store';
 import { AppState } from '../store';
 import { UserService } from '../user.service';
 
@@ -21,7 +21,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./user-settings.component.css']
 })
 export class UserSettingsComponent implements OnInit {
-  //@Select(s => s.isDemo)
+  @select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   private subscription: Subscription = new Subscription()

@@ -5,6 +5,7 @@ import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { MessageService } from '../message.service';
+import { select } from '../observable-store';
 import { UserService } from '../user.service';
 
 
@@ -14,7 +15,7 @@ import { UserService } from '../user.service';
   styleUrls: ['./create-group.component.css']
 })
 export class CreateGroupComponent implements OnInit {
-  //@Select(s => s.isDemo)
+  @select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   groupForm;

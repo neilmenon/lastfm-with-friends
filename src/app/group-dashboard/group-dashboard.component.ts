@@ -24,6 +24,7 @@ import { ConfirmPopupComponent } from '../confirm-popup/confirm-popup.component'
 import { HttpScrobbleModel } from '../models/httpScrobbleModel';
 import { GenreTopArtistsRecordModel } from '../models/commandsModel';
 import { GenreTopArtistsComponent } from '../genre-top-artists/genre-top-artists.component';
+import { select } from '../observable-store';
 
 @Component({
   selector: 'app-group-dashboard',
@@ -31,7 +32,7 @@ import { GenreTopArtistsComponent } from '../genre-top-artists/genre-top-artists
   styleUrls: ['./group-dashboard.component.css']
 })
 export class GroupDashboardComponent implements OnInit {
-  //@Select(s => s.isDemo)
+  @select(s => s.isDemo)
   isDemo: Observable<boolean>
 
   @Input() group: UserGroupModel

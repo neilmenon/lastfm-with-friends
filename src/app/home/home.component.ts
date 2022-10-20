@@ -17,7 +17,7 @@ import { GroupSessionComponent } from '../group-session/group-session.component'
 import { PluralizePipe } from '../pluralize.pipe';
 import { GettingStartedComponent } from '../getting-started/getting-started.component';
 import { SignInUsernameComponent } from '../sign-in-username/sign-in-username.component';
-import { ObservableStore } from '../observable-store';
+import { ObservableStore, select } from '../observable-store';
 
 @Component({
   selector: 'app-home',
@@ -25,7 +25,7 @@ import { ObservableStore } from '../observable-store';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  //@Select(s => s.isDemo)
+  @select(s => s.isDemo)
   isDemo: Observable<boolean>
   
   private subscription: Subscription = new Subscription()
