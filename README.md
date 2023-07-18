@@ -2,6 +2,8 @@
 
 Last.fm with Friends extends existing Last.fm features to give music stats for a group of friends. The app runs at [lfmwf.neilmenon.com](https://lfmwf.neilmenon.com).
 
+![lfmwf neilmenon com_ (1)](https://github.com/neilmenon/lastfm-with-friends/assets/47338272/e2e35a5e-c419-41e1-a15c-2297ccf28fad)
+
 ## How It Works
 Last.fm with Friends is powered by the [Last.fm API](https://www.last.fm/api). Once you connect your Last.fm account, the app scrapes and stores your scrobbles (Last.fm lingo for music plays) in a database. Then, you can create a group and invite your friends to join the group using a join code. The app gives you and your friends cool stats and visualizations based on what everyone has listened to!
 
