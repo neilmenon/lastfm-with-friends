@@ -27,39 +27,39 @@
           <div [matTooltip]="!user.last_update || (user.last_update && user.progress && user.progress < 0) ? 'An update is currently in progress or queued...' : null" matTooltipPosition="left">
             <button [class.disable-click]="!user.last_update || (user.last_update && user.progress && user.progress < 0)" mat-menu-item (click)="updateUser()">Update</button>
           </div>
-          <button mat-menu-item [matMenuTriggerFor]="groupsMenu">Groups</button>
+          <button mat-menu-item [routerLink]="['groups/create']">
+            <mat-icon>add</mat-icon>
+            <span>Create</span>
+          </button>
+          <button mat-menu-item (click)="openJoinDialog()">
+            <mat-icon>person_add</mat-icon>
+            <span>Join</span>
+          </button>
+          <!-- <button mat-menu-item [matMenuTriggerFor]="groupsMenu">Groups</button>
           <mat-menu #groupsMenu="matMenu">
-            <button mat-menu-item [routerLink]="['groups/create']">
-              <mat-icon>add</mat-icon>
-              <span>Create</span>
-            </button>
-            <button mat-menu-item (click)="openJoinDialog()">
-              <mat-icon>person_add</mat-icon>
-              <span>Join</span>
-            </button>
             <button mat-menu-item *ngFor="let group of user?.groups" [routerLink]="['groups/' + group.join_code]" matTooltip="Visit {{ group.name }}'s page" matTooltipPosition="above">
               {{ group.name }}
             </button>
-          </mat-menu>
+          </mat-menu> -->
           <button mat-menu-item [routerLink]="['/settings']">Settings</button>
           <button mat-menu-item (click)="switchUser()" *ngIf="config.admin_username == user.username">Switch User</button>
           <button mat-menu-item (click)="switchBack()" *ngIf="showClearLocalData">Switch Back</button>
           <button mat-menu-item (click)="exitDemo()" *ngIf="isDemo | async">Exit Demo</button>
-          <button mat-menu-item [matMenuTriggerFor]="aboutMenu">About</button>
-            <mat-menu #aboutMenu="matMenu">
-              <button mat-menu-item (click)="openFaqs()">
-                <mat-icon>info</mat-icon>
-                <span>FAQs</span>
-              </button>
-              <button mat-menu-item (click)="openCredits()">
-                <mat-icon>code</mat-icon>
-                <span>Credits / Support</span>
-              </button>
-              <button mat-menu-item (click)="openMobileInstructions()">
-                <mat-icon>phone_iphone</mat-icon>
-                <span>Mobile App</span>
-              </button>
-            </mat-menu>
+          <!-- <button mat-menu-item [matMenuTriggerFor]="aboutMenu">About</button> -->
+          <button mat-menu-item (click)="openFaqs()">
+            <mat-icon>info</mat-icon>
+            <span>FAQs</span>
+          </button>
+          <button mat-menu-item (click)="openCredits()">
+            <mat-icon>code</mat-icon>
+            <span>Credits / Support</span>
+          </button>
+          <button mat-menu-item (click)="openMobileInstructions()">
+            <mat-icon>phone_iphone</mat-icon>
+            <span>Mobile App</span>
+          </button>
+            <!-- <mat-menu #aboutMenu="matMenu">
+            </mat-menu> -->
           <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
         </mat-menu>
       </a>
@@ -98,39 +98,39 @@
             <div [matTooltip]="!user.last_update || (user.last_update && user.progress && user.progress < 0) ? 'An update is currently in progress or queued...' : null" matTooltipPosition="left">
               <button [class.disable-click]="!user.last_update || (user.last_update && user.progress && user.progress < 0)" mat-menu-item (click)="updateUser()">Update</button>
             </div>
-            <button mat-menu-item [matMenuTriggerFor]="groupsMenu">Groups</button>
+            <button mat-menu-item [routerLink]="['groups/create']">
+              <mat-icon>add</mat-icon>
+              <span>Create</span>
+            </button>
+            <button mat-menu-item (click)="openJoinDialog()">
+              <mat-icon>person_add</mat-icon>
+              <span>Join</span>
+            </button>
+            <!-- <button mat-menu-item [matMenuTriggerFor]="groupsMenu">Groups</button>
             <mat-menu #groupsMenu="matMenu">
-              <button mat-menu-item [routerLink]="['groups/create']">
-                <mat-icon>add</mat-icon>
-                <span>Create</span>
-              </button>
-              <button mat-menu-item (click)="openJoinDialog()">
-                <mat-icon>person_add</mat-icon>
-                <span>Join</span>
-              </button>
               <button mat-menu-item *ngFor="let group of user?.groups" [routerLink]="['groups/' + group.join_code]" matTooltip="Visit {{ group.name }}'s page" matTooltipPosition="above">
                 {{ group.name }}
               </button>
-            </mat-menu>
+            </mat-menu> -->
             <button mat-menu-item [routerLink]="['/settings']">Settings</button>
             <button mat-menu-item (click)="switchUser()" *ngIf="config.admin_username == user.username">Switch User</button>
             <button mat-menu-item (click)="switchBack()" *ngIf="showClearLocalData">Switch Back</button>
             <button mat-menu-item (click)="exitDemo()" *ngIf="isDemo | async">Exit Demo</button>
             <button mat-menu-item [matMenuTriggerFor]="aboutMenu">About</button>
-            <mat-menu #aboutMenu="matMenu">
-              <button mat-menu-item (click)="openFaqs()">
-                <mat-icon>info</mat-icon>
-                <span>FAQs</span>
-              </button>
-              <button mat-menu-item (click)="openCredits()">
-                <mat-icon>code</mat-icon>
-                <span>Credits / Support</span>
-              </button>
-              <button mat-menu-item (click)="openMobileInstructions()">
-                <mat-icon>phone_iphone</mat-icon>
-                <span>Mobile App</span>
-              </button>
-            </mat-menu>
+            <button mat-menu-item (click)="openFaqs()">
+              <mat-icon>info</mat-icon>
+              <span>FAQs</span>
+            </button>
+            <button mat-menu-item (click)="openCredits()">
+              <mat-icon>code</mat-icon>
+              <span>Credits / Support</span>
+            </button>
+            <button mat-menu-item (click)="openMobileInstructions()">
+              <mat-icon>phone_iphone</mat-icon>
+              <span>Mobile App</span>
+            </button>
+            <!-- <mat-menu #aboutMenu="matMenu">
+            </mat-menu> -->
             <button mat-menu-item (click)="signOut()" *ngIf="!(isDemo | async)">Sign Out</button>
           </mat-menu>
         </a>
