@@ -113,11 +113,33 @@ export class ListeningTrendsComponent implements OnInit {
         if (cmdMode == "leaderboard-cu") {
           chartDataTmp.sort((a, b) => b.series[b.series.length - 1].value - a.series[b.series.length - 1].value)
         }
-        this.chartData = chartDataTmp
+        this.chartData = this.adjustSeriesArrays(chartDataTmp)
     }).catch(error => {
       this.messageService.open("There was an error generating the trends chart. Please try again.")
       console.log(error)
     })
+  }
+
+  adjustSeriesArrays(data: { name: string; series: number[] }[]): any {
+    const maxSumOfLengths = 5000;
+    let sumOfLengths = data.reduce((accumulator, currentValue) => accumulator + currentValue.series.length, 0);
+    console.log(`Total data points to show in chart is: ${sumOfLengths} of max ${maxSumOfLengths} allowed`)
+  
+    // Calculate the optimal value of n
+    let n = 1;
+    while (sumOfLengths - data.length >= maxSumOfLengths) {
+      n++;
+      sumOfLengths = data.reduce((accumulator, currentValue) => accumulator + Math.ceil(currentValue.series.length / n), 0);
+    }
+  
+    // Remove every nth element from each series array
+    console.log(`Removing each nth item from series arrays (n = ${n})`)
+    data.forEach((item) => {
+      item.series = item.series.filter((_, index) => (index + 1) % n !== 0);
+    });
+    sumOfLengths = data.reduce((accumulator, currentValue) => accumulator + currentValue.series.length, 0);
+    console.log(`Final total of data points is ${sumOfLengths}`)
+    return data
   }
 
   dateTickFormatting(val: any): string {
