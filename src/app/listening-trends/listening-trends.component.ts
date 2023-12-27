@@ -121,7 +121,7 @@ export class ListeningTrendsComponent implements OnInit {
   }
 
   adjustSeriesArrays(data: { name: string; series: number[] }[]): any {
-    const maxSumOfLengths = 100000;
+    const maxSumOfLengths = 25000;
     let sumOfLengths = data.reduce((accumulator, currentValue) => accumulator + currentValue.series.length, 0);
     console.log(`Total data points to show in chart is: ${sumOfLengths} of max ${maxSumOfLengths} allowed`)
 
