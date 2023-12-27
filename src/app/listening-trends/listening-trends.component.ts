@@ -140,9 +140,10 @@ export class ListeningTrendsComponent implements OnInit {
   
     // Calculate the optimal value of n
     let n = 50;
-    while (sumOfLengths >= maxSumOfLengths) {
+    let tmpSumOfLengths = sumOfLengths
+    while (tmpSumOfLengths >= maxSumOfLengths) {
       n--;
-      sumOfLengths = sumOfLengths - Math.floor(sumOfLengths / n);
+      tmpSumOfLengths = sumOfLengths - Math.floor(sumOfLengths / n);
     }
   
     // Remove every nth element from each series array
