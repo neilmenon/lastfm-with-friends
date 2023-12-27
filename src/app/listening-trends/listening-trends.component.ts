@@ -124,16 +124,29 @@ export class ListeningTrendsComponent implements OnInit {
     const maxSumOfLengths = 100000;
     let sumOfLengths = data.reduce((accumulator, currentValue) => accumulator + currentValue.series.length, 0);
     console.log(`Total data points to show in chart is: ${sumOfLengths} of max ${maxSumOfLengths} allowed`)
+
+    if (sumOfLengths < maxSumOfLengths)
+      return data
+
+    if (sumOfLengths >= 2 * maxSumOfLengths) {
+      while (sumOfLengths >= 2 * maxSumOfLengths) {
+        data.forEach((item) => {
+          item.series = item.series.filter((_, index) => (index + 1) % 2 !== 0);
+        });
+        sumOfLengths = data.reduce((accumulator, currentValue) => accumulator + currentValue.series.length, 0)
+        console.log(`Reduced data points to ${sumOfLengths}`)
+      }
+    }
   
     // Calculate the optimal value of n
     let n = 50;
     while (sumOfLengths >= maxSumOfLengths) {
       n--;
-      sumOfLengths = data.reduce((accumulator, currentValue) => accumulator + (currentValue.series.length - Math.floor(currentValue.series.length / n)), 0);
+      sumOfLengths = sumOfLengths - Math.floor(sumOfLengths / n);
     }
   
     // Remove every nth element from each series array
-    if (n > 1) {
+    if (n > 1 && n < 50) {
       console.log(`Removing each nth item from series arrays (n = ${n})`)
       data.forEach((item) => {
         item.series = item.series.filter((_, index) => (index + 1) % n !== 0);
