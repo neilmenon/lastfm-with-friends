@@ -67,7 +67,7 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          script: cd /root/projects/lastfm-with-friends && git pull
+          script: cd /srv/lastfm-with-friends && git pull
           
       - name: Run buildjson.sh
         uses: appleboy/ssh-action@master
@@ -78,7 +78,7 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          script: cd /root/projects/lastfm-with-friends && . /root/.scripts/buildjson.sh > /usr/share/nginx/lastfm-with-friends/assets/build.json
+          script: cd /srv/lastfm-with-friends && . /root/.scripts/buildjson.sh > /usr/share/nginx/lastfm-with-friends/assets/build.json
           
       - name: Restart Flask server
         uses: appleboy/ssh-action@master
@@ -88,4 +88,4 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           passphrase: ${{ secrets.PASSPHRASE }}
-          script: chown -R nginx:nginx /root/projects/lastfm-with-friends/backend && service lfmwf restart
+          script: chown -R nginx:nginx /srv/lastfm-with-friends/backend && service lfmwf restart
