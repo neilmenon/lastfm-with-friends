@@ -25,3 +25,5 @@ group = "nginx"  # GID to switch to
 # Other settings
 reload = False  # Enable code reloading in development if needed
 preload_app = True  # Preload application for performance
+keepalive = 120
+timeout = 120
