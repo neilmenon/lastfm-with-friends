@@ -18,7 +18,7 @@ import { MatDatepickerInputEvent } from '@angular/material/datepicker';
   ],
 })
 export class CustomDateRangeComponent implements OnInit {
-  moment: any = moment;
+  moment = moment;
   startDate: moment.Moment;
   endDate: moment.Moment;
   yearButtons: number[] = [];
@@ -55,7 +55,7 @@ export class CustomDateRangeComponent implements OnInit {
     let start: moment.Moment;
     let end: moment.Moment;
     start = this.moment.utc({year: year, month: 0, day: 1}).startOf('day');
-    end = this.moment(start).add(1, 'year');
+    end = this.moment.utc(start).add(1, 'year').subtract(1, 'second');
     this.submitDateRange.emit({'startDate': start, 'endDate': end});
     this.dialogRef.close();
   }
