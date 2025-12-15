@@ -1,0 +1,25 @@
+/* Layout for preset buttons: row flex, small gap, wrap when needed */
+.preset-buttons {
+	display: flex;
+	gap: 0.5rem; /* small gap between buttons */
+	flex-wrap: wrap; /* allow buttons to wrap to next line */
+	align-items: center;
+	margin-top: 0.5rem;
+}
+
+.preset-buttons button {
+	flex: 0 0 auto; /* don't stretch buttons */
+}
+
+/* Make mini-fab buttons slightly more label-friendly while keeping small size */
+.preset-buttons button[mat-mini-fab] {
+	min-width: 40px;
+	height: 32px;
+	padding: 0 8px;
+	font-size: 0.75rem;
+	white-space: nowrap;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+

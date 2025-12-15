@@ -10,4 +10,11 @@
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-date-range-picker #picker></mat-date-range-picker>
       </mat-form-field>
+    <div class="preset-buttons">
+      <button mat-mini-fab aria-label="This Year" (click)="setPreset('thisYear')">This Year</button>
+      <button mat-mini-fab aria-label="Last Year" (click)="setPreset('lastYear')">Last Year</button>
+      <ng-container *ngFor="let y of yearButtons">
+        <button mat-mini-fab aria-label="{{ y }}" (click)="setPreset(y)">{{ y }}</button>
+      </ng-container>
+    </div>
 </div>

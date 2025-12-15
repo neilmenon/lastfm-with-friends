@@ -21,11 +21,17 @@ export class CustomDateRangeComponent implements OnInit {
   moment: any = moment;
   startDate: moment.Moment;
   endDate: moment.Moment;
+  yearButtons: number[] = [];
   @Output() dateChange: EventEmitter<MatDatepickerInputEvent< any>>
   @Output() submitDateRange: EventEmitter<any> = new EventEmitter(true)
   constructor(@Inject(MAT_DIALOG_DATA) public data: any, public dialogRef: MatDialogRef<CustomDateRangeComponent>) { }
 
   ngOnInit(): void {
+    const currentYear = this.moment().year();
+    // Create buttons for years: currentYear-2 down to currentYear-7 (e.g., 2023-2018 when current is 2025)
+    for (let y = currentYear - 2; y >= currentYear - 7; y--) {
+      this.yearButtons.push(y);
+    }
   }
 
   onDateChange(event: any, type:any) {
@@ -44,6 +50,29 @@ export class CustomDateRangeComponent implements OnInit {
         this.dialogRef.close()
       }
     }
+  
+  }
+  
+  setPreset(preset: any) {
+    let start: moment.Moment;
+    let end: moment.Moment;
+    if (preset === 'thisYear') {
+      start = this.moment.utc().startOf('year');
+      end = this.moment(start).add(1, 'year');
+    } else if (preset === 'lastYear') {
+      start = this.moment.utc().subtract(1, 'year').startOf('year');
+      end = this.moment(start).add(1, 'year');
+    } else {
+      const year = Number(preset);
+      if (!isNaN(year)) {
+        start = this.moment.utc({year: year, month: 0, day: 1}).startOf('day');
+        end = this.moment(start).add(1, 'year');
+      } else {
+        return;
+      }
+    }
+    this.submitDateRange.emit({'startDate': start, 'endDate': end});
+    this.dialogRef.close();
   }
     
 
