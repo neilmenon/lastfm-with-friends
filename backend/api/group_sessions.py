@@ -85,8 +85,9 @@ def end():
         abort(401)
     current_session = group_session_helper.get_current_session(username)
     if current_session: # returns None if not in session
-        if current_session['id'] == session_id and (current_session['owner'] == username or current_session['is_silent']):
-            group_session_helper.end_session(session_id)
+        # if current_session['id'] == session_id and (current_session['owner'] == username or current_session['is_silent']):
+        if (current_session['owner'] == username or current_session['is_silent']):
+            group_session_helper.end_session(current_session['id'])
             return jsonify({"data": "success"})
         elif current_session['id'] != session_id:
             response = make_response(jsonify(error="Session not found."), 404)
